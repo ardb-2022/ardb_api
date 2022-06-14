@@ -1309,9 +1309,10 @@ namespace SBWSDepositApi.Deposit
             int maxTransCD = 0;
             string _query = "Select Nvl(max(trans_cd) + 1, 1) max_trans_cd"
                             + " From   td_dep_trans"
-                            + " Where  trans_dt =  {0} "
-                            + " And    brn_cd = {1}";
+                            + " Where ardb_cd = {0} and  trans_dt =  {1} "
+                            + " And    brn_cd = {2}";
             _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
                                             string.IsNullOrWhiteSpace(tvd.trans_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tvd.trans_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                                             string.IsNullOrWhiteSpace(tvd.brn_cd) ? "brn_cd" : string.Concat("'", tvd.brn_cd, "'")
                                             );
@@ -1365,18 +1366,19 @@ namespace SBWSDepositApi.Deposit
 
         internal bool InsertDepositTemp(DbConnection connection, tm_deposit dep)
         {
-            string _query = " INSERT INTO TM_DEPOSIT_TEMP ( BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
+            string _query = " INSERT INTO TM_DEPOSIT_TEMP ( ARDB_CD,BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
                            + " OPRN_INSTR_CD, OPENING_DT, PRN_AMT, INTT_AMT, DEP_PERIOD, INSTL_AMT, INSTL_NO, MAT_DT, INTT_RT, TDS_APPLICABLE,     "
                            + " LAST_INTT_CALC_DT, ACC_CLOSE_DT, CLOSING_PRN_AMT, CLOSING_INTT_AMT, PENAL_AMT, EXT_INSTL_TOT, MAT_STATUS, ACC_STATUS,"
                            + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT,      "
                            + " APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,      "
-                           + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD )  "
+                           + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD,DEL_FLAG )  "
                            + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}, {14},"
                            + " {15},{16}, {17}, {18},{19},{20},{21},{22},{23},{24}, "
                            + " {25},{26},{27},{28},{29}, SYSDATE,{30},SYSDATE,{31}, "
-                           + " {32},{33},{34}, {35},{36},{37},{38},{39},{40},{41},{42},{43})";
+                           + " {32},{33},{34}, {35},{36},{37},{38},{39},{40},{41},{42},{43},{44},'N')";
 
             _statement = string.Format(_query,
+            string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_type_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
@@ -1434,18 +1436,19 @@ namespace SBWSDepositApi.Deposit
 
         internal bool InsertDepositRenewTemp(DbConnection connection, tm_deposit dep)
         {
-            string _query = " INSERT INTO TM_DEPOSIT_RENEW_TEMP ( BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
+            string _query = " INSERT INTO TM_DEPOSIT_RENEW_TEMP ( ARDB_CD,BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
                         + " OPRN_INSTR_CD, OPENING_DT, PRN_AMT, INTT_AMT, DEP_PERIOD, INSTL_AMT, INSTL_NO, MAT_DT, INTT_RT, TDS_APPLICABLE,     "
                         + " LAST_INTT_CALC_DT, ACC_CLOSE_DT, CLOSING_PRN_AMT, CLOSING_INTT_AMT, PENAL_AMT, EXT_INSTL_TOT, MAT_STATUS, ACC_STATUS,"
                         + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT,      "
                         + " APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,      "
-                        + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, CATG_CD )  "
+                        + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, CATG_CD,DEL_FLAG )  "
                         + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}, {14},"
                         + " {15},{16}, {17}, {18},{19},{20},{21},{22},{23},{24}, "
                         + " {25},{26},{27},{28},{29}, SYSDATE,{30},SYSDATE,{31}, "
-                        + " {32},{33},{34}, {35},{36},{37},{38},{39},{40},{41},{42},{43})";
+                        + " {32},{33},{34}, {35},{36},{37},{38},{39},{40},{41},{42},{43},{44},'N')";
 
             _statement = string.Format(_query,
+            string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_type_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
@@ -1503,11 +1506,12 @@ namespace SBWSDepositApi.Deposit
 
         internal bool InsertIntroducerTemp(DbConnection connection, List<td_introducer> ind)
         {
-            string _query = "INSERT INTO TD_INTRODUCER_TEMP ( brn_cd, acc_type_cd, acc_num, srl_no, introducer_name, introducer_acc_type, introducer_acc_num) "
-                         + " VALUES( {0},{1},{2},{3}, {4}, {5} , {6} ) ";
+            string _query = "INSERT INTO TD_INTRODUCER_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, srl_no, introducer_name, introducer_acc_type, introducer_acc_num) "
+                         + " VALUES( {0},{1},{2},{3}, {4}, {5} , {6},{7} ) ";
             for (int i = 0; i < ind.Count; i++)
             {
                 _statement = string.Format(_query,
+                                                       string.Concat("'", ind[i].arb_cd, "'"),
                                                        string.Concat("'", ind[i].brn_cd, "'"),
                                                        ind[i].acc_type_cd,
                                                        string.Concat("'", ind[i].acc_num, "'"),
