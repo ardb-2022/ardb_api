@@ -3,7 +3,7 @@ using System;
 namespace SBWSFinanceApi.Models
 {
     public class p_gen_param
-    {   public int ardb_cd { get; set; }
+    {   public string ardb_cd { get; set; }
         public int acc_cd { get; set; }
         public string brn_cd { get; set; }
         public DateTime from_dt { get; set; }

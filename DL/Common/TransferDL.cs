@@ -498,52 +498,54 @@ namespace SBWSFinanceApi.DL
             }
             return _ret;
         }
-    
-    internal List<td_def_trans_trf> GetDepTransTrfwithChild(td_def_trans_trf tdt)
+
+        internal List<td_def_trans_trf> GetDepTransTrfwithChild(td_def_trans_trf tdt)
         {
-            List<td_def_trans_trf> tdtRets=new List<td_def_trans_trf>();
-            string _query=" SELECT a.brn_cd,a.trans_dt,a.trans_cd,a.acc_type_cd,a.ACC_NUM,b.acc_type_desc,c.ACC_NAME ,F.CUST_NAME,A.amount "
-                          +" FROM TD_DEP_TRANS_TRF A, "
-                          +" MM_ACC_TYPE B, "
-                          +" M_ACC_MASTER C, "
-                          +" (SELECT D.CUST_NAME,E.ACC_NUM,E.BRN_CD "
-                          +" FROM MM_CUSTOMER D, "
-                          +" TM_DEPOSIT E "
-                          +" WHERE D.CUST_CD=E.CUST_CD "
-                          +" AND D.BRN_CD=E.BRN_CD ) F "
-                          +" WHERE  (A.BRN_CD = {0}) AND " 
-                          +" (A.TRANS_DT = to_date('{1}','dd-mm-yyyy' )) AND  "
-                          +" (  A.TRANS_CD = {2} )   "
-                          +" AND a.ACC_TYPE_CD=b.ACC_TYPE_CD (+) "
-                          +" AND A.ACC_TYPE_CD=c.ACC_CD(+) "
-                          +" AND A.ACC_NUM=F.ACC_NUM (+) "
-                          +" AND A.BRN_CD=F.BRN_CD(+) ";
-                 using (var connection = OrclDbConnection.NewConnection)
-            {              
-             
+            List<td_def_trans_trf> tdtRets = new List<td_def_trans_trf>();
+            string _query = " SELECT a.brn_cd,a.trans_dt,a.trans_cd,a.acc_type_cd,a.ACC_NUM,b.acc_type_desc,c.ACC_NAME ,F.CUST_NAME,A.amount "
+                          + " FROM TD_DEP_TRANS_TRF A, "
+                          + " MM_ACC_TYPE B, "
+                          + " M_ACC_MASTER C, "
+                          + " (SELECT D.CUST_NAME,E.ACC_NUM,E.BRN_CD "
+                          + " FROM MM_CUSTOMER D, "
+                          + " TM_DEPOSIT E "
+                          + " WHERE D.ARDB_CD = E.ARDB_CD AND D.CUST_CD=E.CUST_CD "
+                          + " AND D.BRN_CD=E.BRN_CD ) F "
+                          + " WHERE  (A.ARDB_CD = {0}) AND (A.BRN_CD = {1}) AND "
+                          + " (A.TRANS_DT = to_date('{2}','dd-mm-yyyy' )) AND  "
+                          + " (  A.TRANS_CD = {3} )   "
+                          + " AND A.ACC_TYPE_CD=B.ACC_TYPE_CD (+) "
+                          + " AND A.ACC_TYPE_CD=C.ACC_CD(+) "
+                          + " AND A.ACC_NUM=F.ACC_NUM (+) "
+                          + " AND A.BRN_CD=F.BRN_CD(+) "
+                          + " AND A.ARDB_CD=C.ARDB_CD(+) ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
                 _statement = string.Format(_query,
-                                            string.IsNullOrWhiteSpace( tdt.brn_cd) ? "brn_cd" : string.Concat("'",  tdt.brn_cd , "'"),
-                                            tdt.trans_dt!= null ? tdt.trans_dt.Value.ToString("dd/MM/yyyy"): "trans_dt",
-                                            tdt.trans_cd !=0 ? Convert.ToString(tdt.trans_cd) : "trans_cd"
+                                            string.IsNullOrWhiteSpace(tdt.ardb_cd) ? "ardb_cd" : string.Concat("'", tdt.ardb_cd, "'"),
+                                            string.IsNullOrWhiteSpace(tdt.brn_cd) ? "brn_cd" : string.Concat("'", tdt.brn_cd, "'"),
+                                            tdt.trans_dt != null ? tdt.trans_dt.Value.ToString("dd/MM/yyyy") : "trans_dt",
+                                            tdt.trans_cd != 0 ? Convert.ToString(tdt.trans_cd) : "trans_cd"
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
                     using (var reader = command.ExecuteReader())
                     {
-                        if (reader.HasRows)     
+                        if (reader.HasRows)
                         {
                             while (reader.Read())
-                            {                                
-                               var tdtr = new td_def_trans_trf();
-                                 tdtr.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);   
-         tdtr.trans_cd = UtilityM.CheckNull<Int64>(reader["TRANS_CD"]);   
-         tdtr.acc_type_cd = UtilityM.CheckNull<Int32>(reader["ACC_TYPE_CD"]);   
-         tdtr.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);    
-         tdtr.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]); 
-         tdtr.remarks = UtilityM.CheckNull<string>(reader["acc_type_desc"]);   
-         tdtr.acc_name = UtilityM.CheckNull<string>(reader["ACC_NAME"]);   
-         tdtr.created_by = UtilityM.CheckNull<string>(reader["CUST_NAME"]); 
-         tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]); 
+                            {
+                                var tdtr = new td_def_trans_trf();
+                                tdtr.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                tdtr.trans_cd = UtilityM.CheckNull<Int64>(reader["TRANS_CD"]);
+                                tdtr.acc_type_cd = UtilityM.CheckNull<Int32>(reader["ACC_TYPE_CD"]);
+                                tdtr.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                tdtr.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]);
+                                tdtr.remarks = UtilityM.CheckNull<string>(reader["acc_type_desc"]);
+                                tdtr.acc_name = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
+                                tdtr.created_by = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 tdtRets.Add(tdtr);
                             }
                         }
@@ -552,9 +554,9 @@ namespace SBWSFinanceApi.DL
             }
             return tdtRets;
         }
-        
 
-    internal mm_dashboard GetDashBoardInfo(p_gen_param td)
+
+        internal mm_dashboard GetDashBoardInfo(p_gen_param td)
         {
             mm_dashboard tdtr=new mm_dashboard();
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";

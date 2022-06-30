@@ -12,6 +12,8 @@ namespace SBWSFinanceApi.Models
          public string approval_status {get;set;}   
          public string approved_by {get;set;}   
          public DateTime? approved_dt {get;set;}   
-         public string brn_cd {get;set;}   
+         public string brn_cd {get;set;}
+        public string ardb_cd { get; set; }
+        public string del_flag { get; set; }
     }
 }

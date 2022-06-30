@@ -229,7 +229,7 @@ namespace SBWSDepositApi.Deposit
         {
             decimal amount = 0;
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
-            string _query = "SELECT F_CAL_RD_PENALTY({0}) AMOUNT FROM DUAL";
+            string _query = "SELECT F_CAL_RD_PENALTY({0},{1}) AMOUNT FROM DUAL";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 using (var transaction = connection.BeginTransaction())
@@ -241,6 +241,7 @@ namespace SBWSDepositApi.Deposit
                             command.ExecuteNonQuery();
                         }
                         _statement = string.Format(_query,
+                                         string.Concat("'", prp.ardb_cd, "'"),
                                          string.Concat("'", prp.as_acc_num, "'")
                                         );
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -275,11 +276,11 @@ namespace SBWSDepositApi.Deposit
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _query = "Select intr.intt_rate INT_RATE "
                             + " From mm_acc_type_group act, mm_interest intr "
-                            + "  Where act.acc_type_cd = {0} "
+                            + "  Where intr.ardb_cd= {0} and act.acc_type_cd = {1} "
                             + " and intr.acc_type_cd = act.acc_group_cd "
-                            + " and intr.effective_dt <= {1} "
-                            + " and intr.catg_cd      = {2} "
-                            + "and intr.no_of_days >= {3} + 1 "
+                            + " and intr.effective_dt <= {2} "
+                            + " and intr.catg_cd      = {3} "
+                            + "and intr.no_of_days >= {4} + 1 "
                             + " and rownum = 1 ";
 
             using (var connection = OrclDbConnection.NewConnection)
@@ -293,6 +294,7 @@ namespace SBWSDepositApi.Deposit
                             command.ExecuteNonQuery();
                         }
                         _statement = string.Format(_query,
+                                                   string.Concat("'", prp.ardb_cd, "'"),
                                                    prp.acc_cd,
                                                    string.Concat("to_date('", prp.from_dt.ToString("dd/MM/yyyy"), "' ,'dd/MM/yyyy')"),
                                                    prp.ls_catg_cd,
@@ -756,7 +758,7 @@ namespace SBWSDepositApi.Deposit
                  + " INTRODUCER_ACC_TYPE,"
                  + " INTRODUCER_ACC_NUM ,DEL_FLAG "
                  + " FROM TD_INTRODUCER_TEMP  "
-                 + " WHERE ARDB_CD = {0} AND BRN_CD = {1} AND ACC_NUM = {2}  AND ACC_TYPE_CD = {3} AND DEL_FLAG='N";
+                 + " WHERE ARDB_CD = {0} AND BRN_CD = {1} AND ACC_NUM = {2}  AND ACC_TYPE_CD = {3} AND DEL_FLAG='N' ";
 
             _statement = string.Format(_query,
             !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
@@ -812,7 +814,7 @@ namespace SBWSDepositApi.Deposit
              + " PERCENTAGE,  "
              + " RELATION ,DEL_FLAG    "
              + " FROM TD_NOMINEE_TEMP "
-             + " WHERE ARDB_CD = {0}, BRN_CD = {1} AND ACC_TYPE_CD = {2} AND ACC_NUM = {3} AND DEL_FLAG='N' ";
+             + " WHERE ARDB_CD = {0} AND BRN_CD = {1} AND ACC_TYPE_CD = {2} AND ACC_NUM = {3} AND DEL_FLAG='N' ";
             _statement = string.Format(_query,
                 !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                 !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
@@ -996,12 +998,13 @@ namespace SBWSDepositApi.Deposit
          + " APPROVAL_STATUS,"
          + " APPROVED_BY,"
          + " APPROVED_DT,"
-         + " BRN_CD"
+         + " BRN_CD,ARDB_CD,DEL_FLAG "
          + " FROM TM_TRANSFER"
-         + " WHERE (BRN_CD = {0}) AND "
-         + " (TRF_DT = to_date('{1}','dd-mm-yyyy' )) AND  "
-         + " (  TRANS_CD = {2} ) ";
+         + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
+         + " (TRF_DT = to_date('{2}','dd-mm-yyyy' )) AND  "
+         + " (  TRANS_CD = {3} ) ";
             _statement = string.Format(_query,
+                                         string.IsNullOrWhiteSpace(tdt.ardb_cd) ? "ardb_cd" : string.Concat("'", tdt.ardb_cd, "'"),
                                          string.IsNullOrWhiteSpace(tdt.brn_cd) ? "brn_cd" : string.Concat("'", tdt.brn_cd, "'"),
                                          tdt.trans_dt != null ? tdt.trans_dt.Value.ToString("dd/MM/yyyy") : "TRF_DT",
                                          tdt.trans_cd != 0 ? Convert.ToString(tdt.trans_cd) : "TRANS_CD"
@@ -1024,6 +1027,8 @@ namespace SBWSDepositApi.Deposit
                             tdtr.approved_by = UtilityM.CheckNull<string>(reader["APPROVED_BY"]);
                             tdtr.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
                             tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                            tdtr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                            tdtr.del_flag= UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
                             tdtRets.Add(tdtr);
                         }
                     }
@@ -1089,12 +1094,13 @@ namespace SBWSDepositApi.Deposit
          + " BORROWER_CR_CD,"
          + " INTT_TILL_DT,"
          + " '' ACC_NAME ,"
-         + " BRN_CD"
+         + " BRN_CD, ARDB_CD,DEL_FLAG "
           + " FROM TD_DEP_TRANS_TRF"
-           + " WHERE (BRN_CD = {0}) AND "
-            + " (TRANS_DT = to_date('{1}','dd-mm-yyyy' )) AND  "
-          + " (  TRANS_CD = {2} )   ";
+           + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
+            + " (TRANS_DT = to_date('{2}','dd-mm-yyyy' )) AND  "
+          + " (  TRANS_CD = {3} ) AND DEL_FLAG='N'  ";
             _statement = string.Format(_query,
+                                        string.IsNullOrWhiteSpace(tdt.ardb_cd) ? "ardb_cd" : string.Concat("'", tdt.ardb_cd, "'"),
                                         string.IsNullOrWhiteSpace(tdt.brn_cd) ? "brn_cd" : string.Concat("'", tdt.brn_cd, "'"),
                                         tdt.trans_dt != null ? tdt.trans_dt.Value.ToString("dd/MM/yyyy") : "trans_dt",
                                         tdt.trans_cd != 0 ? Convert.ToString(tdt.trans_cd) : "trans_cd"
@@ -1160,6 +1166,8 @@ namespace SBWSDepositApi.Deposit
                             tdtr.intt_till_dt = UtilityM.CheckNull<DateTime>(reader["INTT_TILL_DT"]);
                             tdtr.acc_name = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
                             tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                            tdtr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                            tdtr.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
                             tdtRets.Add(tdtr);
                         }
                     }
@@ -1223,14 +1231,15 @@ namespace SBWSDepositApi.Deposit
          + " BORROWER_CR_CD,"
          + " INTT_TILL_DT,"
          + " '' ACC_NAME ,"
-         + " BRN_CD"
+         + " BRN_CD,ARDB_CD,DEL_FLAG "
          + " FROM TD_DEP_TRANS"
-         + " WHERE BRN_CD = {0} AND ACC_NUM = {1} AND  ACC_TYPE_CD = {2} AND  NVL(APPROVAL_STATUS, 'U') = 'U'  ";
+         + " WHERE  ARDB_CD = {0} AND BRN_CD = {1} AND ACC_NUM = {2} AND  ACC_TYPE_CD = {3} AND  NVL(APPROVAL_STATUS, 'U') = 'U' AND DEL_FLAG='N' ";
             _statement = string.Format(_query,
-                                              !string.IsNullOrWhiteSpace(tdt.brn_cd) ? string.Concat("'", tdt.brn_cd, "'") : "brn_cd",
-                                              !string.IsNullOrWhiteSpace(tdt.acc_num) ? string.Concat("'", tdt.acc_num, "'") : "acc_num",
-                                               tdt.acc_type_cd != 0 ? Convert.ToString(tdt.acc_type_cd) : "ACC_TYPE_CD"
-                                               );
+                                      !string.IsNullOrWhiteSpace(tdt.ardb_cd) ? string.Concat("'", tdt.ardb_cd, "'") : "ardb_cd",
+                                      !string.IsNullOrWhiteSpace(tdt.brn_cd) ? string.Concat("'", tdt.brn_cd, "'") : "brn_cd",
+                                      !string.IsNullOrWhiteSpace(tdt.acc_num) ? string.Concat("'", tdt.acc_num, "'") : "acc_num",
+                                      tdt.acc_type_cd != 0 ? Convert.ToString(tdt.acc_type_cd) : "ACC_TYPE_CD"
+                                      );
 
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -1293,6 +1302,8 @@ namespace SBWSDepositApi.Deposit
                             tdtr.intt_till_dt = UtilityM.CheckNull<DateTime>(reader["INTT_TILL_DT"]);
                             tdtr.acc_name = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
                             tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                            tdtr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                            tdtr.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
                             tdtRets = tdtr;
                         }
                     }
@@ -1340,9 +1351,10 @@ namespace SBWSDepositApi.Deposit
             int maxTransCD = 0;
             string _query = "Select Nvl(max(trf_cd) + 1, 1) max_trf_cd"
                             + " From   tm_transfer"
-                            + " Where  trf_dt =  {0} "
-                            + " And    brn_cd = {1}";
+                            + " Where ARDB_CD = {0} AND  trf_dt =  {1} "
+                            + "  And    brn_cd = {2} ";
             _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
                                             string.IsNullOrWhiteSpace(tvd.trf_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tvd.trf_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                                             string.IsNullOrWhiteSpace(tvd.brn_cd) ? "brn_cd" : string.Concat("'", tvd.brn_cd, "'")
                                             );
@@ -1366,19 +1378,18 @@ namespace SBWSDepositApi.Deposit
 
         internal bool InsertDepositTemp(DbConnection connection, tm_deposit dep)
         {
-            string _query = " INSERT INTO TM_DEPOSIT_TEMP ( ARDB_CD,BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
+            string _query = " INSERT INTO TM_DEPOSIT_TEMP ( BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
                            + " OPRN_INSTR_CD, OPENING_DT, PRN_AMT, INTT_AMT, DEP_PERIOD, INSTL_AMT, INSTL_NO, MAT_DT, INTT_RT, TDS_APPLICABLE,     "
                            + " LAST_INTT_CALC_DT, ACC_CLOSE_DT, CLOSING_PRN_AMT, CLOSING_INTT_AMT, PENAL_AMT, EXT_INSTL_TOT, MAT_STATUS, ACC_STATUS,"
                            + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT,      "
                            + " APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,      "
-                           + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD,DEL_FLAG )  "
+                           + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD,ARDB_CD,DEL_FLAG )  "
                            + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}, {14},"
                            + " {15},{16}, {17}, {18},{19},{20},{21},{22},{23},{24}, "
                            + " {25},{26},{27},{28},{29}, SYSDATE,{30},SYSDATE,{31}, "
                            + " {32},{33},{34}, {35},{36},{37},{38},{39},{40},{41},{42},{43},{44},'N')";
 
-            _statement = string.Format(_query,
-            string.Concat("'", dep.ardb_cd, "'"),
+            _statement = string.Format(_query,            
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_type_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
@@ -1424,7 +1435,8 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.bonus_intt_rt, "'"),
             string.Concat("'", dep.transfer_flag, "'"),
             string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-            string.Concat("'", dep.agent_cd, "'")
+            string.Concat("'", dep.agent_cd, "'"),
+            string.Concat("'", dep.ardb_cd, "'")
                                          );
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -1506,12 +1518,12 @@ namespace SBWSDepositApi.Deposit
 
         internal bool InsertIntroducerTemp(DbConnection connection, List<td_introducer> ind)
         {
-            string _query = "INSERT INTO TD_INTRODUCER_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, srl_no, introducer_name, introducer_acc_type, introducer_acc_num) "
-                         + " VALUES( {0},{1},{2},{3}, {4}, {5} , {6},{7} ) ";
+            string _query = "INSERT INTO TD_INTRODUCER_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, srl_no, introducer_name, introducer_acc_type, introducer_acc_num,del_flag) "
+                         + " VALUES( {0},{1},{2},{3}, {4}, {5} , {6}, {7}, 'N' ) ";
             for (int i = 0; i < ind.Count; i++)
             {
                 _statement = string.Format(_query,
-                                                       string.Concat("'", ind[i].arb_cd, "'"),
+                                                       string.Concat("'", ind[i].ardb_cd, "'"),
                                                        string.Concat("'", ind[i].brn_cd, "'"),
                                                        ind[i].acc_type_cd,
                                                        string.Concat("'", ind[i].acc_num, "'"),
@@ -1536,12 +1548,13 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-            string _query = "INSERT INTO TD_NOMINEE_TEMP (brn_cd,acc_type_cd,acc_num,nom_id,nom_name,nom_addr1,nom_addr2,phone_no,percentage,relation )"
-                          + " VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8},{9} ) ";
+            string _query = "INSERT INTO TD_NOMINEE_TEMP (ardb_cd,brn_cd,acc_type_cd,acc_num,nom_id,nom_name,nom_addr1,nom_addr2,phone_no,percentage,relation,del_flag )"
+                          + " VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},'N' ) ";
 
             for (int i = 0; i < nom.Count; i++)
             {
                 _statement = string.Format(_query,
+                                                  string.Concat("'", nom[i].ardb_cd, "'"),
                                                   string.Concat("'", nom[i].brn_cd, "'"),
                                                   nom[i].acc_type_cd,
                                                   string.Concat("'", nom[i].acc_num, "'"),
@@ -1568,11 +1581,12 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-            string _query = "INSERT INTO TD_SIGNATORY_TEMP ( brn_cd, acc_type_cd, acc_num, signatory_name) "
-                          + " VALUES( {0},{1},{2},{3}) ";
+            string _query = "INSERT INTO TD_SIGNATORY_TEMP ( ardb_cd, brn_cd, acc_type_cd, acc_num, signatory_name,del_flag) "
+                          + " VALUES( {0},{1},{2},{3},{4},'N') ";
             for (int i = 0; i < sig.Count; i++)
             {
                 _statement = string.Format(_query,
+                                                       string.Concat("'", sig[i].ardb_cd, "'"),
                                                        string.Concat("'", sig[i].brn_cd, "'"),
                                                        sig[i].acc_type_cd,
                                                        string.Concat("'", sig[i].acc_num, "'"),
@@ -1593,12 +1607,13 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-            string _query = "INSERT INTO TD_ACCHOLDER_TEMP ( brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd ) "
-                         + " VALUES( {0},{1},{2},{3}, {4}, {5} ) ";
+            string _query = "INSERT INTO TD_ACCHOLDER_TEMP ( ardb_cd, brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd,del_flag ) "
+                         + " VALUES( {0},{1},{2},{3}, {4}, {5},{6},'N') ";
 
             for (int i = 0; i < acc.Count; i++)
             {
                 _statement = string.Format(_query,
+                                                       string.Concat("'", acc[i].ardb_cd, "'"),
                                                        string.Concat("'", acc[i].brn_cd, "'"),
                                                        acc[i].acc_type_cd,
                                                        string.Concat("'", acc[i].acc_num, "'"),
@@ -1655,10 +1670,10 @@ namespace SBWSDepositApi.Deposit
             List<td_def_trans_trf> tdtRets = new List<td_def_trans_trf>();
             string _query = "INSERT INTO TM_TRANSFER (TRF_DT,TRF_CD,TRANS_CD,CREATED_BY,"
                         + " CREATED_DT,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT,"
-                        + " BRN_CD)"
+                        + " BRN_CD,ARDB_CD,DEL_FLAG)"
                         + " VALUES ({0},{1},{2},{3},"
                         + " {4},{5},{6},{7},"
-                        + " {8})";
+                        + " {8},{9},'N')";
 
             for (int i = 0; i < tdt.Count; i++)
             {
@@ -1673,7 +1688,8 @@ namespace SBWSDepositApi.Deposit
                              string.Concat("'", tdt[i].approval_status, "'"),
                              string.Concat("'", tdt[i].approved_by, "'"),
                              string.IsNullOrWhiteSpace(tdt[i].approved_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].approved_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                             string.Concat("'", tdt[i].brn_cd, "'")
+                             string.Concat("'", tdt[i].brn_cd, "'"),
+                             string.Concat("'", tdt[i].ardb_cd, "'")
                              );
 
                 using (var command = OrclDbConnection.Command(connection, _statement))
@@ -1694,12 +1710,12 @@ namespace SBWSDepositApi.Deposit
                         + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT,PARTICULARS,TR_ACC_TYPE_CD,TR_ACC_NUM,VOUCHER_DT,VOUCHER_ID,TRF_TYPE,TR_ACC_CD,"
                         + " ACC_CD,SHARE_AMT,SUM_ASSURED,PAID_AMT,CURR_PRN_RECOV,OVD_PRN_RECOV,CURR_INTT_RECOV,OVD_INTT_RECOV,REMARKS,CROP_CD,ACTIVITY_CD,CURR_INTT_RATE,OVD_INTT_RATE,"
                         + " INSTL_NO,INSTL_START_DT,PERIODICITY,DISB_ID,COMP_UNIT_NO,ONGOING_UNIT_NO,MIS_ADVANCE_RECOV,AUDIT_FEES_RECOV,SECTOR_CD,SPL_PROG_CD,BORROWER_CR_CD,INTT_TILL_DT,"
-                        + " BRN_CD)"
+                        + " BRN_CD,ARDB_CD,DEL_FLAG,HOME_BRN_CD,INTRA_BRANCH_TRN)"
                         + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9}, {10},{11},"
                         + " {12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23}, {24},"
                         + " {25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},"
                         + " {38},{39},{40},{41},{42},{43},{44}, {45},{46},{47},{48},{49},"
-                        + " {50})";
+                        + " {50},{51},'N',{52},{53})";
 
 
             for (int i = 0; i < tdt.Count; i++)
@@ -1760,7 +1776,10 @@ namespace SBWSDepositApi.Deposit
                                              string.Concat("'", tdt[i].spl_prog_cd, "'"),
                                              string.Concat("'", tdt[i].borrower_cr_cd, "'"),
                                              string.IsNullOrWhiteSpace(tdt[i].intt_till_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].intt_till_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                                             string.Concat("'", tdt[i].brn_cd, "'")
+                                             string.Concat("'", tdt[i].brn_cd, "'"),
+                                             string.Concat("'", tdt[i].ardb_cd, "'"),
+                                             string.Concat("'", tdt[i].home_brn_cd, "'"),
+                                             string.Concat("'", tdt[i].intra_branch_trn, "'")
                                              );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -1780,12 +1799,12 @@ namespace SBWSDepositApi.Deposit
                         + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT,PARTICULARS,TR_ACC_TYPE_CD,TR_ACC_NUM,VOUCHER_DT,VOUCHER_ID,TRF_TYPE,TR_ACC_CD,"
                         + " ACC_CD,SHARE_AMT,SUM_ASSURED,PAID_AMT,CURR_PRN_RECOV,OVD_PRN_RECOV,CURR_INTT_RECOV,OVD_INTT_RECOV,REMARKS,CROP_CD,ACTIVITY_CD,CURR_INTT_RATE,OVD_INTT_RATE,"
                         + " INSTL_NO,INSTL_START_DT,PERIODICITY,DISB_ID,COMP_UNIT_NO,ONGOING_UNIT_NO,MIS_ADVANCE_RECOV,AUDIT_FEES_RECOV,SECTOR_CD,SPL_PROG_CD,BORROWER_CR_CD,INTT_TILL_DT,"
-                        + " BRN_CD)"
+                        + " BRN_CD,ARDB_CD,DEL_FLAG,HOME_BRN_CD,INTRA_BRANCH_TRN)"
                         + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9}, {10},{11},"
                         + " {12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23}, {24},"
                         + " {25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},"
                         + " {38},{39},{40},{41},{42},{43},{44}, {45},{46},{47},{48},{49},"
-                        + " {50})";
+                        + " {50},{51},'N',{52},{53})";
 
             _statement = string.Format(_query,
                              string.IsNullOrWhiteSpace(tdt.trans_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt.trans_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
@@ -1840,7 +1859,10 @@ namespace SBWSDepositApi.Deposit
                              string.Concat("'", tdt.spl_prog_cd, "'"),
                              string.Concat("'", tdt.borrower_cr_cd, "'"),
                              string.IsNullOrWhiteSpace(tdt.intt_till_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt.intt_till_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                             string.Concat("'", tdt.brn_cd, "'")
+                             string.Concat("'", tdt.brn_cd, "'"),
+                              string.Concat("'", tdt.ardb_cd, "'"),
+                              string.Concat("'", tdt.home_brn_cd, "'"),
+                             string.Concat("'", tdt.intra_branch_trn, "'")
                              );
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -1900,7 +1922,7 @@ namespace SBWSDepositApi.Deposit
                   + "transfer_flag        = NVL({43}, transfer_flag       ),"
                   + "transfer_dt          = NVL({44}, transfer_dt ),"
                   + "agent_cd             = NVL({45}, agent_cd            ) "
-                  + "WHERE brn_cd = NVL({46}, brn_cd) AND acc_num = NVL({47},  acc_num ) AND acc_type_cd=NVL({48},  acc_type_cd ) ";
+                  + "WHERE ardb_cd={46} and brn_cd = NVL({47}, brn_cd) AND acc_num = NVL({48},  acc_num ) AND acc_type_cd=NVL({49},  acc_type_cd ) ";
 
             _statement = string.Format(_query,
                         string.Concat("'", dep.brn_cd, "'"),
@@ -1950,6 +1972,7 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.transfer_flag, "'"),
             string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
             string.Concat("'", dep.agent_cd, "'"),
+            string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
             string.Concat("'", dep.acc_type_cd, "'")
@@ -2012,7 +2035,7 @@ namespace SBWSDepositApi.Deposit
                   + "transfer_flag        = NVL({43}, transfer_flag       ),"
                   + "transfer_dt          = NVL({44}, transfer_dt ),"
                   + "CATG_CD             = NVL({45}, CATG_CD            ) "
-                  + "WHERE brn_cd = NVL({46}, brn_cd) AND acc_num = NVL({47},  acc_num ) AND acc_type_cd=NVL({48},  acc_type_cd ) ";
+                  + "WHERE ardb_cd = {46} And brn_cd = NVL({47}, brn_cd) AND acc_num = NVL({48},  acc_num ) AND acc_type_cd=NVL({49},  acc_type_cd ) ";
 
             _statement = string.Format(_query,
                         string.Concat("'", dep.brn_cd, "'"),
@@ -2062,6 +2085,7 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.transfer_flag, "'"),
             string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
             string.Concat("'", dep.agent_cd, "'"),
+            string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
             string.Concat("'", dep.acc_type_cd, "'")
@@ -2078,11 +2102,12 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateIntroducerTemp(DbConnection connection, List<td_introducer> ind)
         {
             string _queryd = " DELETE FROM TD_INTRODUCER_TEMP "
-             + " WHERE brn_cd = {0} AND acc_num = {1} AND  ACC_TYPE_CD = {2}";
+             + " WHERE ardb_cd = {0} and brn_cd = {1} AND acc_num = {2} AND  ACC_TYPE_CD = {3} AND DEL_FLAG='N' ";
 
             try
             {
                 _statement = string.Format(_queryd,
+                                     !string.IsNullOrWhiteSpace(ind[0].ardb_cd) ? string.Concat("'", ind[0].ardb_cd, "'") : "ardb_cd",
                                      !string.IsNullOrWhiteSpace(ind[0].brn_cd) ? string.Concat("'", ind[0].brn_cd, "'") : "brn_cd",
                                      !string.IsNullOrWhiteSpace(ind[0].acc_num) ? string.Concat("'", ind[0].acc_num, "'") : "acc_num",
                                      (ind[0].acc_type_cd > 0) ? ind[0].acc_type_cd.ToString() : "ACC_TYPE_CD"
@@ -2107,9 +2132,9 @@ namespace SBWSDepositApi.Deposit
             + " introducer_name     = {4} , "
             + " introducer_acc_type = {5} , "
             + " introducer_acc_num  = {6}   "
-           + "  WHERE brn_cd = {7} AND acc_num = {8} AND acc_type_cd=NVL({9},  acc_type_cd )  ";
-            string _queryins = "INSERT INTO TD_INTRODUCER_TEMP ( brn_cd, acc_type_cd, acc_num, srl_no, introducer_name, introducer_acc_type, introducer_acc_num) "
-                          + " VALUES( {0},{1},{2},{3}, {4}, {5} , {6} ) ";
+           + "  WHERE ardb_cd={7} and brn_cd = {8} AND acc_num = {9} AND acc_type_cd=NVL({10},  acc_type_cd ) and DEL_FLAG='N'  ";
+            string _queryins = "INSERT INTO TD_INTRODUCER_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, srl_no, introducer_name, introducer_acc_type, introducer_acc_num,DEL_FLAG) "
+                          + " VALUES( {0},{1},{2},{3}, {4}, {5} , {6},{7},'N' ) ";
 
             for (int i = 0; i < ind.Count; i++)
             {
@@ -2124,6 +2149,7 @@ namespace SBWSDepositApi.Deposit
                                          !string.IsNullOrWhiteSpace(ind[i].introducer_name) ? string.Concat("'", ind[i].introducer_name, "'") : "introducer_name",
                                          !string.IsNullOrWhiteSpace(ind[i].introducer_acc_type.ToString()) ? string.Concat("'", ind[i].introducer_acc_type, "'") : "introducer_acc_type",
                                          !string.IsNullOrWhiteSpace(ind[i].introducer_acc_num) ? string.Concat("'", ind[i].introducer_acc_num, "'") : "introducer_acc_num",
+                                         !string.IsNullOrWhiteSpace(ind[i].ardb_cd) ? string.Concat("'", ind[i].ardb_cd, "'") : "ardb_cd",
                                         !string.IsNullOrWhiteSpace(ind[i].brn_cd) ? string.Concat("'", ind[i].brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(ind[i].acc_type_cd.ToString()) ? string.Concat("'", ind[i].acc_type_cd, "'") : "acc_type_cd",
                                            string.Concat("'", ind[i].acc_type_cd, "'")
@@ -2132,6 +2158,7 @@ namespace SBWSDepositApi.Deposit
                 else
                 {
                     _statement = string.Format(_queryins,
+                                                      string.Concat("'", ind[i].ardb_cd, "'"),
                                                       string.Concat("'", ind[i].brn_cd, "'"),
                                                       ind[i].acc_type_cd,
                                                       string.Concat("'", ind[i].acc_num, "'"),
@@ -2156,14 +2183,14 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateNomineeTemp(DbConnection connection, List<td_nominee> nom)
         {
             string _queryd = " DELETE FROM TD_NOMINEE_TEMP "
-                         + " WHERE brn_cd = {0} AND acc_num = {1}  AND nom_id = {2} ";
+                         + " WHERE ardb_cd={0} and  brn_cd = {1} AND acc_num = {2} ";
 
             try
             {
                 _statement = string.Format(_queryd,
+                                     !string.IsNullOrWhiteSpace(nom[0].ardb_cd) ? string.Concat("'", nom[0].ardb_cd, "'") : "ardb_cd",
                                      !string.IsNullOrWhiteSpace(nom[0].brn_cd) ? string.Concat("'", nom[0].brn_cd, "'") : "brn_cd",
-                                     !string.IsNullOrWhiteSpace(nom[0].acc_num) ? string.Concat("'", nom[0].acc_num, "'") : "acc_num",
-                                     !string.IsNullOrWhiteSpace(nom[0].nom_id.ToString()) ? string.Concat("'", nom[0].nom_id, "'") : "nom_id"
+                                     !string.IsNullOrWhiteSpace(nom[0].acc_num) ? string.Concat("'", nom[0].acc_num, "'") : "acc_num"
                                       );
 
                 using (var command = OrclDbConnection.Command(connection, _statement))
@@ -2186,9 +2213,9 @@ namespace SBWSDepositApi.Deposit
              + " phone_no    = {7} , "
              + " percentage  = {8} , "
              + " relation    = {9}  "
-             + " WHERE brn_cd = {10} AND acc_num = {11} AND nom_id = {12} AND acc_type_cd=NVL({13},  acc_type_cd ) ";
-            string _queryins = "INSERT INTO TD_NOMINEE_TEMP (brn_cd,acc_type_cd,acc_num,nom_id,nom_name,nom_addr1,nom_addr2,phone_no,percentage,relation )"
-                         + " VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8},{9} ) ";
+             + " WHERE ardb_cd = {10} And brn_cd = {11} AND acc_num = {12} AND nom_id = {13} AND acc_type_cd=NVL({14},  acc_type_cd ) ";
+            string _queryins = "INSERT INTO TD_NOMINEE_TEMP (ardb_cd,brn_cd,acc_type_cd,acc_num,nom_id,nom_name,nom_addr1,nom_addr2,phone_no,percentage,relation,del_flag )"
+                         + " VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},'N' ) ";
 
             for (int i = 0; i < nom.Count; i++)
             {
@@ -2206,6 +2233,7 @@ namespace SBWSDepositApi.Deposit
                                          !string.IsNullOrWhiteSpace(nom[i].phone_no) ? string.Concat("'", nom[i].phone_no, "'") : "phone_no",
                                          !string.IsNullOrWhiteSpace(nom[i].percentage.ToString()) ? string.Concat("'", nom[i].percentage, "'") : "percentage",
                                          !string.IsNullOrWhiteSpace(nom[i].relation) ? string.Concat("'", nom[i].relation, "'") : "relation",
+                                         !string.IsNullOrWhiteSpace(nom[i].ardb_cd) ? string.Concat("'", nom[i].ardb_cd, "'") : "ardb_cd",
                                          !string.IsNullOrWhiteSpace(nom[i].brn_cd) ? string.Concat("'", nom[i].brn_cd, "'") : "brn_cd",
                                          !string.IsNullOrWhiteSpace(nom[i].acc_num) ? string.Concat("'", nom[i].acc_num, "'") : "acc_num",
                                          !string.IsNullOrWhiteSpace(nom[i].nom_id.ToString()) ? string.Concat("'", nom[i].nom_id, "'") : "nom_id",
@@ -2215,6 +2243,7 @@ namespace SBWSDepositApi.Deposit
                 else
                 {
                     _statement = string.Format(_queryins,
+                                                 string.Concat("'", nom[i].ardb_cd, "'"),
                                                  string.Concat("'", nom[i].brn_cd, "'"),
                                                  nom[i].acc_type_cd,
                                                  string.Concat("'", nom[i].acc_num, "'"),
@@ -2241,11 +2270,12 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateSignatoryTemp(DbConnection connection, List<td_signatory> sig)
         {
             string _queryd = " DELETE FROM TD_SIGNATORY_TEMP  "
-             + " WHERE brn_cd = {0} AND acc_num = {1} AND acc_type_cd={2}";
+             + " WHERE ardb_cd = {0} and brn_cd = {1} AND acc_num = {2} AND acc_type_cd={3} AND DEL_FLAG= 'N' ";
 
             try
             {
                 _statement = string.Format(_queryd,
+                                     !string.IsNullOrWhiteSpace(sig[0].ardb_cd) ? string.Concat("'", sig[0].ardb_cd, "'") : "ardb_cd",
                                      !string.IsNullOrWhiteSpace(sig[0].brn_cd) ? string.Concat("'", sig[0].brn_cd, "'") : "brn_cd",
                                      !string.IsNullOrWhiteSpace(sig[0].acc_num) ? string.Concat("'", sig[0].acc_num, "'") : "acc_num",
                                      !string.IsNullOrWhiteSpace(sig[0].acc_type_cd.ToString()) ? string.Concat("'", sig[0].acc_type_cd, "'") : "acc_type_cd"
@@ -2267,9 +2297,9 @@ namespace SBWSDepositApi.Deposit
              + " acc_type_cd    = {1}  ,  "
              + " acc_num        = {2}  ,  "
              + " signatory_name = {3}     "
-            + " WHERE brn_cd = {4} AND acc_num = {5} AND acc_type_cd=NVL({6},  acc_type_cd ) ";
-            string _queryins = "INSERT INTO TD_SIGNATORY_TEMP ( brn_cd, acc_type_cd, acc_num, signatory_name) "
-                          + " VALUES( {0},{1},{2},{3}) ";
+            + " WHERE ardb_cd ={4}, brn_cd = {5} AND acc_num = {6} AND acc_type_cd=NVL({7},  acc_type_cd ) ";
+            string _queryins = "INSERT INTO TD_SIGNATORY_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, signatory_name,del_flag) "
+                          + " VALUES( {0},{1},{2},{3},{4},'N') ";
             for (int i = 0; i < sig.Count; i++)
             {
                 sig[i].upd_ins_flag = "I";
@@ -2280,6 +2310,7 @@ namespace SBWSDepositApi.Deposit
                                          !string.IsNullOrWhiteSpace(sig[i].acc_type_cd.ToString()) ? string.Concat("'", sig[i].acc_type_cd, "'") : "acc_type_cd",
                                          !string.IsNullOrWhiteSpace(sig[i].acc_num) ? string.Concat("'", sig[i].acc_num, "'") : "acc_num",
                                          !string.IsNullOrWhiteSpace(sig[i].signatory_name) ? string.Concat("'", sig[i].signatory_name, "'") : "signatory_name",
+                                         !string.IsNullOrWhiteSpace(sig[i].ardb_cd) ? string.Concat("'", sig[i].ardb_cd, "'") : "ardb_cd",
                                          !string.IsNullOrWhiteSpace(sig[i].brn_cd) ? string.Concat("'", sig[i].brn_cd, "'") : "brn_cd",
                                          !string.IsNullOrWhiteSpace(sig[i].acc_num) ? string.Concat("'", sig[i].acc_num, "'") : "acc_num",
                                          string.Concat("'", sig[i].acc_type_cd, "'")
@@ -2288,6 +2319,7 @@ namespace SBWSDepositApi.Deposit
                 else
                 {
                     _statement = string.Format(_queryins,
+                                                            string.Concat("'", sig[i].ardb_cd, "'"),
                                                            string.Concat("'", sig[i].brn_cd, "'"),
                                                            sig[i].acc_type_cd,
                                                            string.Concat("'", sig[i].acc_num, "'"),
@@ -2307,10 +2339,11 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateAccholderTemp(DbConnection connection, List<td_accholder> acc)
         {
             string _queryd = " DELETE FROM td_accholder_temp "
-            + " WHERE brn_cd = {0} AND acc_num = {1} AND  ACC_TYPE_CD = {2}";
+            + " WHERE ardb_cd = {0} and brn_cd = {1} AND acc_num = {2} AND  ACC_TYPE_CD = {3}";
             try
             {
                 _statement = string.Format(_queryd,
+                                     !string.IsNullOrWhiteSpace(acc[0].ardb_cd) ? string.Concat("'", acc[0].ardb_cd, "'") : "ardb_cd",
                                      !string.IsNullOrWhiteSpace(acc[0].brn_cd) ? string.Concat("'", acc[0].brn_cd, "'") : "brn_cd",
                                      !string.IsNullOrWhiteSpace(acc[0].acc_num) ? string.Concat("'", acc[0].acc_num, "'") : "acc_num",
                                      (acc[0].acc_type_cd > 0) ? acc[0].acc_type_cd.ToString() : "ACC_TYPE_CD"
@@ -2333,9 +2366,9 @@ namespace SBWSDepositApi.Deposit
                  + " acc_holder     = {3}, "
                  + " relation       = {4}, "
                  + " cust_cd        = {5} "
-                + " WHERE brn_cd = {6} AND acc_num = {7} AND acc_type_cd=NVL({8},  acc_type_cd )  ";
-            string _queryins = "INSERT INTO TD_ACCHOLDER_TEMP ( brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd ) "
-                        + " VALUES( {0},{1},{2},{3}, {4}, {5} ) ";
+                + " WHERE ardb_cd={6} and brn_cd = {7} AND acc_num = {8} AND acc_type_cd=NVL({9},  acc_type_cd )  and del_flag='N' ";
+            string _queryins = "INSERT INTO TD_ACCHOLDER_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd,del_flag ) "
+                        + " VALUES( {0},{1},{2},{3}, {4}, {5},{6},'N' ) ";
 
             for (int i = 0; i < acc.Count; i++)
             {
@@ -2349,6 +2382,7 @@ namespace SBWSDepositApi.Deposit
                                          !string.IsNullOrWhiteSpace(acc[i].acc_holder) ? string.Concat("'", acc[i].acc_holder, "'") : "acc_holder",
                                          !string.IsNullOrWhiteSpace(acc[i].relation) ? string.Concat("'", acc[i].relation, "'") : "relation",
                                          !string.IsNullOrWhiteSpace(acc[i].cust_cd.ToString()) ? string.Concat("'", acc[i].cust_cd, "'") : "cust_cd",
+                                         !string.IsNullOrWhiteSpace(acc[i].ardb_cd) ? string.Concat("'", acc[i].ardb_cd, "'") : "ardb_cd",
                                          !string.IsNullOrWhiteSpace(acc[i].brn_cd) ? string.Concat("'", acc[i].brn_cd, "'") : "brn_cd",
                                          !string.IsNullOrWhiteSpace(acc[i].acc_num) ? string.Concat("'", acc[i].acc_num, "'") : "acc_num",
                                          string.Concat("'", acc[i].acc_type_cd, "'")
@@ -2357,6 +2391,7 @@ namespace SBWSDepositApi.Deposit
                 else
                 {
                     _statement = string.Format(_queryins,
+                                                       string.Concat("'", acc[i].ardb_cd, "'"),
                                                        string.Concat("'", acc[i].brn_cd, "'"),
                                                        acc[i].acc_type_cd,
                                                        string.Concat("'", acc[i].acc_num, "'"),
@@ -2442,12 +2477,13 @@ namespace SBWSDepositApi.Deposit
         public bool UpdateTransfer(DbConnection connection, List<tm_transfer> tdt)
         {
             string _queryd = "DELETE FROM TM_TRANSFER  "
-             + " WHERE (BRN_CD = {0}) AND "
-             + " (TRF_DT = {1}) AND  "
-             + " (  TRANS_CD = {2} ) ";
+             + " WHERE  (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
+             + " (TRF_DT = {2}) AND  "
+             + " (  TRANS_CD = {3} ) ";
             try
             {
                 _statement = string.Format(_queryd,
+                             string.Concat("'", tdt[0].ardb_cd, "'"),
                              string.Concat("'", tdt[0].brn_cd, "'"),
                              string.IsNullOrWhiteSpace(tdt[0].trf_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[0].trf_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat(tdt[0].trans_cd)
@@ -2474,15 +2510,15 @@ namespace SBWSDepositApi.Deposit
                    + " APPROVED_BY            =NVL({6},APPROVED_BY    ),"
                    + " APPROVED_DT            =NVL({7},APPROVED_DT    ),"
                    + " BRN_CD                 =NVL({8},BRN_CD         )"
-              + " WHERE (BRN_CD = {9}) AND "
-              + " (TRF_DT = {10} ) AND  "
-              + " (  TRF_CD = {11} ) ";
+              + " WHERE (ARDB_CD = {9}) AND (BRN_CD = {10}) AND "
+              + " (TRF_DT = {11} ) AND  "
+              + " (  TRF_CD = {12} ) AND DEL_FLAG ='N' ";
             string _queryins = "INSERT INTO TM_TRANSFER (TRF_DT,TRF_CD,TRANS_CD,CREATED_BY,"
                       + " CREATED_DT,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT,"
-                      + " BRN_CD)"
+                      + " BRN_CD,ARDB_CD,DEL_FLAG)"
                       + " VALUES ({0},{1},{2},{3},"
                       + " {4},{5},{6},{7},"
-                      + " {8})";
+                      + " {8},{9},'N')";
             for (int i = 0; i < tdt.Count; i++)
             {
                 tdt[i].upd_ins_flag = "I";
@@ -2499,6 +2535,7 @@ namespace SBWSDepositApi.Deposit
                              string.Concat("'", tdt[i].approved_by, "'"),
                              string.IsNullOrWhiteSpace(tdt[i].approved_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].approved_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat("'", tdt[i].brn_cd, "'"),
+                             string.Concat("'", tdt[i].ardb_cd, "'"),
                              string.Concat("'", tdt[i].brn_cd, "'"),
                              string.IsNullOrWhiteSpace(tdt[i].trf_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].trf_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat("'", tdt[i].trf_cd, "'")
@@ -2517,7 +2554,8 @@ namespace SBWSDepositApi.Deposit
                            string.Concat("'", tdt[i].approval_status, "'"),
                            string.Concat("'", tdt[i].approved_by, "'"),
                            string.IsNullOrWhiteSpace(tdt[i].approved_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].approved_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                           string.Concat("'", tdt[i].brn_cd, "'")
+                           string.Concat("'", tdt[i].brn_cd, "'"),
+                           string.Concat("'", tdt[i].ardb_cd, "'")
                            );
                 }
                 using (var command = OrclDbConnection.Command(connection, _statement))
@@ -2533,14 +2571,15 @@ namespace SBWSDepositApi.Deposit
         public bool UpdateDepTransTrf(DbConnection connection, List<td_def_trans_trf> tdt)
         {
             string _queryd = "DELETE FROM TD_DEP_TRANS_TRF  "
-            + " WHERE (BRN_CD = {0}) AND "
-            + " (TRANS_DT = {1}) AND  "
-            + " (  TRANS_CD = {2} ) ";
+            + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
+            + " (TRANS_DT = {2}) AND  "
+            + " (  TRANS_CD = {3} ) ";
 
             try
             {
 
                 _statement = string.Format(_queryd,
+                             string.Concat("'", tdt[0].ardb_cd, "'"),
                              string.Concat("'", tdt[0].brn_cd, "'"),
                              string.IsNullOrWhiteSpace(tdt[0].trans_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[0].trans_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat(tdt[0].trans_cd)
@@ -2607,21 +2646,21 @@ namespace SBWSDepositApi.Deposit
          + " BORROWER_CR_CD         =NVL({48},BORROWER_CR_CD ),"
          + " INTT_TILL_DT           =NVL({49},INTT_TILL_DT   ),"
          + " BRN_CD                 =NVL({50},BRN_CD         )"
-    + " WHERE (BRN_CD = {51}) AND "
-    + " (TRANS_DT = {52}) AND  "
-    + " (  TRANS_CD = {53} ) AND  "
-    + " ACC_TYPE_CD = {54} AND "
-    + " ACC_NUM = {55}";
+    + " WHERE (ARDB_CD = {51}) AND (BRN_CD = {52}) AND "
+    + " (TRANS_DT = {53}) AND  "
+    + " (  TRANS_CD = {54} ) AND  "
+    + " ACC_TYPE_CD = {55} AND "
+    + " ACC_NUM = {56} AND DEL_FLAG = 'N' ";
             string _queryins = "INSERT INTO TD_DEP_TRANS_TRF (TRANS_DT,TRANS_CD,ACC_TYPE_CD,ACC_NUM,TRANS_TYPE,TRANS_MODE,AMOUNT,INSTRUMENT_DT,INSTRUMENT_NUM,PAID_TO,TOKEN_NUM,CREATED_BY,"
                                 + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT,PARTICULARS,TR_ACC_TYPE_CD,TR_ACC_NUM,VOUCHER_DT,VOUCHER_ID,TRF_TYPE,TR_ACC_CD,"
                                 + " ACC_CD,SHARE_AMT,SUM_ASSURED,PAID_AMT,CURR_PRN_RECOV,OVD_PRN_RECOV,CURR_INTT_RECOV,OVD_INTT_RECOV,REMARKS,CROP_CD,ACTIVITY_CD,CURR_INTT_RATE,OVD_INTT_RATE,"
                                 + " INSTL_NO,INSTL_START_DT,PERIODICITY,DISB_ID,COMP_UNIT_NO,ONGOING_UNIT_NO,MIS_ADVANCE_RECOV,AUDIT_FEES_RECOV,SECTOR_CD,SPL_PROG_CD,BORROWER_CR_CD,INTT_TILL_DT,"
-                                + " BRN_CD)"
+                                + " BRN_CD,ARDB_CD,DEL_FLAG)"
                                 + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9}, {10},{11},"
                                 + " {12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23}, {24},"
                                 + " {25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},"
-                                + " {38},{39},{40},{41},{42},{43},{44}, {45},{46},{47},{48},{49},"
-                                + " {50})";
+                                + " {38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},"
+                                + " {50},{51},'N')";
             for (int i = 0; i < tdt.Count; i++)
             {
                 tdt[i].upd_ins_flag = "I";
@@ -2680,6 +2719,7 @@ namespace SBWSDepositApi.Deposit
                                  string.Concat("'", tdt[i].borrower_cr_cd, "'"),
                                  string.IsNullOrWhiteSpace(tdt[i].intt_till_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].intt_till_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                                  string.Concat("'", tdt[i].brn_cd, "'"),
+                                 string.Concat("'", tdt[i].ardb_cd, "'"),
                                  string.Concat("'", tdt[i].brn_cd, "'"),
                                  string.IsNullOrWhiteSpace(tdt[i].trans_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].trans_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                                  string.Concat(tdt[i].trans_cd),
@@ -2742,7 +2782,8 @@ namespace SBWSDepositApi.Deposit
                             string.Concat("'", tdt[i].spl_prog_cd, "'"),
                             string.Concat("'", tdt[i].borrower_cr_cd, "'"),
                             string.IsNullOrWhiteSpace(tdt[i].intt_till_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt[i].intt_till_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                            string.Concat("'", tdt[i].brn_cd, "'")
+                            string.Concat("'", tdt[i].brn_cd, "'"),
+                            string.Concat("'", tdt[i].ardb_cd, "'")
                             );
 
                 }
@@ -2811,11 +2852,11 @@ namespace SBWSDepositApi.Deposit
          + " BORROWER_CR_CD         =NVL({48},BORROWER_CR_CD ),"
          + " INTT_TILL_DT           =NVL({49},INTT_TILL_DT   ),"
          + " BRN_CD                 =NVL({50},BRN_CD         )"
-                + " WHERE BRN_CD = {51} AND "
-                + " TRANS_DT = {52} AND  "
-                + " TRANS_CD = {53} AND  "
-                + " ACC_TYPE_CD = {54} AND "
-                + " ACC_NUM = {55}";
+                + " WHERE ARDB_CD = {51} AND BRN_CD = {52} AND "
+                + " TRANS_DT = {53} AND  "
+                + " TRANS_CD = {54} AND  "
+                + " ACC_TYPE_CD = {55} AND "
+                + " ACC_NUM = {56} AND DEL_FLAG='N' ";
             _statement = string.Format(_query,
                             string.IsNullOrWhiteSpace(tdt.trans_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt.trans_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat(tdt.trans_cd),
@@ -2869,6 +2910,7 @@ namespace SBWSDepositApi.Deposit
                              string.Concat("'", tdt.borrower_cr_cd, "'"),
                              string.IsNullOrWhiteSpace(tdt.intt_till_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt.intt_till_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat("'", tdt.brn_cd, "'"),
+                             string.Concat("'", tdt.ardb_cd, "'"),
                              string.Concat("'", tdt.brn_cd, "'"),
                             string.IsNullOrWhiteSpace(tdt.trans_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt.trans_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                                              string.Concat(tdt.trans_cd),
@@ -3352,14 +3394,15 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-            string _query = "SELECT BRN_CD,"
+            string _query = "SELECT ARDB_CD,BRN_CD,"
              + " ACC_TYPE_CD,"
              + " ACC_NUM,"
-             + " SIGNATORY_NAME"
+             + " SIGNATORY_NAME,DEL_FLAG"
              + " FROM TD_SIGNATORY"
-             + " WHERE BRN_CD = {0} AND ACC_NUM = {1} AND  ACC_TYPE_CD = {2} ";
+             + " WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_NUM = {2} AND  ACC_TYPE_CD = {3} ";
 
             _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num",
                                            sig.acc_type_cd != 0 ? Convert.ToString(sig.acc_type_cd) : "ACC_TYPE_CD"
@@ -3374,10 +3417,12 @@ namespace SBWSDepositApi.Deposit
                             while (reader.Read())
                             {
                                 var s = new td_signatory();
+                                s.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 s.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 s.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
                                 s.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
                                 s.signatory_name = UtilityM.CheckNull<string>(reader["SIGNATORY_NAME"]);
+                                s.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
                                 sigList.Add(s);
                             }
@@ -3395,18 +3440,19 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_accholder> accList = new List<td_accholder>();
 
-            dynamic _query = " SELECT BRN_CD, "
+            dynamic _query = " SELECT ARDB_CD, BRN_CD, "
                  + " ACC_TYPE_CD,   "
                  + " ACC_NUM,       "
                  + " ACC_HOLDER,    "
                  + " RELATION,      "
-                 + " CUST_CD        "
+                 + " CUST_CD,DEL_FLAG        "
                  + " FROM TD_ACCHOLDER "
-                 + " WHERE BRN_CD = {0} AND ACC_NUM = {1} AND  ACC_TYPE_CD = {2}  ";
-            var v1 = !string.IsNullOrWhiteSpace(acc.brn_cd) ? string.Concat("'", acc.brn_cd, "'") : "brn_cd";
-            var v2 = !string.IsNullOrWhiteSpace(acc.acc_num) ? string.Concat("'", acc.acc_num, "'") : "acc_num";
-            dynamic v3 = (acc.acc_type_cd > 0) ? acc.acc_type_cd.ToString() : "ACC_TYPE_CD";
-            _statement = string.Format(_query, v1, v2, v3);
+                 + " WHERE ARDB_CD = {0} AND BRN_CD = {1} AND ACC_NUM = {2} AND  ACC_TYPE_CD = {3}  ";
+            var v1 = !string.IsNullOrWhiteSpace(acc.ardb_cd) ? string.Concat("'", acc.ardb_cd, "'") : "ardb_cd";
+            var v2 = !string.IsNullOrWhiteSpace(acc.brn_cd) ? string.Concat("'", acc.brn_cd, "'") : "brn_cd";
+            var v3 = !string.IsNullOrWhiteSpace(acc.acc_num) ? string.Concat("'", acc.acc_num, "'") : "acc_num";
+            dynamic v4 = (acc.acc_type_cd > 0) ? acc.acc_type_cd.ToString() : "ACC_TYPE_CD";
+            _statement = string.Format(_query, v1, v2, v3,v4);
 
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -3419,12 +3465,14 @@ namespace SBWSDepositApi.Deposit
                             while (reader.Read())
                             {
                                 var a = new td_accholder();
+                                a.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 a.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 a.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
                                 a.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
                                 a.acc_holder = UtilityM.CheckNull<string>(reader["ACC_HOLDER"]);
                                 a.relation = UtilityM.CheckNull<string>(reader["RELATION"]);
                                 a.cust_cd = UtilityM.CheckNull<decimal>(reader["CUST_CD"]);
+                                a.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
                                 accList.Add(a);
                             }
@@ -3439,17 +3487,18 @@ namespace SBWSDepositApi.Deposit
         internal List<td_introducer> GetIntroducer(DbConnection connection, tm_deposit dep)
         {
             List<td_introducer> indList = new List<td_introducer>();
-            string _query = "SELECT BRN_CD, "
+            string _query = "SELECT ARDB_CD, BRN_CD, "
                  + " ACC_TYPE_CD,        "
                  + " ACC_NUM,            "
                  + " SRL_NO,             "
                  + " INTRODUCER_NAME,    "
                  + " INTRODUCER_ACC_TYPE,"
-                 + " INTRODUCER_ACC_NUM  "
+                 + " INTRODUCER_ACC_NUM,DEL_FLAG  "
                  + " FROM TD_INTRODUCER  "
-                 + " WHERE BRN_CD = {0} AND ACC_NUM = {1}  AND ACC_TYPE_CD = {2}";
+                 + " WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_NUM = {2}  AND ACC_TYPE_CD = {3}";
 
             _statement = string.Format(_query,
+            !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
             !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
             !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
             (dep.acc_type_cd > 0 ? dep.acc_type_cd.ToString() : "ACC_TYPE_CD"));
@@ -3464,6 +3513,7 @@ namespace SBWSDepositApi.Deposit
                             while (reader.Read())
                             {
                                 var i = new td_introducer();
+                                i.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 i.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 i.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
                                 i.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
@@ -3472,6 +3522,7 @@ namespace SBWSDepositApi.Deposit
                                 i.introducer_name = UtilityM.CheckNull<string>(reader["INTRODUCER_NAME"]);
                                 i.introducer_acc_type = UtilityM.CheckNull<int>(reader["INTRODUCER_ACC_TYPE"]);
                                 i.introducer_acc_num = UtilityM.CheckNull<string>(reader["INTRODUCER_ACC_NUM"]);
+                                i.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
                                 indList.Add(i);
                             }
@@ -3531,7 +3582,7 @@ namespace SBWSDepositApi.Deposit
                   + "tds_applicable       = NVL({3}, tds_applicable      ),"
                   + "modified_by          = NVL({4}, modified_by   ),"
                   + "modified_dt          = NVL({5}, modified_dt   )"
-                  + "WHERE brn_cd = NVL({6}, brn_cd) AND acc_num = NVL({7},  acc_num ) AND acc_type_cd=NVL({8},  acc_type_cd ) ";
+                  + "WHERE ardb_cd={6} and brn_cd = NVL({7}, brn_cd) AND acc_num = NVL({8},  acc_num ) AND acc_type_cd=NVL({9},  acc_type_cd ) and del_flag='N' ";
 
             _statement = string.Format(_query,
             string.Concat("'", dep.oprn_instr_cd, "'"),
@@ -3540,6 +3591,7 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.tds_applicable, "'"),
             string.Concat("'", dep.modified_by, "'"),
             string.Concat("sysdate"),
+            string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
             string.Concat("'", dep.acc_type_cd, "'")
@@ -3557,10 +3609,11 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateNominee(DbConnection connection, List<td_nominee> nom)
         {
             string _queryd = " DELETE FROM TD_NOMINEE "
-                         + " WHERE brn_cd = {0} AND acc_num = {1} AND acc_type_cd = {2}";
+                         + " WHERE ardb_cd = {0} and brn_cd = {1} AND acc_num = {2} AND acc_type_cd = {3}";
 
 
             _statement = string.Format(_queryd,
+                                 !string.IsNullOrWhiteSpace(nom[0].ardb_cd) ? string.Concat("'", nom[0].ardb_cd, "'") : "ardb_cd",
                                  !string.IsNullOrWhiteSpace(nom[0].brn_cd) ? string.Concat("'", nom[0].brn_cd, "'") : "brn_cd",
                                  !string.IsNullOrWhiteSpace(nom[0].acc_num) ? string.Concat("'", nom[0].acc_num, "'") : "acc_num",
                                  !string.IsNullOrWhiteSpace(nom[0].acc_type_cd.ToString()) ? string.Concat("'", nom[0].acc_type_cd, "'") : "acc_type_cd"
@@ -3571,12 +3624,13 @@ namespace SBWSDepositApi.Deposit
                 command.ExecuteNonQuery();
             }
 
-            string _queryins = "INSERT INTO TD_NOMINEE (brn_cd,acc_type_cd,acc_num,nom_id,nom_name,nom_addr1,nom_addr2,phone_no,percentage,relation )"
-                         + " VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8},{9} ) ";
+            string _queryins = "INSERT INTO TD_NOMINEE (ardb_cd,brn_cd,acc_type_cd,acc_num,nom_id,nom_name,nom_addr1,nom_addr2,phone_no,percentage,relation,del_flag )"
+                         + " VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},'N' ) ";
 
             for (int i = 0; i < nom.Count; i++)
             {
                 _statement = string.Format(_queryins,
+                                             string.Concat("'", nom[i].ardb_cd, "'"),
                                              string.Concat("'", nom[i].brn_cd, "'"),
                                              nom[i].acc_type_cd,
                                              string.Concat("'", nom[i].acc_num, "'"),
@@ -3600,9 +3654,10 @@ namespace SBWSDepositApi.Deposit
                 internal bool UpdateSignatory(DbConnection connection, List<td_signatory> sig)
         {
             string _queryd=" DELETE FROM TD_SIGNATORY  "
-             +" WHERE brn_cd = {0} AND acc_num = {1} AND acc_type_cd={2}";
+             +" WHERE ardb_cd={0} AND brn_cd = {1} AND acc_num = {2} AND acc_type_cd={3}";
 
                      _statement = string.Format(_queryd,
+                                          !string.IsNullOrWhiteSpace(sig[0].ardb_cd) ? string.Concat("'", sig[0].ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig[0].brn_cd) ? string.Concat("'", sig[0].brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig[0].acc_num) ? string.Concat("'", sig[0].acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(sig[0].acc_type_cd.ToString()) ? string.Concat("'", sig[0].acc_type_cd, "'") : "acc_type_cd"
@@ -3615,13 +3670,14 @@ namespace SBWSDepositApi.Deposit
                         }
                         
 
-            string _queryins = "INSERT INTO TD_SIGNATORY ( brn_cd, acc_type_cd, acc_num, signatory_name) "
-                          + " VALUES( {0},{1},{2},{3}) ";
+            string _queryins = "INSERT INTO TD_SIGNATORY ( ardb_cd,brn_cd, acc_type_cd, acc_num, signatory_name,del_flag) "
+                          + " VALUES( {0},{1},{2},{3},{4},'N') ";
                           
             for (int i = 0; i < sig.Count; i++)
             {
                 
                 _statement = string.Format(_queryins,
+                                                       string.Concat("'", sig[i].ardb_cd, "'"),
                                                        string.Concat("'", sig[i].brn_cd, "'"),
                                                        sig[i].acc_type_cd,
                                                        string.Concat("'", sig[i].acc_num, "'"),
@@ -3641,9 +3697,10 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateAccholder(DbConnection connection, List<td_accholder> acc)
         {
              string _queryd=" DELETE FROM td_accholder "
-             +" WHERE brn_cd = {0} AND acc_num = {1} AND  ACC_TYPE_CD = {2}";
+             +" WHERE ardb_cd={0} and brn_cd = {1} AND acc_num = {2} AND  ACC_TYPE_CD = {3}";
 
                      _statement = string.Format(_queryd,
+                                          !string.IsNullOrWhiteSpace(acc[0].ardb_cd) ? string.Concat("'", acc[0].ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(acc[0].brn_cd) ? string.Concat("'", acc[0].brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(acc[0].acc_num) ? string.Concat("'", acc[0].acc_num, "'") : "acc_num",
                                           (acc[0].acc_type_cd > 0) ? acc[0].acc_type_cd.ToString() : "ACC_TYPE_CD"
@@ -3655,13 +3712,14 @@ namespace SBWSDepositApi.Deposit
                            
                         }
             
-             string _queryins = "INSERT INTO TD_ACCHOLDER ( brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd ) "
-                         + " VALUES( {0},{1},{2},{3}, {4}, {5} ) ";
+             string _queryins = "INSERT INTO TD_ACCHOLDER ( ardb_cd,brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd,del_flag ) "
+                         + " VALUES( {0},{1},{2},{3}, {4}, {5},{6},'N' ) ";
 
             for (int i = 0; i < acc.Count; i++)
             {
                 
                     _statement = string.Format(_queryins,
+                                                       string.Concat("'", acc[i].ardb_cd, "'"),
                                                        string.Concat("'", acc[i].brn_cd, "'"),
                                                        acc[i].acc_type_cd,
                                                        string.Concat("'", acc[i].acc_num, "'"),

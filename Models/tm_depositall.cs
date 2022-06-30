@@ -4,6 +4,7 @@ namespace SBWSDepositApi.Models
 {
     public class tm_depositall: BaseModel
     {
+        public string ardb_cd { get; set; }
         public string brn_cd { get; set; }
         public int acc_type_cd { get; set; }
         public string acc_num { get; set; }
@@ -84,6 +85,8 @@ public string constitution_desc {get;set;}
         //public int temp_flag {get;set;}
          public int acc_cd {get;set;}
         public int intt_acc_cd {get;set;}  
-        public int intt_prov_acc_cd {get;set;} 
+        public int intt_prov_acc_cd {get;set;}
+
+        public string del_flag { get; set; }
     }
 }

@@ -151,6 +151,8 @@ namespace SBWSFinanceApi.Controllers
             return _ll2.ApproveAccountTranaction(tvd);
         }
 
+        
+
         [Route("isDormantAccount")]
         [HttpPost]
         public int isDormantAccount([FromBody] tm_deposit tvd)

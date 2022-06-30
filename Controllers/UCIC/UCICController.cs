@@ -106,6 +106,21 @@ namespace SBWSFinanceApi.Controllers
             return _ll1.DeleteShgData(pmc);
         }
 
+        [Route("Checkpancard")]
+        [HttpPost]
+        public int Checkpancard([FromBody] mm_customer pmc)
+        {
+            return _ll.Checkpancard(pmc);
+        }
+
+
+        [Route("Checkaadharcard")]
+        [HttpPost]
+        public int Checkaadharcard([FromBody] mm_customer pmc)
+        {
+            return _ll.Checkaadharcard(pmc);
+        }
+
 
 
     }

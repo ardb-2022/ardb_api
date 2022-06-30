@@ -50,15 +50,19 @@ namespace SBWSFinanceApi.Models
          public decimal comp_unit_no {get;set;}   
          public decimal ongoing_unit_no {get;set;}   
          public decimal mis_advance_recov {get;set;}   
-         public decimal audit_fees_recov {get;set;}   
-         public string sector_cd {get;set;}   
+         public decimal audit_fees_recov {get;set;}
+        public decimal penal_intt_recov { get; set; }
+        public decimal adv_prn_recov { get; set; }
+        public string sector_cd {get;set;}   
          public string spl_prog_cd {get;set;}   
          public string borrower_cr_cd {get;set;}   
          public DateTime? intt_till_dt {get;set;}   
          public string acc_name  {get;set;}  
          public string brn_cd {get;set;}
+        public string home_brn_cd { get; set; }
+        public string intra_branch_trn { get; set; }
         public string ardb_cd { get; set; }
-        public string del_flag { get; set; }
+        public string del_flag { get; set; }        
 
     }
 }

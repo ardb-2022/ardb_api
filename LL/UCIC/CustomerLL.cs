@@ -31,9 +31,19 @@ namespace SBWSFinanceApi.LL
         {         
            
             return _dac.DeleteCustomerDtls(pmc);
-        }   
-         
-          internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
+        }
+
+        internal int Checkpancard(mm_customer pmc)
+        {
+            return _dac.Checkpancard(pmc);
+        }
+
+        internal int Checkaadharcard(mm_customer pmc)
+        {
+            return _dac.Checkaadharcard(pmc);
+        }
+
+        internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
         {
 
             return _dac.GetDepositDtls(pmc);

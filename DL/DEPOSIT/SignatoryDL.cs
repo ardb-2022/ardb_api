@@ -13,16 +13,17 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-            string _query = "SELECT BRN_CD,"
+            string _query = "SELECT ARDB_CD, BRN_CD,"
              +" ACC_TYPE_CD,"
              +" ACC_NUM,"
-             +" SIGNATORY_NAME"
+             +" SIGNATORY_NAME,DEL_FLAG"
              +" FROM TD_SIGNATORY_TEMP"
-             +" WHERE BRN_CD = {0} AND ACC_NUM = {1}";
+             +" WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_NUM = {2}";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num"
                                            );
@@ -36,10 +37,12 @@ namespace SBWSDepositApi.Deposit
                                 while (reader.Read())
                                 {
                                     var s = new td_signatory();
+                                    s.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                     s.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                     s.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
                                     s.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
                                     s.signatory_name = UtilityM.CheckNull<string>(reader["SIGNATORY_NAME"]);
+                                    s.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
                                     sigList.Add(s);
                                 }
@@ -55,8 +58,8 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-           string _query= "INSERT INTO TD_SIGNATORY_TEMP ( brn_cd, acc_type_cd, acc_num, signatory_name) "
-                         +" VALUES( {0},{1},{2},{3}) ";
+           string _query= "INSERT INTO TD_SIGNATORY_TEMP ( ardb_cd,brn_cd, acc_type_cd, acc_num, signatory_name,del_flag) "
+                         +" VALUES( {0},{1},{2},{3},{4},'N') ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -65,6 +68,7 @@ namespace SBWSDepositApi.Deposit
                     try
                     {
                         _statement = string.Format(_query,
+                                                   string.Concat("'", sig.ardb_cd, "'"),
                                                    string.Concat("'", sig.brn_cd, "'"),
                                                    sig.acc_type_cd ,
                                                    string.Concat("'", sig.acc_num, "'"),
@@ -97,7 +101,7 @@ namespace SBWSDepositApi.Deposit
              +" acc_type_cd    = {1}  ,  "
              +" acc_num        = {2}  ,  "
              +" signatory_name = {3}     "
-            +" WHERE brn_cd = {0} AND acc_num = {1}  ";
+            +" WHERE ardb_cd={4} and brn_cd = {5} AND acc_num = {6} and del_flag='N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -110,6 +114,7 @@ namespace SBWSDepositApi.Deposit
                                           !string.IsNullOrWhiteSpace(sig.acc_type_cd.ToString()) ? string.Concat("'", sig.acc_type_cd, "'") : "acc_type_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(sig.signatory_name) ? string.Concat("'", sig.signatory_name, "'") : "signatory_name",
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num"
                                           );
@@ -134,7 +139,7 @@ namespace SBWSDepositApi.Deposit
             int _ret=0;
 
             string _query=" DELETE FROM TD_SIGNATORY_TEMP  "
-             +" WHERE brn_cd = {0} AND acc_num = {1} AND acc_type_cd={2}";
+             +" WHERE ardb_cd={0} and brn_cd = {1} AND acc_num = {2} AND acc_type_cd={3}";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -143,6 +148,7 @@ namespace SBWSDepositApi.Deposit
                     try
                     {
                      _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(sig.acc_type_cd.ToString()) ? string.Concat("'", sig.acc_type_cd, "'") : "acc_type_cd"
@@ -168,16 +174,17 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-            string _query = "SELECT BRN_CD,"
+            string _query = "SELECT ARDB_CD, BRN_CD,"
              +" ACC_TYPE_CD,"
              +" ACC_NUM,"
-             +" SIGNATORY_NAME"
+             +" SIGNATORY_NAME,DEL_FLAG"
              +" FROM TD_SIGNATORY"
-             +" WHERE BRN_CD = {0} AND ACC_NUM = {1}";
+             +" WHERE ARDB_CD={0} and BRN_CD = {1} AND ACC_NUM = {2}";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num"
                                            );
@@ -191,6 +198,7 @@ namespace SBWSDepositApi.Deposit
                                 while (reader.Read())
                                 {
                                     var s = new td_signatory();
+                                    s.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                     s.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                     s.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
                                     s.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
@@ -210,8 +218,8 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_signatory> sigList = new List<td_signatory>();
 
-           string _query= "INSERT INTO TD_SIGNATORY ( brn_cd, acc_type_cd, acc_num, signatory_name) "
-                         +" VALUES( {0},{1},{2},{3}) ";
+           string _query= "INSERT INTO TD_SIGNATORY ( ardb_cd,brn_cd, acc_type_cd, acc_num, signatory_name,DEL_FLAG) "
+                         +" VALUES( {0},{1},{2},{3},'{4},'N') ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -220,6 +228,7 @@ namespace SBWSDepositApi.Deposit
                     try
                     {
                         _statement = string.Format(_query,
+                                                   string.Concat("'", sig.ardb_cd, "'"),
                                                    string.Concat("'", sig.brn_cd, "'"),
                                                    sig.acc_type_cd ,
                                                    string.Concat("'", sig.acc_num, "'"),
@@ -252,7 +261,7 @@ namespace SBWSDepositApi.Deposit
              +" acc_type_cd    = {1}  ,  "
              +" acc_num        = {2}  ,  "
              +" signatory_name = {3}     "
-            +" WHERE brn_cd = {0} AND acc_num = {1}  ";
+            +" WHERE ardb_cd = {4} and brn_cd = {5} AND acc_num = {6}  ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -265,6 +274,7 @@ namespace SBWSDepositApi.Deposit
                                           !string.IsNullOrWhiteSpace(sig.acc_type_cd.ToString()) ? string.Concat("'", sig.acc_type_cd, "'") : "acc_type_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(sig.signatory_name) ? string.Concat("'", sig.signatory_name, "'") : "signatory_name",
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num"
                                           );
@@ -289,7 +299,7 @@ namespace SBWSDepositApi.Deposit
             int _ret=0;
 
             string _query=" DELETE FROM TD_SIGNATORY  "
-             +" WHERE brn_cd = {0} AND acc_num = {1} AND  acc_type_cd={2}";
+             +" WHERE ardb_cd = {0} AND brn_cd = {1} AND acc_num = {2} AND  acc_type_cd={3}";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -298,6 +308,7 @@ namespace SBWSDepositApi.Deposit
                     try
                     {
                      _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(sig.acc_type_cd.ToString()) ? string.Concat("'", sig.acc_type_cd, "'") : "acc_type_cd"

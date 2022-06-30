@@ -30,7 +30,7 @@ namespace SBWSDepositApi.Deposit
                             command.ExecuteNonQuery();
                         }
                         _statement = string.Format(_query,
-                                         string.Concat("'", td.brn_cd, "'"),
+                                         string.Concat("'", td.ardb_cd, "'"),
                                          string.Concat("'", td.acc_type_cd, "'"),
                                          string.Concat("'", td.acc_num, "'")
                                         );

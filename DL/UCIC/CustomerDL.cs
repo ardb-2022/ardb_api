@@ -284,10 +284,104 @@ namespace SBWSFinanceApi.DL
             return maxCustCd;
         }
 
+
+        internal int Checkpancard(mm_customer pmp)
+        {
+            int d = 0;
+
+            string _query = " select  count(*)  CNT "
+                            + " from MM_CUSTOMER"
+                            + " where ardb_cd = {0} "
+                            + "  AND ((KYC_PHOTO_TYPE = 'P' And KYC_PHOTO_NO = {1}) OR (KYC_ADDRESS_TYPE = 'P' And KYC_ADDRESS_NO = {2}))";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                          string.Concat("'", pmp.ardb_cd, "'"),
+                                          string.Concat("'", pmp.kyc_photo_no, "'"),
+                                          string.Concat("'", pmp.kyc_address_no, "'")
+                                   );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        try
+                        {
+                            if (reader.HasRows)
+                            {
+                                {
+                                    while (reader.Read())
+                                    {
+
+                                        d = (int)UtilityM.CheckNull<decimal>(reader["CNT"]);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return d;
+        }
+
+
+
+
+        internal int Checkaadharcard(mm_customer pmp)
+        {
+            int d = 0;
+
+            string _query = " select  count(*)  CNT "
+                            + " from MM_CUSTOMER"
+                            + " where ardb_cd = {0} "
+                            + "  AND ((KYC_PHOTO_TYPE = 'G' And KYC_PHOTO_NO = {1}) OR (KYC_ADDRESS_TYPE = 'G' And KYC_ADDRESS_NO = {2}))";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                          string.Concat("'", pmp.ardb_cd, "'"),
+                                          string.Concat("'", pmp.kyc_photo_no, "'"),
+                                          string.Concat("'", pmp.kyc_address_no, "'")
+                                   );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        try
+                        {
+                            if (reader.HasRows)
+                            {
+                                {
+                                    while (reader.Read())
+                                    {
+
+                                        d = (int)UtilityM.CheckNull<decimal>(reader["CNT"]);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return d;
+        }
+
+
+
         internal int UpdateCustomerDtls(mm_customer pmp)
         {
             int _ret = 0;
-            string _query = "UPDATE MM_CUSTOMER"
+            string _query = "UPDATE MM_CUSTOMER "
          + " SET CUST_TYPE=NVL({0},CUST_TYPE),"
          + "  TITLE=NVL({1},TITLE),"
          + "  FIRST_NAME=NVL({2},FIRST_NAME),"
@@ -377,7 +471,8 @@ namespace SBWSFinanceApi.DL
                                              string.IsNullOrWhiteSpace(pmp.date_of_death.ToString()) ? null : string.Concat(pmp.date_of_death.Value.ToString("dd/MM/yyyy")),
                                              string.Concat("'", pmp.sms_flag, "'"),
                                              string.Concat("'", pmp.status, "'"),
-                                             string.Concat("'", pmp.pan.ToUpper(), "'"),
+                                              //string.Concat("'", pmp.pan.ToUpper(), "'"),
+                                             string.Concat("'", string.IsNullOrWhiteSpace(pmp.pan) ? string.Empty : pmp.pan.ToUpper(), "'"),
                                              string.Concat("'", pmp.nominee, "'"),
                                              string.Concat("'", pmp.nom_relation, "'"),
                                              string.Concat("'", pmp.kyc_photo_type, "'"),
