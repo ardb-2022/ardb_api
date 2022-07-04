@@ -47,14 +47,17 @@ namespace SBWSDepositApi.Deposit
 +" TD_OUTWARD_PAYMENT.MODIFIED_DT, "
 +" TD_OUTWARD_PAYMENT.APPROVED_BY, "
 +" TD_OUTWARD_PAYMENT.APPROVED_DT, "
-+" TD_OUTWARD_PAYMENT.APPROVAL_STATUS "
-+" FROM TD_OUTWARD_PAYMENT "
-+" WHERE ( TD_OUTWARD_PAYMENT.BRN_CD = {0} ) AND "
-+" ( TD_OUTWARD_PAYMENT.TRANS_CD = {1} ) ";
++" TD_OUTWARD_PAYMENT.APPROVAL_STATUS, "
++ "TD_OUTWARD_PAYMENT.ARDB_CD, "
++ "TD_OUTWARD_PAYMENT.DEL_FLAG "
++ " FROM TD_OUTWARD_PAYMENT "
++ " WHERE ( TD_OUTWARD_PAYMENT.ARDB_CD = {0} ) AND ( TD_OUTWARD_PAYMENT.BRN_CD = {1} ) AND "
++ " ( TD_OUTWARD_PAYMENT.TRANS_CD = {2} ) ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(nom.ardb_cd) ? string.Concat("'", nom.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'")   : "brn_cd",
                                           nom.trans_cd>0 ? string.Concat("'", nom.trans_cd.ToString(), "'") : "trans_cd"
                                            );
@@ -99,7 +102,9 @@ n.modified_dt       = UtilityM.CheckNull<DateTime>(reader["MODIFIED_DT"]);
 n.approved_by       = UtilityM.CheckNull<string>(reader["APPROVED_BY"]);
 n.approved_dt       = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
 n.approval_status   = UtilityM.CheckNull<string>(reader["APPROVAL_STATUS"]);
-                           
+n.ardb_cd           = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+n.del_flag          = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
+
                                     nomList.Add(n);
                                 }
                             }
@@ -115,7 +120,7 @@ n.approval_status   = UtilityM.CheckNull<string>(reader["APPROVAL_STATUS"]);
         {
             int maxTransCD = 0;
             string _query = "Select Nvl(max(trans_cd) + 1, 1) max_trans_cd"
-                            + " From   TD_OUTWARD_PAYMENT";
+                            + " From   TD_OUTWARD_PAYMENT ";
             _statement = string.Format(_query);
             using (var command = OrclDbConnection.Command(connection, _statement))
             {

@@ -125,7 +125,13 @@ namespace SBWSDepositApi.Deposit
                             prm.from_dt = prm.from_dt.AddDays(1);
                             // ad_acc_type_cd NUMBER,as_cust_name VARCHAR2
                             command.CommandType = System.Data.CommandType.StoredProcedure;
-                            var parm = new OracleParameter("as_acc_num", OracleDbType.Decimal, ParameterDirection.Input);
+                            var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm.Value = prm.ardb_cd;
+                            command.Parameters.Add(parm);
+                            parm = new OracleParameter("ad_acc_type", OracleDbType.Decimal, ParameterDirection.Input);
+                            parm.Value = prm.ad_acc_type_cd;
+                            command.Parameters.Add(parm);
+                            parm = new OracleParameter("as_acc_num", OracleDbType.Decimal, ParameterDirection.Input);
                             parm.Value = prm.as_acc_num;
                             command.Parameters.Add(parm);
                             parm = new OracleParameter("adt_from_dt", OracleDbType.Date, ParameterDirection.Input);
@@ -136,9 +142,16 @@ namespace SBWSDepositApi.Deposit
                             command.Parameters.Add(parm);
                             using (var reader = command.ExecuteReader())
                             {
+                                // transaction.Commit();
                                 using (var command2 = OrclDbConnection.Command(connection, "P_GET_SB_INTT"))
                                 {
                                     command2.CommandType = System.Data.CommandType.StoredProcedure;
+                                    parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                                    parm.Value = prm.ardb_cd;
+                                    command2.Parameters.Add(parm);
+                                    parm = new OracleParameter("ad_acc_type", OracleDbType.Decimal, ParameterDirection.Input);
+                                    parm.Value = prm.ad_acc_type_cd;
+                                    command2.Parameters.Add(parm);
                                     parm = new OracleParameter("as_acc_num", OracleDbType.Decimal, ParameterDirection.Input);
                                     parm.Value = prm.as_acc_num;
                                     command2.Parameters.Add(parm);
@@ -152,6 +165,7 @@ namespace SBWSDepositApi.Deposit
                                     command2.Parameters.Add(parm);
                                     using (var reader2 = command2.ExecuteReader())
                                     {
+                                        // transaction.Commit();
                                         try
                                         {
                                             if (reader2.HasRows)
@@ -163,7 +177,7 @@ namespace SBWSDepositApi.Deposit
                                             }
                                         }
                                         catch (Exception e)
-                                        {
+                                        {                                           		
                                             transaction.Rollback();
                                             amount = 0;
                                         }
@@ -174,6 +188,7 @@ namespace SBWSDepositApi.Deposit
                     }
                     catch (Exception ex)
                     {
+                        var abc = ex.Message;                        
                         transaction.Rollback();
                         amount = 0;
                     }
@@ -1448,19 +1463,18 @@ namespace SBWSDepositApi.Deposit
 
         internal bool InsertDepositRenewTemp(DbConnection connection, tm_deposit dep)
         {
-            string _query = " INSERT INTO TM_DEPOSIT_RENEW_TEMP ( ARDB_CD,BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
+            string _query = " INSERT INTO TM_DEPOSIT_RENEW_TEMP (BRN_CD, ACC_TYPE_CD, ACC_NUM, RENEW_ID, CUST_CD, INTT_TRF_TYPE, CONSTITUTION_CD,"
                         + " OPRN_INSTR_CD, OPENING_DT, PRN_AMT, INTT_AMT, DEP_PERIOD, INSTL_AMT, INSTL_NO, MAT_DT, INTT_RT, TDS_APPLICABLE,     "
                         + " LAST_INTT_CALC_DT, ACC_CLOSE_DT, CLOSING_PRN_AMT, CLOSING_INTT_AMT, PENAL_AMT, EXT_INSTL_TOT, MAT_STATUS, ACC_STATUS,"
                         + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT,      "
                         + " APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,      "
-                        + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, CATG_CD,DEL_FLAG )  "
+                        + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, CATG_CD,ARDB_CD,DEL_FLAG )  "
                         + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}, {14},"
                         + " {15},{16}, {17}, {18},{19},{20},{21},{22},{23},{24}, "
                         + " {25},{26},{27},{28},{29}, SYSDATE,{30},SYSDATE,{31}, "
                         + " {32},{33},{34}, {35},{36},{37},{38},{39},{40},{41},{42},{43},{44},'N')";
 
             _statement = string.Format(_query,
-            string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_type_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
@@ -1506,7 +1520,8 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.bonus_intt_rt, "'"),
             string.Concat("'", dep.transfer_flag, "'"),
             string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-            string.Concat("'", dep.agent_cd, "'")
+            string.Concat("'", dep.agent_cd, "'"),
+            string.Concat("'", dep.ardb_cd, "'")
                                          );
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -2929,11 +2944,12 @@ namespace SBWSDepositApi.Deposit
         {
             string accountNumber = null;
             string _query = "SELECT MIN(ACC_NUM) ACC_NUM FROM TM_DEPOSIT"
-                            + " WHERE ACC_TYPE_CD = {0} "
-                            + " AND CUST_CD = {1} AND UPPER(ACC_STATUS) <> 'C' ";
+                            + " WHERE ARDB_CD = {0} AND ACC_TYPE_CD = {1} "
+                            + " AND CUST_CD = {2} AND UPPER(ACC_STATUS) <> 'C' AND DEL_FLAG = 'N' ";
 
             _statement = string.Format(_query,
-                                       cust.acc_type_cd == 0 ? 1 : cust.acc_type_cd,
+                                       string.Concat("'", cust.ardb_cd, "'"),
+                                       cust.acc_type_cd == 0 ? 8 : cust.acc_type_cd,
                                        cust.cust_cd);
             using (var connection = OrclDbConnection.NewConnection)
             {

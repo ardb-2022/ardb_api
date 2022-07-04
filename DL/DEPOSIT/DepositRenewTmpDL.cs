@@ -20,13 +20,14 @@ namespace SBWSDepositApi.Deposit
                             + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG,                         "
                             + " CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT, APPROVAL_STATUS, APPROVED_BY,       "
                             + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
-                            + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT                                   "
+                            + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT,ARDB_CD,DEL_FLAG                                   "
                             + " FROM TM_DEPOSIT_RENEW_TEMP                                                                  "
-                            + " WHERE BRN_CD={0} AND ACC_NUM={1}  AND ACC_TYPE_CD = {2} ";
+                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2}  AND ACC_TYPE_CD = {3} AND DEL_FLAG = 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
                                            (dep.acc_type_cd > 0 ? dep.acc_type_cd.ToString() : "ACC_TYPE_CD"));
@@ -85,6 +86,8 @@ namespace SBWSDepositApi.Deposit
                                     d.bonus_intt_rt = UtilityM.CheckNull<decimal>(reader["BONUS_INTT_RT"]);
                                     d.transfer_flag = UtilityM.CheckNull<string>(reader["TRANSFER_FLAG"]);
                                     d.transfer_dt = UtilityM.CheckNull<DateTime>(reader["TRANSFER_DT"]);
+                                    d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                    d.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
                                     depoList.Add(d);
                                 }
@@ -105,11 +108,11 @@ namespace SBWSDepositApi.Deposit
                            + " LAST_INTT_CALC_DT, ACC_CLOSE_DT, CLOSING_PRN_AMT, CLOSING_INTT_AMT, PENAL_AMT, EXT_INSTL_TOT, MAT_STATUS, ACC_STATUS,"
                            + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT,      "
                            + " APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,      "
-                           + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT   "
+                           + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT,ARDB_CD,DEL_FLAG   "
                            + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},to_date('{8}','dd-mm-yyyy' ),{9},{10},{11},{12},{13}, to_date('{14}','dd-mm-yyyy' ),"
                            + " {15},{16}, to_date('{17}','dd-mm-yyyy' ), to_date('{18}','dd-mm-yyyy' ),{19},{20},{21},{22},{23},{24}, "
                            + " {25},{26},{27},{28},{29}, to_date('{30}','dd-mm-yyyy' ),{31}, to_date('{32}','dd-mm-yyyy' ),{33}, "
-                           + " to_date('{34}','dd-mm-yyyy' ),{35},{36}, to_date('{37}','dd-mm-yyyy' ),{38},{39},{40},{41},{42},{43},to_date('{44}','dd-mm-yyyy' ))";
+                           + " to_date('{34}','dd-mm-yyyy' ),{35},{36}, to_date('{37}','dd-mm-yyyy' ),{38},{39},{40},{41},{42},{43},to_date('{44}','dd-mm-yyyy' ),{45},'N')";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -162,7 +165,8 @@ namespace SBWSDepositApi.Deposit
                        string.Concat("'", dep.penal_intt_rt, "'"),
                        string.Concat("'", dep.bonus_intt_rt, "'"),
                        string.Concat("'", dep.transfer_flag, "'"),
-                       string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? null : string.Concat("'", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "'")
+                       string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? null : string.Concat("'", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "'"),
+                       string.Concat("'", dep.ardb_cd, "'")
                                                     );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -233,7 +237,7 @@ namespace SBWSDepositApi.Deposit
                + "transfer_flag        = NVL({43}, transfer_flag       ),"
                + "transfer_dt          = NVL(to_date('{44}','dd-mm-yyyy' ), transfer_dt ),"
                + "agent_cd             = NVL({45}, agent_cd            ) "
-               + "WHERE brn_cd = NVL({46}, brn_cd) AND acc_num = NVL('{47}',  acc_num ) AND  ACC_TYPE_CD = NVL('{48}',  ACC_TYPE_CD )";
+               + "WHERE ARDB_CD = {46} AND brn_cd = NVL({47}, brn_cd) AND acc_num = NVL('{48}',  acc_num ) AND  ACC_TYPE_CD = NVL('{49}',  ACC_TYPE_CD ) AND DEL_FLAG = 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -287,6 +291,7 @@ namespace SBWSDepositApi.Deposit
                        string.Concat("'", dep.bonus_intt_rt, "'"),
                        string.Concat("'", dep.transfer_flag, "'"),
                        string.IsNullOrWhiteSpace(dep.transfer_dt.ToString()) ? null : string.Concat("'", dep.transfer_dt.Value.ToString("dd/MM/yyyy"), "'"),
+                       string.Concat("'", dep.ardb_cd, "'"),
                        string.Concat("'", dep.brn_cd, "'"),
                        string.Concat("'", dep.acc_num, "'"),
                        string.Concat("'", dep.acc_type_cd, "'")
@@ -312,8 +317,8 @@ namespace SBWSDepositApi.Deposit
         {
             int _ret = 0;
 
-            string _query = " DELETE FROM TM_DEPOSIT_RENEW_TEMP "
-                          + " WHERE brn_cd = {0} AND acc_num = {1} AND ACC_TYPE_CD={2} ";
+            string _query = " UPDATE TM_DEPOSIT_RENEW_TEMP SET DEL_FLAG= 'Y'  "
+                          + " WHERE ARDB_CD={0} AND brn_cd = {1} AND acc_num = {2} AND ACC_TYPE_CD={3} ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -322,6 +327,7 @@ namespace SBWSDepositApi.Deposit
                     try
                     {
                         _statement = string.Format(_query,
+                                             !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                                              !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
                                              !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
                                               (dep.acc_type_cd > 0 ? dep.acc_type_cd.ToString() : "ACC_TYPE_CD"));

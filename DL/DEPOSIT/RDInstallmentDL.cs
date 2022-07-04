@@ -13,13 +13,14 @@ namespace SBWSDepositApi.Deposit
         {
             List<td_rd_installment> rdInstlList = new List<td_rd_installment>();
 
-            string _query = " SELECT ACC_NUM,INSTL_NUM,DUE_DT,INSTL_DT,STATUS                                "
-                            + " FROM TD_RD_INSTALLMENT                                                                  "
-                            + " WHERE ACC_NUM={0} ";
+            string _query = " SELECT ACC_NUM,INSTL_NUM,DUE_DT,INSTL_DT,STATUS"
+                            + " FROM TD_RD_INSTALLMENT"
+                            + " WHERE   ARDB_CD = {0} AND ACC_NUM= {1} AND DEL_FLAG = 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                 !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num"
                                           );
                 using (var command = OrclDbConnection.Command(connection, _statement))
