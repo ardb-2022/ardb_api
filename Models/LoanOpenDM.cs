@@ -10,6 +10,7 @@ namespace SBWSDepositApi.Models
  public LoanOpenDM()
         {
             this.tmloanall = new tm_loan_all();
+            this.tmdepositrenew = new tm_deposit();
             this.tmguaranter = new tm_guaranter();
             this.tmlaonsanction = new List<tm_loan_sanction>();
             this.tmlaonsanctiondtls = new List<tm_loan_sanction_dtls>();
@@ -19,8 +20,10 @@ namespace SBWSDepositApi.Models
             this.tddeftranstrf = new List<td_def_trans_trf>();
             this.tddeftrans = new td_def_trans_trf();
             this.tdloansancsetlist = new List<td_loan_sanc_set>();
+
         }
         public tm_loan_all tmloanall { get; set; }
+        public tm_deposit tmdepositrenew { get; set; }
         public tm_guaranter tmguaranter { get; set; }
         public List<tm_loan_sanction> tmlaonsanction { get; set; }
         public List<tm_loan_sanction_dtls> tmlaonsanctiondtls { get; set; }

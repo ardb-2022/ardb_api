@@ -715,11 +715,15 @@ namespace SBWSDepositApi.Deposit
                             + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE,  CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
                             + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD,DEL_FLAG                                   "
                             + " FROM V_DEPOSIT                                                                  "
-                            + " WHERE ARDB_CD = {0} AND ACC_TYPE_CD ={1} AND ACC_NUM={2}  AND DEL_FLAG = 'N'                                                          ";
+                            + " WHERE ARDB_CD = {0} AND ACC_TYPE_CD ={1} AND ACC_NUM={2}  AND DEL_FLAG = 'N'  "
+                            + " AND   RENEW_ID = (SELECT MAX(RENEW_ID) FROM  V_DEPOSIT WHERE ARDB_CD = {3} AND ACC_TYPE_CD ={4} AND ACC_NUM={5}  AND DEL_FLAG = 'N')                                                      ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
+                                           dep.acc_type_cd != 0 ? Convert.ToString(dep.acc_type_cd) : "ACC_TYPE_CD",
+                                          !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                                            dep.acc_type_cd != 0 ? Convert.ToString(dep.acc_type_cd) : "ACC_TYPE_CD",
                                           !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num"
@@ -804,7 +808,7 @@ namespace SBWSDepositApi.Deposit
                             + " TD.CURR_BAL CURR_BAL, TD.CLR_BAL CLR_BAL, TD.STANDING_INSTR_FLAG STANDING_INSTR_FLAG, TD.CHEQUE_FACILITY_FLAG CHEQUE_FACILITY_FLAG,                         "
                             + " TD.CREATED_BY CREATED_BY, TD.CREATED_DT CREATED_DT, TD.MODIFIED_BY MODIFIED_BY, TD.MODIFIED_DT MODIFIED_DT, TD.APPROVAL_STATUS APPROVAL_STATUS, TD.APPROVED_BY APPROVED_BY,       "
                             + " TD.APPROVED_DT APPROVED_DT, TD.USER_ACC_NUM USER_ACC_NUM, TD.LOCK_MODE LOCK_MODE, TD.LOAN_ID LOAN_ID, TD.CERT_NO CERT_NO, TD.BONUS_AMT BONUS_AMT, TD.PENAL_INTT_RT PENAL_INTT_RT,     "
-                            + " TD.BONUS_INTT_RT BONUS_INTT_RT, TD.TRANSFER_FLAG TRANSFER_FLAG, TD.TRANSFER_DT TRANSFER_DT, TD.AGENT_CD AGENT_CD,MC.CUST_NAME CUST_NAME,MC.PERMANENT_ADDRESS PERMANENT_ADDRESS,MC.PHONE PHONE,MC.GUARDIAN_NAME GUARDIAN_NAME,MC.DT_OF_BIRTH DT_OF_BIRTH,MC.SEX SEX,MC.OCCUPATION OCCUPATION,MC.PRESENT_ADDRESS PRESENT_ADDRESS,MC.CUST_TYPE CUST_TYPE,MC.AGE AGE  "
+                            + " TD.BONUS_INTT_RT BONUS_INTT_RT, TD.TRANSFER_FLAG TRANSFER_FLAG, TD.TRANSFER_DT TRANSFER_DT, TD.AGENT_CD AGENT_CD,MC.CUST_NAME CUST_NAME,MC.PERMANENT_ADDRESS PERMANENT_ADDRESS,MC.PHONE PHONE,MC.GUARDIAN_NAME GUARDIAN_NAME,MC.DT_OF_BIRTH DT_OF_BIRTH,MC.SEX SEX,MC.CATG_CD CATG_CD,MC.OCCUPATION OCCUPATION,MC.PRESENT_ADDRESS PRESENT_ADDRESS,MC.CUST_TYPE CUST_TYPE,MC.AGE AGE  "
                            + " , MC.KYC_PHOTO_TYPE KYC_PHOTO_TYPE,MC.KYC_PHOTO_NO KYC_PHOTO_NO,MC.KYC_ADDRESS_TYPE KYC_ADDRESS_TYPE,MC.KYC_ADDRESS_NO KYC_ADDRESS_NO ,MCO.CONSTITUTION_DESC CONSTITUTION_DESC,MCO.CONSTITUTION_CD CONSTITUTION_CD,MCO.ACC_CD ACC_CD,MCO.INTT_ACC_CD INTT_ACC_CD,MCO.INTT_PROV_ACC_CD INTT_PROV_ACC_CD "
                             + " FROM TM_DEPOSIT TD,  MM_CUSTOMER MC,  MM_CONSTITUTION MCO   "
                             + " WHERE  TD.ARDB_CD={0} AND TD.ACC_NUM={1} AND TD.ACC_TYPE_CD={2} AND TD.CUST_CD=MC.CUST_CD AND TD.CONSTITUTION_CD =MCO.CONSTITUTION_CD AND TD.ACC_TYPE_CD=MCO.ACC_TYPE_CD ";
@@ -887,7 +891,7 @@ namespace SBWSDepositApi.Deposit
                                         d.age = UtilityM.CheckNull<decimal>(reader["AGE"]);
                                         d.sex = UtilityM.CheckNull<string>(reader["SEX"]);
                                         //d.marital_status = UtilityM.CheckNull<string>(reader["MARITAL_STATUS"]);
-                                        //d.catg_cd = UtilityM.CheckNull<int>(reader["CATG_CD"]);
+                                        d.catg_cd = UtilityM.CheckNull<int>(reader["CATG_CD"]);
                                         //d.community = UtilityM.CheckNull<decimal>(reader["COMMUNITY"]);
                                         //d.caste = UtilityM.CheckNull<decimal>(reader["CASTE"]);
                                         d.permanent_address = UtilityM.CheckNull<string>(reader["PERMANENT_ADDRESS"]);
@@ -1559,7 +1563,44 @@ namespace SBWSDepositApi.Deposit
             return standingInstrExeList;
         }
 
-        internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
+        internal decimal GetInttRate(p_gen_param pmc)
+        {
+            decimal inttrate = 0 ;
+
+            string _query = "Select f_get_intt_rate({0},{1},{2}) INTT_RATE "
+                            + " From   Dual ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                _statement = string.Format(_query,
+                                            pmc.acc_type_cd,
+                                            pmc.catg_cd,
+                                            pmc.no_of_days
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                inttrate = UtilityM.CheckNull<decimal>(reader["INTT_RATE"]);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            return inttrate;
+
+        }          
+
+
+
+
+            internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
         {
             List<tm_deposit> depo = new List<tm_deposit>();
             string _query =  " SELECT TM_DEPOSIT.ACC_TYPE_CD, TM_DEPOSIT.ACC_NUM, "
@@ -1650,9 +1691,171 @@ namespace SBWSDepositApi.Deposit
 
             return depoList;
         }
-        
 
-                
+
+
+        internal List<mm_agent> GetAgentData(mm_agent dep)
+        {
+            List<mm_agent> depoList = new List<mm_agent>();
+
+            string _query = " select a.ardb_cd,a.brn_cd,a.agent_cd,a.agent_name  "
+                            + "  from mm_agent a where a.ardb_cd={0} and a.brn_cd={1} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
+                                          !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd");
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            {
+                                while (reader.Read())
+                                {
+                                    var d = new mm_agent();
+                                    d.ardb_cd = UtilityM.CheckNull<string>(reader["ardb_cd"]);
+                                    d.brn_cd = UtilityM.CheckNull<string>(reader["brn_cd"]);
+                                    d.agent_cd = UtilityM.CheckNull<string>(reader["agent_cd"]);
+                                    d.agent_name = UtilityM.CheckNull<string>(reader["agent_name"]);
+                                    depoList.Add(d);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return depoList;
+        }
+
+
+        internal List<export_data> GetExportData(export_data prm)
+        {
+            List<export_data> accDtlsLovs = new List<export_data>();
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var command = OrclDbConnection.Command(connection, "P_GENERATE_EXPFILE"))
+                {
+                    // ad_acc_type_cd NUMBER,as_cust_name VARCHAR2
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.ardb_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.brn_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("as_agent_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.agent_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("p_dds_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
+                    command.Parameters.Add(parm);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        try
+                        {
+                            if (reader.HasRows)
+                            {
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var accDtlsLov = new export_data();
+                                        accDtlsLov.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                        accDtlsLov.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                        accDtlsLov.acc_num = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                        accDtlsLov.cust_name = UtilityM.CheckNull<string>(reader["PARTY_NAME"]);
+                                        accDtlsLov.agent_cd = UtilityM.CheckNull<string>(reader["AS_BLOCK"]);
+                                        accDtlsLov.opening_dt = UtilityM.CheckNull<string>(reader["TRF_DT"]);
+                                        accDtlsLov.curr_bal_amt = UtilityM.CheckNull<Int64>(reader["PRN"]);
+                                        accDtlsLov.interest = UtilityM.CheckNull<Int64>(reader["INTT"]);
+                                        accDtlsLov.balance_amt = UtilityM.CheckNull<Int64>(reader["BALANCE_AMT"]);
+                                        accDtlsLov.password = UtilityM.CheckNull<string>(reader["PASSWORD"]);
+                                        accDtlsLov.agent_name = prm.agent_name;
+
+                                        accDtlsLovs.Add(accDtlsLov);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return accDtlsLovs;
+        }
+
+
+
+        internal List<string> GetDataForFile(export_data prm)
+        {
+            List<string> accDtlsLovs = new List<string>();
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var command = OrclDbConnection.Command(connection, "P_EXPORT_DDS_DATA"))
+                {
+                    // ad_acc_type_cd NUMBER,as_cust_name VARCHAR2
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.ardb_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.brn_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("as_agent_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.agent_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("as_machine_type", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.machine_type;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("p_dds_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
+                    command.Parameters.Add(parm);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        try
+                        {
+                            if (reader.HasRows)
+                            {
+                                {
+                                    while (reader.Read())
+                                    {
+                                        string accDtlsLov;
+
+                                        accDtlsLov = UtilityM.CheckNull<string>(reader["EXP_SYNTAX"]);                                       
+
+                                        accDtlsLovs.Add(accDtlsLov);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return accDtlsLovs;
+        }
+
+
+
+
+
+
+
 
     }
 }

@@ -18,7 +18,9 @@ namespace SBWSFinanceApi.Models
 
          public string crop_desc {get;set;}
          public string activity_desc {get;set;}
-         public string sector_desc {get;set;}  
-  
+         public string sector_desc {get;set;}
+        public string ardb_cd { get; set; }
+        public string del_flag { get; set; }
+
     }
 }

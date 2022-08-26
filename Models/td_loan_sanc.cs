@@ -10,4 +10,5 @@ public class td_loan_sanc {
   public int dataset_no {get; set;}
   public string field_name {get; set;}
   public string param_desc {get; set;}
+    public string ardb_cd { get; set; }
 }

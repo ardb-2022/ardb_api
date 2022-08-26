@@ -14,6 +14,8 @@ namespace SBWSAdminApi.LL
             return _dac.GetBankConfigDtls();
         }
 
+        
+
         internal List<BankConfig> GetBankConfigDtlsNoPass()
         {
             return _dac.GetBankConfigDtlsNoPass();

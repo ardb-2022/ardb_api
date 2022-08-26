@@ -51,6 +51,31 @@ namespace SBWSFinanceApi.LL
         
         }
 
+        internal int InsertSubsidyData(tm_subsidy loan)
+        {
+            return _dac.InsertSubsidyData(loan);
+        }
+
+        internal int UpdateSubsidyData(tm_subsidy loan)
+        {
+            return _dac.UpdateSubsidyData(loan);
+        }
+
+        internal int DeleteSubsidyData(tm_subsidy loan)
+        {
+            return _dac.DeleteSubsidyData(loan);
+        }
+
+        internal tm_subsidy GetSubsidyData(tm_subsidy loan)
+        {
+            return _dac.GetSubsidyData(loan);
+        }
+
+        internal string GetHostName1()
+        {
+            return _dac.GetHostName1();
+        }
+
         internal tm_loan_all GetLoanAllWithChild(tm_loan_all loan)
         {
             return _dac.GetLoanAllWithChild(loan);

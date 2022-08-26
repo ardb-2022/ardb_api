@@ -74,7 +74,7 @@ namespace SBWSFinanceApi.DL
          + " FROM TD_DEP_TRANS"
          + " WHERE ARDB_CD = {0} AND BRN_CD = {1} "
         + " AND   TRANS_CD = {2} "
-        + " AND TRANS_DT = to_date('{3}','dd-mm-yyyy' )" ;
+        + " AND TRANS_DT = to_date('{3}','dd-mm-yyyy' ) AND DEL_FLAG = 'N' " ;
             _statement = string.Format(_query,
                                               !string.IsNullOrWhiteSpace(tdt.ardb_cd) ? string.Concat("'", tdt.ardb_cd, "'") : "ardb_cd",
                                               !string.IsNullOrWhiteSpace(tdt.brn_cd) ? string.Concat("'", tdt.brn_cd, "'") : "brn_cd",
@@ -575,6 +575,7 @@ namespace SBWSFinanceApi.DL
          + " TRANS_MODE,"
          + " AMOUNT,"
          + " TRF_TYPE,"
+         +  " REMARKS,"
          + " OVD_PRN_RECOV,"
          + " BRN_CD,ARDB_CD,DEL_FLAG"
     + " FROM TD_DEP_TRANS"
@@ -606,6 +607,7 @@ namespace SBWSFinanceApi.DL
                                 tdtr.trans_mode = UtilityM.CheckNull<string>(reader["TRANS_MODE"]);
                                 tdtr.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]);
                                 tdtr.trf_type = UtilityM.CheckNull<string>(reader["TRF_TYPE"]);
+                                tdtr.remarks = UtilityM.CheckNull<string>(reader["REMARKS"]);
                                 tdtr.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["OVD_PRN_RECOV"]);
                                 tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 tdtr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
@@ -711,6 +713,8 @@ namespace SBWSFinanceApi.DL
                        AccountOpenDL _dac = new AccountOpenDL(); 
                        if (acc.tmdenominationtrans.Count > 0)
                             _dac.UpdateDenominationDtls(connection, acc.tmdenominationtrans);
+                        if (!String.IsNullOrWhiteSpace(acc.tmdepositrenew.acc_num))
+                            _dac.UpdateDepositRenewTemp(connection, acc.tmdepositrenew);
                         if (acc.tmtransfer.Count > 0)
                             _dac.UpdateTransfer(connection, acc.tmtransfer);
                         if (acc.tddeftranstrf.Count > 0)

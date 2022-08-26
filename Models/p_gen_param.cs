@@ -33,5 +33,11 @@ namespace SBWSFinanceApi.Models
         public string gs_user_id { get; set; }
         public string output { get; set; }
         public string as_cust_name { get; set; }
+
+        public int acc_type_cd { get; set; }
+
+        public int catg_cd { get; set; }
+
+        public int no_of_days { get; set; }
     }
 }

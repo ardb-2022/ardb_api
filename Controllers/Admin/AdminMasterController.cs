@@ -26,6 +26,8 @@ namespace SBWSFinanceApi.Controllers
             return _ll.GetBankConfigDtls();
         }
 
+        
+
         [Route("GetBankConfigDtlsNoPass")]
         [HttpPost]
         public List<BankConfig> GetBankConfigDtlsNoPass()

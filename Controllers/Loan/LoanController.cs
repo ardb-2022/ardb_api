@@ -32,7 +32,43 @@ namespace SBWSFinanceApi.Controllers
         {         
             return _ll.PopulateCropAmtDueDt(prp); 
         }
-        
+
+        [Route("InsertSubsidyData")]
+        [HttpPost]
+        public int InsertSubsidyData(tm_subsidy prp)
+        {
+            return _ll.InsertSubsidyData(prp);
+        }
+
+        [Route("UpdateSubsidyData")]
+        [HttpPost]
+        public int UpdateSubsidyData(tm_subsidy prp)
+        {
+            return _ll.UpdateSubsidyData(prp);
+        }
+
+        [Route("DeleteSubsidyData")]
+        [HttpPost]
+        public int DeleteSubsidyData(tm_subsidy prp)
+        {
+            return _ll.DeleteSubsidyData(prp);
+        }
+
+
+        [Route("GetSubsidyData")]
+        [HttpPost]
+        public tm_subsidy GetSubsidyData(tm_subsidy prp)
+        {
+            return _ll.GetSubsidyData(prp);
+        }
+
+        [Route("GetHostName1")]
+        [HttpPost]
+        public String GetHostName1()
+        {
+            return _ll.GetHostName1();
+        }
+
         [Route("GetLoanData")]
         [HttpPost]
          public LoanOpenDM GetLoanData(tm_loan_all loan)

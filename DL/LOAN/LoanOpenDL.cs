@@ -11,6 +11,7 @@ using SBWSDepositApi.Deposit;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
 
+
 namespace SBWSFinanceApi.DL
 {
     public class LoanOpenDL
@@ -28,8 +29,9 @@ namespace SBWSFinanceApi.DL
             string _query4 = "Select Nvl(curr_prn, 0) curr_prn,"
 				            +" Nvl(ovd_prn, 0) ovd_prn,"
 				            +" Nvl(curr_intt, 0) curr_intt,"
-				            +" Nvl(ovd_intt, 0) ovd_intt"
-				            +" From   tm_loan_all where loan_id={0}";
+				            +" Nvl(ovd_intt, 0) ovd_intt,"
+                            + " Nvl(penal_intt, 0) penal_intt"
+                            + " From   tm_loan_all where ardb_cd = {0} and loan_id = {1} and del_flag= 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -45,30 +47,36 @@ namespace SBWSFinanceApi.DL
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             command.CommandType = System.Data.CommandType.StoredProcedure;
-                            var parm1 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm1.Value = prp.loan_id;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
                             command.Parameters.Add(parm1);
-                            var parm2 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
-                            parm2.Value = prp.intt_dt;
+                            var parm2 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.loan_id;
                             command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.intt_dt;
+                            command.Parameters.Add(parm3);
                             command.ExecuteNonQuery();
                         }
                         _statement = string.Format(_query2);
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             command.CommandType = System.Data.CommandType.StoredProcedure;
-                            var parm1 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm1.Value = prp.loan_id;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
                             command.Parameters.Add(parm1);
-                            var parm2 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
-                            parm2.Value = prp.intt_dt;
+                            var parm2 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.loan_id;
                             command.Parameters.Add(parm2);
-                            var parm3 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm3.Value = prp.brn_cd;
+                            var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.intt_dt;
                             command.Parameters.Add(parm3);
-                            var parm4 = new OracleParameter("as_user", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm4.Value = prp.gs_user_id;
+                            var parm4 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm4.Value = prp.brn_cd;
                             command.Parameters.Add(parm4);
+                            var parm5 = new OracleParameter("as_user", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm5.Value = prp.gs_user_id;
+                            command.Parameters.Add(parm5);
                             command.ExecuteNonQuery();
 
                         }
@@ -78,33 +86,43 @@ namespace SBWSFinanceApi.DL
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             command.CommandType = System.Data.CommandType.StoredProcedure;
-                            var parm1 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm1.Value = prp.loan_id;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
                             command.Parameters.Add(parm1);
-                            var parm2 = new OracleParameter("ad_recov_amt", OracleDbType.Decimal, ParameterDirection.Input);
-                            parm2.Value = prp.recov_amt;
+                            var parm2 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.loan_id;
                             command.Parameters.Add(parm2);
-                            var parm3 = new OracleParameter("as_curr_intt_rate", OracleDbType.Decimal, ParameterDirection.Input);
-                            parm3.Value = prp.curr_intt_rate;
+                            var parm3 = new OracleParameter("ad_recov_amt", OracleDbType.Decimal, ParameterDirection.Input);
+                            parm3.Value = prp.recov_amt;
                             command.Parameters.Add(parm3);
-                            var parm4 = new OracleParameter("ad_curr_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            var parm4 = new OracleParameter("as_curr_intt_rate", OracleDbType.Decimal, ParameterDirection.Input);
+                            parm4.Value = prp.curr_intt_rate;
                             command.Parameters.Add(parm4);
-                            var parm5 = new OracleParameter("ad_ovd_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            var parm5 = new OracleParameter("ad_curr_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
                             command.Parameters.Add(parm5);
-                            var parm6 = new OracleParameter("ad_curr_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            var parm6 = new OracleParameter("ad_ovd_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
                             command.Parameters.Add(parm6);
-                            var parm7 = new OracleParameter("ad_ovd_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            var parm7 = new OracleParameter("ad_curr_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
                             command.Parameters.Add(parm7);
-                            command.ExecuteNonQuery();
-                            tcaRet.curr_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm4.Value.ToString()));
-                            tcaRet.ovd_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm5.Value.ToString()));
-                            tcaRet.curr_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm6.Value.ToString()));
-                            tcaRet.ovd_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm7.Value.ToString()));
-                        }
+                            var parm8 = new OracleParameter("ad_ovd_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            command.Parameters.Add(parm8);
+                            var parm9 = new OracleParameter("ad_penal_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            command.Parameters.Add(parm9);
+                            var parm10 = new OracleParameter("ad_adv_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                            command.Parameters.Add(parm10);
+                                command.ExecuteNonQuery();
+                            tcaRet.curr_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm5.Value.ToString()));
+                            tcaRet.ovd_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm6.Value.ToString()));
+                            tcaRet.curr_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm7.Value.ToString()));
+                            tcaRet.ovd_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm8.Value.ToString()));
+                            tcaRet.penal_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm9.Value.ToString()));
+                            tcaRet.adv_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm10.Value.ToString()));
+                            }
                          }
                          else
                          {
                         _statement = string.Format(_query4,
+                                                    string.Concat("'", prp.ardb_cd, "'"),
                                                     string.Concat("'", prp.loan_id, "'"));
                          using (var command = OrclDbConnection.Command(connection, _statement))
                         {
@@ -118,7 +136,8 @@ namespace SBWSFinanceApi.DL
                                         tcaRet.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["ovd_prn"]);
                                         tcaRet.curr_intt_recov = UtilityM.CheckNull<decimal>(reader["curr_intt"]);
                                         tcaRet.ovd_intt_recov = UtilityM.CheckNull<decimal>(reader["ovd_intt"]);
-                                    }
+                                        tcaRet.penal_intt_recov= UtilityM.CheckNull<decimal>(reader["penal_intt"]);
+                                        }
                                 }
                             }
                         }
@@ -164,12 +183,15 @@ namespace SBWSFinanceApi.DL
                             using (var command = OrclDbConnection.Command(connection, _statement))
                             {
                                 command.CommandType = System.Data.CommandType.StoredProcedure;
-                                var parm1 = new OracleParameter("ad_acc_cd", OracleDbType.Varchar2, ParameterDirection.Input);
-                                parm1.Value = prp[i].acc_cd;
+                                var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                                parm1.Value = prp[i].ardb_cd;
                                 command.Parameters.Add(parm1);
-                                var parm2 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
-                                parm2.Value = prp[i].intt_dt;
+                                var parm2 = new OracleParameter("ad_acc_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                                parm2.Value = prp[i].acc_cd;
                                 command.Parameters.Add(parm2);
+                                var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                                parm3.Value = prp[i].intt_dt;
+                                command.Parameters.Add(parm3);
                                 command.ExecuteNonQuery();
                             }
                             transaction.Commit();
@@ -295,7 +317,7 @@ namespace SBWSFinanceApi.DL
 
             string _query = "Select nvl(max(to_number(substr(loan_id,4))) + 1, 1) ACC_NUM "
                            + " From  TM_LOAN_ALL "
-                           + " Where brn_cd = {0} ";
+                           + " Where ardb_cd={0} and brn_cd = {1} ";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 using (var transaction = connection.BeginTransaction())
@@ -304,6 +326,7 @@ namespace SBWSFinanceApi.DL
                     {
 
                         _statement = string.Format(_query,
+                                        string.Concat("'", prp.ardb_cd, "'"),
                                          string.Concat("'", prp.brn_cd, "'")
                                         );
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -343,10 +366,10 @@ namespace SBWSFinanceApi.DL
                         td.acc_num = loan.loan_id;
                         td.acc_type_cd = loan.acc_cd;
                         AccOpenDMRet.tmloanall = GetLoanAll(connection, loan);
-                        AccOpenDMRet.tmguaranter = GetGuaranter(connection, loan.loan_id);
-                        AccOpenDMRet.tmlaonsanction = GetLoanSanction(connection, loan.loan_id);
-                        AccOpenDMRet.tdaccholder = GetAccholderTemp(connection, loan.brn_cd, loan.loan_id, loan.acc_cd);
-                        AccOpenDMRet.tmlaonsanctiondtls = GetLoanSanctionDtls(connection, loan.loan_id);
+                        AccOpenDMRet.tmguaranter = GetGuaranter(connection, loan.ardb_cd, loan.loan_id);
+                        AccOpenDMRet.tmlaonsanction = GetLoanSanction(connection, loan.ardb_cd,loan.loan_id);
+                        AccOpenDMRet.tdaccholder = GetAccholderTemp(connection, loan.ardb_cd, loan.brn_cd, loan.loan_id, loan.acc_cd);
+                        AccOpenDMRet.tmlaonsanctiondtls = GetLoanSanctionDtls(connection, loan.ardb_cd, loan.loan_id);
                         AccOpenDMRet.tddeftrans = _dac.GetDepTrans(connection, td);
                         if (!String.IsNullOrWhiteSpace(AccOpenDMRet.tddeftrans.trans_cd.ToString()) && AccOpenDMRet.tddeftrans.trans_cd > 0)
                         {
@@ -357,7 +380,7 @@ namespace SBWSFinanceApi.DL
                             AccOpenDMRet.tddeftranstrf = _dac.GetDepTransTrf(connection, td);
                         }
 
-                        AccOpenDMRet.tdloansancsetlist = GetTdLoanSanctionDtls(connection, loan.loan_id , AccOpenDMRet.tmloanall.acc_cd);
+                        AccOpenDMRet.tdloansancsetlist = GetTdLoanSanctionDtls(connection, loan.ardb_cd, loan.loan_id , AccOpenDMRet.tmloanall.acc_cd);
 
                         return AccOpenDMRet;
                     }
@@ -382,9 +405,9 @@ namespace SBWSFinanceApi.DL
                     {
                         _section = "GetTransCDMaxId";
                         int maxTransCD = _dac.GetTransCDMaxId(connection, acc.tddeftrans);
-                        _section = "InsertDenominationDtls";
-                        if (acc.tmdenominationtrans.Count > 0)
-                            _dac.InsertDenominationDtls(connection, acc.tmdenominationtrans, maxTransCD);
+                        //_section = "InsertDenominationDtls";
+                        //if (acc.tmdenominationtrans.Count > 0)
+                        //    _dac.InsertDenominationDtls(connection, acc.tmdenominationtrans, maxTransCD);
                         _section = "InsertTransfer";
                         if (acc.tmtransfer.Count > 0)
                             _dac.InsertTransfer(connection, acc.tmtransfer, maxTransCD);
@@ -407,6 +430,217 @@ namespace SBWSFinanceApi.DL
                 }
             }
         }
+
+
+
+        internal int InsertSubsidyData(tm_subsidy prp)
+        {
+            
+            int _ret = 0;
+
+            tm_subsidy prprets = new tm_subsidy();
+
+            string _query = "INSERT INTO TM_SUBSIDY (ARDB_CD,BRN_CD,LOAN_CASE_NO,LOAN_ID,START_DT,DISTRIBUTION_DT,SUBSIDY_AMT,SUBSIDY_TYPE,MODIFIED_BY,MODIFIED_DT,SUBSIDY,DEL_FLAG)"
+                        + " VALUES ({0},{1},{2},{3},to_date({4},'dd-mm-yyyy'),to_date({5},'dd-mm-yyyy'),{6},{7},{8},Sysdate,{9},'N') ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                                 _statement = string.Format(_query,
+                                         string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.brn_cd, "'"),
+                                         string.Concat("'",prp.loan_acc_no,"'"),
+                                         string.Concat("'",prp.loan_id,"'"),
+                                         string.Concat("'",prp.start_dt.Value.ToString("dd/MM/yyyy"),"'"),
+                                         string.Concat("'", prp.distribution_dt.Value.ToString("dd/MM/yyyy"),"'"),
+                                         string.Concat("'", prp.subsidy_amt, "'"),
+                                         string.Concat("'", prp.subsidy_type, "'"),
+                                         string.Concat("'", prp.modified_by, "'"),
+                                         string.Concat("'", prp.subsidy,"'")                                         
+                                         );
+
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.ExecuteNonQuery();
+                                transaction.Commit();
+                                _ret = 0;
+                            }
+                      
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+
+        }
+
+
+        internal int UpdateSubsidyData(tm_subsidy prp)
+        {
+            int _ret = 0;
+
+            string _query = "UPDATE TM_SUBSIDY SET "
+         + " LOAN_CASE_NO     =NVL({0},LOAN_CASE_NO       ),"
+         + " START_DT         =NVL(to_date('{1}','dd-mm-yyyy'),START_DT       ),"
+         + " DISTRIBUTION_DT  =NVL(to_date('{2}','dd-mm-yyyy'),DISTRIBUTION_DT       ),"
+         + " SUBSIDY_AMT      =NVL({3},SUBSIDY_AMT    ),"
+         + " MODIFIED_BY      =NVL({4},MODIFIED_BY        ),"
+         + " MODIFIED_DT      =Sysdate,"
+         + " SUBSIDY_TYPE      =NVL({5},SUBSIDY_TYPE        ),"
+         + " SUBSIDY          =NVL({6},SUBSIDY )"
+         + " WHERE (ARDB_CD = {7}) AND (BRN_CD = {8}) AND "
+         + " (LOAN_ID = {9} ) AND  "
+         + " (DEL_FLAG = 'N') ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                            _statement = string.Format(_query,
+                                         string.Concat(prp.loan_acc_no),
+                                         string.Concat(prp.start_dt.Value.ToString("dd/MM/yyyy")),
+                                         string.Concat(prp.distribution_dt.Value.ToString("dd/MM/yyyy")),
+                                         string.Concat("'", prp.subsidy_amt, "'"),
+                                         string.Concat("'", prp.modified_by, "'"),
+                                         string.Concat("'", prp.subsidy_type, "'"),
+                                         string.Concat("'", prp.subsidy, "'"),
+                                         string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.brn_cd, "'"),
+                                         string.Concat("'", prp.loan_id, "'")                                        
+                                         );
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.ExecuteNonQuery();
+                                transaction.Commit();
+                                _ret = 0;
+                            }                        
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal int DeleteSubsidyData(tm_subsidy prp)
+        {
+            int _ret = 0;
+
+            string _query = "UPDATE TM_SUBSIDY SET "
+         + " DEL_FLAG     = 'Y'  "
+         + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
+         + " (LOAN_ID = {2} ) AND  "
+         + " (DEL_FLAG = 'N') ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                     string.Concat("'", prp.ardb_cd, "'"),
+                                     string.Concat("'", prp.brn_cd, "'"),
+                                     string.Concat("'", prp.loan_id, "'")
+                                     );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal tm_subsidy GetSubsidyData(tm_subsidy prp)
+        {
+            tm_subsidy prpRets = new tm_subsidy();
+
+            string _query = "SELECT  LOAN_ID,"
+            + " LOAN_CASE_NO,"
+            + " START_DT,"
+            + " DISTRIBUTION_DT,"
+            + " SUBSIDY_AMT,"
+            + " SUBSIDY_TYPE,"
+            + " SUBSIDY,"
+            + " ARDB_CD,"
+            + " BRN_CD,"
+            + " DEL_FLAG"
+            + " FROM TM_SUBSIDY"
+            + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) "
+            + " AND (  LOAN_ID = {2} )  "
+            + " AND (DEL_FLAG='N' ) ";
+
+            using (var connection = OrclDbConnection.NewConnection)            {
+                
+                    _statement = string.Format(_query,
+                    string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                    string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'"),
+                    string.Concat("'", prp.loan_id, "'")
+                    );
+                
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var ppr = new tm_subsidy();
+                                ppr.loan_id = UtilityM.CheckNull<Int64>(reader["LOAN_ID"]);
+                                ppr.loan_acc_no = UtilityM.CheckNull<string>(reader["LOAN_CASE_NO"]);
+                                ppr.start_dt = UtilityM.CheckNull<DateTime>(reader["START_DT"]);
+                                ppr.distribution_dt = UtilityM.CheckNull<DateTime>(reader["DISTRIBUTION_DT"]);
+                                ppr.subsidy_amt = UtilityM.CheckNull<decimal>(reader["SUBSIDY_AMT"]);
+                                ppr.subsidy_type = UtilityM.CheckNull<string>(reader["SUBSIDY_TYPE"]);
+                                ppr.subsidy = UtilityM.CheckNull<Int64>(reader["SUBSIDY"]);
+                                ppr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                ppr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                ppr.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
+
+                                prpRets = ppr;
+                            }
+                        }
+                    }
+                }
+            }
+            return prpRets;
+        }
+
+
+
+        internal String GetHostName1()
+        {
+            string hostname = System.Environment.MachineName;
+
+            return hostname;
+        }
+
+
 
         internal String InsertLoanAccountOpeningData(LoanOpenDM acc)
         {
@@ -497,14 +731,14 @@ namespace SBWSFinanceApi.DL
         internal tm_loan_all GetLoanAll(DbConnection connection, tm_loan_all loan)
         {
             tm_loan_all loanRet = new tm_loan_all();
-            string _query = " SELECT MC.BRN_CD,TL.PARTY_CD,TL.ACC_CD,TL.LOAN_ID,TL.LOAN_ACC_NO,TL.PRN_LIMIT,TL.DISB_AMT,TL.DISB_DT, "
-                     + " TL.CURR_PRN,TL.OVD_PRN,TL.CURR_INTT,TL.OVD_INTT,TL.PRE_EMI_INTT,TL.OTHER_CHARGES,TL.CURR_INTT_RATE,TL.OVD_INTT_RATE,TL.DISB_STATUS,TL.PIRIODICITY,TL.TENURE_MONTH,   "
+            string _query = " SELECT TL.ARDB_CD,MC.BRN_CD,TL.PARTY_CD,TL.ACC_CD,TL.LOAN_ID,TL.LOAN_ACC_NO,TL.PRN_LIMIT,TL.DISB_AMT,TL.DISB_DT, "
+                     + " TL.CURR_PRN,TL.OVD_PRN,TL.CURR_INTT,TL.OVD_INTT,TL.PENAL_INTT,TL.PRE_EMI_INTT,TL.OTHER_CHARGES,TL.CURR_INTT_RATE,TL.OVD_INTT_RATE,TL.DISB_STATUS,TL.PIRIODICITY,TL.TENURE_MONTH,   "
                      + " TL.INSTL_START_DT,TL.CREATED_BY,TL.CREATED_DT,TL.MODIFIED_BY,TL.MODIFIED_DT,TL.LAST_INTT_CALC_DT,TL.OVD_TRF_DT,TL.APPROVAL_STATUS,TL.CC_FLAG,TL.CHEQUE_FACILITY,TL.INTT_CALC_TYPE, "
                      + " TL.EMI_FORMULA_NO,TL.REP_SCH_FLAG,TL.LOAN_CLOSE_DT,TL.LOAN_STATUS,TL.INSTL_AMT,TL.INSTL_NO,ACTIVITY_CD,ACTIVITY_DTLS,SECTOR_CD,FUND_TYPE,COMP_UNIT_NO "
                      + " ,MC.CUST_NAME , (Select sum(tot_share_holding) From   tm_party_share Where  party_cd = TL.PARTY_CD ) tot_share_holding   "
                      + " FROM TM_LOAN_ALL TL,MM_CUSTOMER MC  "
-                     + " WHERE TL.BRN_CD={0} AND TL.LOAN_ID={1} AND TL.ACC_CD ={2}  "
-                     + " AND  TL.PARTY_CD=MC.CUST_CD(+) AND TL.BRN_CD=MC.BRN_CD(+)   ";
+                     + " WHERE TL.ARDB_CD={0} AND TL.LOAN_ID={1} AND TL.ACC_CD ={2}  "
+                     + " AND  TL.PARTY_CD=MC.CUST_CD(+) AND TL.ARDB_CD=MC.ARDB_CD(+)  AND TL.DEL_FLAG='N'  ";
 
             /*string _query = " SELECT BRN_CD,PARTY_CD,ACC_CD,LOAN_ID,LOAN_ACC_NO,PRN_LIMIT,DISB_AMT,DISB_DT,"
                            + "CURR_PRN,OVD_PRN,CURR_INTT,OVD_INTT,PRE_EMI_INTT,OTHER_CHARGES,CURR_INTT_RATE,OVD_INTT_RATE,DISB_STATUS,PIRIODICITY,TENURE_MONTH,"
@@ -513,7 +747,7 @@ namespace SBWSFinanceApi.DL
                            + " FROM TM_LOAN_ALL WHERE BRN_CD={0} AND LOAN_ID={1} ";*/
 
             _statement = string.Format(_query,
-                                          !string.IsNullOrWhiteSpace(loan.brn_cd) ? string.Concat("'", loan.brn_cd, "'") : "brn_cd",
+                                          !string.IsNullOrWhiteSpace(loan.ardb_cd) ? string.Concat("'", loan.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(loan.loan_id) ? string.Concat("'", loan.loan_id, "'") : "LOAN_ID",
                                           loan.acc_cd>0 ? loan.acc_cd.ToString() : "ACC_CD"
                                            );
@@ -527,6 +761,7 @@ namespace SBWSFinanceApi.DL
                             while (reader.Read())
                             {
                                 var d = new tm_loan_all();
+                                d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 d.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 d.party_cd = UtilityM.CheckNull<decimal>(reader["PARTY_CD"]);
                                 d.acc_cd = UtilityM.CheckNull<Int32>(reader["ACC_CD"]);
@@ -539,6 +774,7 @@ namespace SBWSFinanceApi.DL
                                 d.ovd_prn = UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
                                 d.curr_intt = UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
                                 d.ovd_intt = UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                d.penal_intt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
                                 d.pre_emi_intt = UtilityM.CheckNull<decimal>(reader["PRE_EMI_INTT"]);
                                 d.other_charges = UtilityM.CheckNull<decimal>(reader["OTHER_CHARGES"]);
                                 d.curr_intt_rate = UtilityM.CheckNull<double>(reader["CURR_INTT_RATE"]);
@@ -578,15 +814,16 @@ namespace SBWSFinanceApi.DL
             }
             return loanRet;
         }
-        internal tm_guaranter GetGuaranter(DbConnection connection, string loan_id)
+        internal tm_guaranter GetGuaranter(DbConnection connection, string ardb_cd, string loan_id)
         {
             tm_guaranter loanRet = new tm_guaranter();
-            string _query = " SELECT LOAN_ID,ACC_CD,GUA_TYPE,GUA_ID,GUA_NAME,GUA_ADD,OFFICE_NAME, "
+            string _query = " SELECT ARDB_CD,LOAN_ID,ACC_CD,GUA_TYPE,GUA_ID,GUA_NAME,GUA_ADD,OFFICE_NAME, "
                             + " SHARE_ACC_NUM,SHARE_TYPE,OPENING_DT,SHARE_BAL,DEPART,DESIG,  "
                             + " SALARY,SEC_58,MOBILE,SRL_NO "
-                            + " FROM TM_GUARANTER WHERE    LOAN_ID = {0}";
+                            + " FROM TM_GUARANTER WHERE ARDB_CD = {0} AND  LOAN_ID = {1} AND DEL_FLAG= 'N' ";
 
             _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(ardb_cd) ? string.Concat("'", ardb_cd, "'") : "ARDB_CD", 
                                           !string.IsNullOrWhiteSpace(loan_id) ? string.Concat("'", loan_id, "'") : "LOAN_ID"
                                            );
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -599,6 +836,7 @@ namespace SBWSFinanceApi.DL
                             while (reader.Read())
                             {
                                 var d = new tm_guaranter();
+                                d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
                                 d.acc_cd = UtilityM.CheckNull<Decimal>(reader["ACC_CD"]);
                                 d.gua_type = UtilityM.CheckNull<string>(reader["GUA_TYPE"]);
@@ -624,16 +862,17 @@ namespace SBWSFinanceApi.DL
             }
             return loanRet;
         }
-        internal List<tm_loan_sanction> GetLoanSanction(DbConnection connection, string loan_id)
+        internal List<tm_loan_sanction> GetLoanSanction(DbConnection connection,string ardb_cd, string loan_id)
         {
             List<tm_loan_sanction> loanRet = new List<tm_loan_sanction>();
-            string _query = " SELECT     LOAN_ID , SANC_NO ,   SANC_DT , CREATED_BY , "
+            string _query = " SELECT     ARDB_CD,LOAN_ID , SANC_NO ,   SANC_DT , CREATED_BY , "
                             + " CREATED_DT ,  MODIFIED_BY ,  MODIFIED_DT , "
                             + " APPROVAL_STATUS ,   APPROVED_BY , APPROVED_DT , "
                             + " MEMO_NO    FROM  TM_LOAN_SANCTION   "
-                            + " WHERE   LOAN_ID  = {0} ";
+                            + " WHERE  ARDB_CD={0} and  LOAN_ID  = {1} ";
 
             _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(ardb_cd) ? string.Concat("'", ardb_cd, "'") : "ARDB_CD",
                                           !string.IsNullOrWhiteSpace(loan_id) ? string.Concat("'", loan_id, "'") : "LOAN_ID"
                                            );
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -646,6 +885,7 @@ namespace SBWSFinanceApi.DL
                             while (reader.Read())
                             {
                                 var d = new tm_loan_sanction();
+                                d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
                                 d.sanc_no = UtilityM.CheckNull<decimal>(reader["SANC_NO"]);
                                 d.sanc_dt = UtilityM.CheckNull<DateTime>(reader["SANC_DT"]);
@@ -665,23 +905,24 @@ namespace SBWSFinanceApi.DL
             }
             return loanRet;
         }
-        internal List<td_accholder> GetAccholderTemp(DbConnection connection, string brn_cd, string acc_num, Int32 acc_type_cd)
+        internal List<td_accholder> GetAccholderTemp(DbConnection connection, string ardb_cd, string brn_cd, string acc_num, Int32 acc_type_cd)
         {
             List<td_accholder> accList = new List<td_accholder>();
 
-            dynamic _query = " SELECT TA.BRN_CD,TA.ACC_TYPE_CD,TA.ACC_NUM,TA.ACC_HOLDER,"
+            dynamic _query = " SELECT TA.ARDB_CD,TA.BRN_CD,TA.ACC_TYPE_CD,TA.ACC_NUM,TA.ACC_HOLDER,"
                   + " TA.RELATION,TA.CUST_CD,MC.CUST_NAME                      "
                   + " FROM TD_ACCHOLDER TA,MM_CUSTOMER MC                      "
-                  + " WHERE TA.BRN_CD = {0}                                  "
-                  + " AND   ACC_NUM = {1}                              "
+                  + " WHERE TA.ARDB_CD = {0} AND TA.BRN_CD = {1}                                  "
+                  + " AND   ACC_NUM = {2}                              "
                   + " AND   TA.CUST_CD=MC.CUST_CD (+)                          "
                   + " AND   TA.BRN_CD=MC.BRN_CD (+)                            "
-                  + " AND   ACC_TYPE_CD = {2}                                  ";
+                  + " AND   ACC_TYPE_CD = {3}                                  ";
 
-            var v1 = !string.IsNullOrWhiteSpace(brn_cd) ? string.Concat("'", brn_cd, "'") : "brn_cd";
-            var v2 = !string.IsNullOrWhiteSpace(acc_num) ? string.Concat("'", acc_num, "'") : "acc_num";
-            dynamic v3 = (acc_type_cd > 0) ? acc_type_cd.ToString() : "ACC_TYPE_CD";
-            _statement = string.Format(_query, v1, v2, v3);
+            var v1 = !string.IsNullOrWhiteSpace(ardb_cd) ? string.Concat("'", ardb_cd, "'") : "ardb_cd";
+            var v2 = !string.IsNullOrWhiteSpace(brn_cd) ? string.Concat("'", brn_cd, "'") : "brn_cd";
+            var v3 = !string.IsNullOrWhiteSpace(acc_num) ? string.Concat("'", acc_num, "'") : "acc_num";
+            dynamic v4 = (acc_type_cd > 0) ? acc_type_cd.ToString() : "ACC_TYPE_CD";
+            _statement = string.Format(_query, v1, v2, v3,v4);
 
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -694,6 +935,7 @@ namespace SBWSFinanceApi.DL
                             while (reader.Read())
                             {
                                 var a = new td_accholder();
+                                a.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 a.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 a.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
                                 a.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
@@ -709,10 +951,10 @@ namespace SBWSFinanceApi.DL
             }
             return accList;
         }
-        internal List<tm_loan_sanction_dtls> GetLoanSanctionDtls(DbConnection connection, string loan_id)
+        internal List<tm_loan_sanction_dtls> GetLoanSanctionDtls(DbConnection connection, string ardb_cd, string loan_id)
         {
             List<tm_loan_sanction_dtls> loanRet = new List<tm_loan_sanction_dtls>();
-            string _query = " SELECT  LS.SECTOR_CD ,  LS.ACTIVITY_CD ,   LS.CROP_CD ,  SANC_AMT ,      "
+            string _query = " SELECT  LS.ARDB_CD,LS.SECTOR_CD ,  LS.ACTIVITY_CD ,   LS.CROP_CD ,  SANC_AMT ,      "
                      + " DUE_DT ,  LOAN_ID , SANC_NO , SANC_STATUS ,                              "
                      + " SRL_NO ,  APPROVAL_STATUS ,MC.CROP_DESC,MA.ACTIVITY_DESC,MS.SECTOR_DESC  "
                      + " FROM  TM_LOAN_SANCTION_DTLS   LS,                                        "
@@ -720,9 +962,10 @@ namespace SBWSFinanceApi.DL
                      + " MM_SECTOR MS                                                             "
                      + " WHERE LS.SECTOR_CD=MS.SECTOR_CD(+) AND LS.CROP_CD=MC.CROP_CD(+)          "
                      + " AND LS.ACTIVITY_CD=MA.ACTIVITY_CD(+)                                     "
-                     + " AND MA.SECTOR_CD=MS.SECTOR_CD AND    LS.LOAN_ID  = {0}    ";
+                     + " AND MA.SECTOR_CD=MS.SECTOR_CD AND LS.ARDB_CD = {0} AND  LS.LOAN_ID  = {1}  AND LS.DEL_FLAG = 'N' ";
 
             _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(ardb_cd) ? string.Concat("'", ardb_cd, "'") : "ARDB_CD",
                                           !string.IsNullOrWhiteSpace(loan_id) ? string.Concat("'", loan_id, "'") : "LOAN_ID"
                                            );
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -735,6 +978,7 @@ namespace SBWSFinanceApi.DL
                             while (reader.Read())
                             {
                                 var d = new tm_loan_sanction_dtls();
+                                d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
                                 d.sanc_no = UtilityM.CheckNull<decimal>(reader["SANC_NO"]);
                                 d.sector_cd = UtilityM.CheckNull<string>(reader["SECTOR_CD"]);
@@ -757,7 +1001,7 @@ namespace SBWSFinanceApi.DL
             return loanRet;
         }
 
-      internal List<td_loan_sanc_set> GetTdLoanSanctionDtls(DbConnection connection, string loan_id , int acc_cd)
+      internal List<td_loan_sanc_set> GetTdLoanSanctionDtls(DbConnection connection, string ardb_cd,string loan_id , int acc_cd)
         {
             List<td_loan_sanc_set> tdLoanSancSetList = new List<td_loan_sanc_set>();
             List<td_loan_sanc> tdLoanSancList = new List<td_loan_sanc>();
@@ -765,15 +1009,16 @@ namespace SBWSFinanceApi.DL
 
             int prevDataSet = 1;
 
-            string _query = " SELECT T.LOAN_ID , T.SANC_NO , T.PARAM_CD , T.PARAM_VALUE , UPPER(T.PARAM_TYPE) PARAM_TYPE , T.DATASET_NO , T.FIELD_NAME , S.PARAM_DESC"
+            string _query = " SELECT T.ARDB_CD,T.LOAN_ID , T.SANC_NO , T.PARAM_CD , T.PARAM_VALUE , UPPER(T.PARAM_TYPE) PARAM_TYPE , T.DATASET_NO , T.FIELD_NAME , S.PARAM_DESC"
                            + " FROM TD_LOAN_SANC  T, SM_LOAN_SANCTION S "
-                           + " WHERE T.LOAN_ID = {0}            "
+                           + " WHERE T.ARDB_CD = {0} AND T.LOAN_ID = {1}            "
                            +" AND S.PARAM_CD = T.PARAM_CD     "
                            +" AND S.FIELD_NAME = T.FIELD_NAME "
-                           +" AND S.ACC_CD = {1}              "
+                           +" AND S.ACC_CD = {2} AND T.DEL_FLAG = 'N'             "
                            +" ORDER BY DATASET_NO , PARAM_CD ";
 
             _statement = string.Format(_query,
+                                            !string.IsNullOrWhiteSpace(ardb_cd) ? string.Concat("'", ardb_cd, "'") : "1" ,
                                           !string.IsNullOrWhiteSpace(loan_id) ? string.Concat("'", loan_id, "'") : "1" ,
                                            string.Concat("'", acc_cd , "'") 
                                            );
@@ -788,6 +1033,7 @@ namespace SBWSFinanceApi.DL
                             while (reader.Read())
                             {
                                 var d = new td_loan_sanc();
+                                d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 d.loan_id = UtilityM.CheckNull<decimal>(reader["LOAN_ID"]).ToString();
                                 d.sanc_no = UtilityM.CheckNull<decimal>(reader["SANC_NO"]);                                
                                 d.param_cd = UtilityM.CheckNull<string>(reader["PARAM_CD"]);
@@ -846,12 +1092,12 @@ namespace SBWSFinanceApi.DL
                             + "DISB_STATUS, PIRIODICITY, TENURE_MONTH, INSTL_START_DT, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT,"
                             + "LAST_INTT_CALC_DT, OVD_TRF_DT, APPROVAL_STATUS, CC_FLAG, CHEQUE_FACILITY, INTT_CALC_TYPE, EMI_FORMULA_NO,  "
                             + "REP_SCH_FLAG, LOAN_CLOSE_DT, LOAN_STATUS, INSTL_AMT, INSTL_NO, ACTIVITY_CD, ACTIVITY_DTLS, SECTOR_CD,  "
-                            + "FUND_TYPE, COMP_UNIT_NO)    "
+                            + "FUND_TYPE, COMP_UNIT_NO,ARDB_CD,DEL_FLAG,PENAL_INTT)    "
                             + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}, {14},"
                             + " {15},{16}, {17}, {18},{19},{20},SYSDATE,{21},SYSDATE, "
                             + " {22},{23},{24},{25},{26},{27},{28},{29}, "
                             + " {30},{31},{32},{33},{34}, {35},{36},{37},"
-                            + " {38} )   ";
+                            + " {38},{39},'N',{40})   ";
 
             _statement = string.Format(_query,
                string.Concat("'", loan.brn_cd, "'"),
@@ -892,7 +1138,9 @@ namespace SBWSFinanceApi.DL
                 string.Concat("'", loan.activity_dtls, "'"),
                 string.Concat("'", loan.sector_cd, "'"),
                 string.Concat("'", loan.fund_type, "'"),
-                string.Concat("'", loan.comp_unit_no, "'")
+                string.Concat("'", loan.comp_unit_no, "'"),
+                string.Concat("'", loan.ardb_cd, "'"),
+                string.Concat("'", loan.penal_intt, "'")
                 );
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -903,9 +1151,9 @@ namespace SBWSFinanceApi.DL
         internal bool Insertguaranter(DbConnection connection, tm_guaranter loan)
         {
             string _query = "INSERT INTO TM_GUARANTER (LOAN_ID, ACC_CD, GUA_TYPE, GUA_ID, GUA_NAME, GUA_ADD, OFFICE_NAME, "
-                           + " SHARE_ACC_NUM, SHARE_TYPE, OPENING_DT, SHARE_BAL, DEPART, DESIG, SALARY, SEC_58, MOBILE, SRL_NO) "
+                           + " SHARE_ACC_NUM, SHARE_TYPE, OPENING_DT, SHARE_BAL, DEPART, DESIG, SALARY, SEC_58, MOBILE, SRL_NO,ARDB_CD,DEL_FLAG) "
                            + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}, {14},"
-                           + " {15},{16} ) ";
+                           + " {15},{16},{17},'N' ) ";
 
             _statement = string.Format(_query,
                 String.Concat("'", loan.loan_id, "'"),
@@ -924,7 +1172,8 @@ namespace SBWSFinanceApi.DL
                 String.Concat("'", loan.salary, "'"),
                 String.Concat("'", loan.sec_58, "'"),
                 String.Concat("'", loan.mobile, "'"),
-                String.Concat("'", loan.srl_no, "'")
+                String.Concat("'", loan.srl_no, "'"),
+                String.Concat("'", loan.ardb_cd,"'")
                 );
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -934,8 +1183,8 @@ namespace SBWSFinanceApi.DL
         }
         internal bool InsertAccholder(DbConnection connection, td_accholder acc)
         {
-            string _query = "INSERT INTO TD_ACCHOLDER ( brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd ) "
-                         + " VALUES( {0},{1},{2},{3}, {4}, {5} ) ";
+            string _query = "INSERT INTO TD_ACCHOLDER ( brn_cd, acc_type_cd, acc_num, acc_holder, relation, cust_cd,ardb_cd,del_flag ) "
+                         + " VALUES( {0},{1},{2},{3}, {4}, {5},{6},'N' ) ";
 
             _statement = string.Format(_query,
                                                    string.Concat("'", acc.brn_cd, "'"),
@@ -943,7 +1192,8 @@ namespace SBWSFinanceApi.DL
                                                    string.Concat("'", acc.acc_num, "'"),
                                                    string.Concat("'", acc.acc_holder, "'"),
                                                    string.Concat("'", acc.relation, "'"),
-                                                   acc.cust_cd
+                                                   acc.cust_cd,
+                                                   string.Concat("'", acc.ardb_cd, "'")
                                                     );
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -955,8 +1205,8 @@ namespace SBWSFinanceApi.DL
         internal bool InsertLoanSanction(DbConnection connection, tm_loan_sanction acc)
         {
 
-            string _query = "INSERT INTO TM_LOAN_SANCTION (LOAN_ID, SANC_NO, SANC_DT, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT, APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, MEMO_NO) "
-                            + "VALUES ({0}, {1}, {2}, {3},SYSDATE, {4}, SYSDATE,{5}, {6}, {7}, {8})";
+            string _query = "INSERT INTO TM_LOAN_SANCTION (LOAN_ID, SANC_NO, SANC_DT, CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT, APPROVAL_STATUS, APPROVED_BY, APPROVED_DT, MEMO_NO,ARDB_CD,DEL_FLAG) "
+                            + "VALUES ({0}, {1}, {2}, {3},SYSDATE, {4}, SYSDATE,{5}, {6}, {7}, {8},{9},'N')";
 
             _statement = string.Format(_query,
                          string.Concat("'", acc.loan_id, "'"),
@@ -967,7 +1217,8 @@ namespace SBWSFinanceApi.DL
                          string.Concat("'", acc.approval_status, "'"),
                          string.Concat("'", acc.approved_by, "'"),
                          string.IsNullOrWhiteSpace(acc.approved_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", acc.approved_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                         string.Concat("'", acc.memo_no, "'"));
+                         string.Concat("'", acc.memo_no, "'"),
+                         string.Concat("'", acc.ardb_cd, "'"));
 
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -978,8 +1229,8 @@ namespace SBWSFinanceApi.DL
         internal bool InsertLoanSanctionDtls(DbConnection connection, tm_loan_sanction_dtls acc)
         {
 
-            string _query = "INSERT INTO TM_LOAN_SANCTION_DTLS (LOAN_ID, SANC_NO, SECTOR_CD, ACTIVITY_CD, CROP_CD, SANC_AMT, DUE_DT, SANC_STATUS, SRL_NO, APPROVAL_STATUS)"
-                            + " VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})";
+            string _query = "INSERT INTO TM_LOAN_SANCTION_DTLS (LOAN_ID, SANC_NO, SECTOR_CD, ACTIVITY_CD, CROP_CD, SANC_AMT, DUE_DT, SANC_STATUS, SRL_NO, APPROVAL_STATUS,ARDB_CD,DEL_FLAG)"
+                            + " VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9},{10},'N')";
 
 
             _statement = string.Format(_query,
@@ -992,7 +1243,8 @@ namespace SBWSFinanceApi.DL
       string.IsNullOrWhiteSpace(acc.due_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", acc.due_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
       string.Concat("'", acc.sanc_status, "'"),
       string.Concat("'", acc.srl_no, "'"),
-      string.Concat("'", acc.approval_status, "'"));
+      string.Concat("'", acc.approval_status, "'"),
+      string.Concat("'", acc.ardb_cd, "'"));
 
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -1043,8 +1295,9 @@ namespace SBWSFinanceApi.DL
 + ", SECTOR_CD         = NVL({35}, SECTOR_CD        )"
 + ", FUND_TYPE         = NVL({36}, FUND_TYPE        )"
 + ", COMP_UNIT_NO      = NVL({37}, COMP_UNIT_NO     )"
-+ " WHERE LOAN_ID           = {38} "
-+ " AND   BRN_CD            = {39} ";
++ ", PENAL_INTT        = NVL({38}, PENAL_INTT        )"
++ " WHERE LOAN_ID           = {39} "
++ " AND   BRN_CD            = {40} AND ARDB_CD = {41} ";
 
             _statement = string.Format(_query,
              string.Concat("'", loan.brn_cd, "'"),
@@ -1085,8 +1338,10 @@ namespace SBWSFinanceApi.DL
               string.Concat("'", loan.sector_cd, "'"),
               string.Concat("'", loan.fund_type, "'"),
               string.Concat("'", loan.comp_unit_no, "'"),
+              string.Concat("'", loan.penal_intt, "'"),
                string.Concat("'", loan.loan_id, "'"),
-              string.Concat("'", loan.brn_cd, "'")
+              string.Concat("'", loan.brn_cd, "'"),
+              string.Concat("'", loan.ardb_cd, "'")
               );
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -1117,7 +1372,7 @@ namespace SBWSFinanceApi.DL
 + ", SEC_58         = NVL({14}, SEC_58       )"
 + ", MOBILE         = NVL({15}, MOBILE       )"
 + ", SRL_NO         = NVL({16}, SRL_NO       )"
-+ " WHERE LOAN_ID = {17} AND ACC_CD = {18}      "
++ " WHERE LOAN_ID = {17} AND ACC_CD = {18} AND ARDB_CD={19}     "
 + " AND SRL_NO = 1 ";
             _statement = string.Format(_query,
                String.Concat("'", loan.loan_id, "'"),
@@ -1138,7 +1393,8 @@ namespace SBWSFinanceApi.DL
                String.Concat("'", loan.mobile, "'"),
                String.Concat("'", loan.srl_no, "'"),
                String.Concat("'", loan.loan_id, "'"),
-               String.Concat("'", loan.acc_cd, "'")
+               String.Concat("'", loan.acc_cd, "'"),
+               String.Concat("'", loan.ardb_cd, "'")
                );
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -1163,7 +1419,7 @@ namespace SBWSFinanceApi.DL
 + ", APPROVED_BY       = NVL({5},APPROVED_BY     )"
 + ", APPROVED_DT       = NVL({6},APPROVED_DT     )"
 + ", MEMO_NO           = NVL({7},MEMO_NO         )"
-+ " WHERE LOAN_ID = {8} AND SANC_NO = {9}";
++ " WHERE LOAN_ID = {8} AND SANC_NO = {9} AND ARDB_CD={10}";
             for (int i = 0; i < acc.Count; i++)
             {
                 _statement = string.Format(_query,
@@ -1176,7 +1432,8 @@ namespace SBWSFinanceApi.DL
                              string.IsNullOrWhiteSpace(acc[i].approved_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", acc[i].approved_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
                              string.Concat("'", acc[i].memo_no, "'"),
                               string.Concat("'", acc[i].loan_id, "'"),
-                             string.Concat("'", acc[i].sanc_no, "'"));
+                             string.Concat("'", acc[i].sanc_no, "'"),
+                             string.Concat("'", acc[i].ardb_cd, "'"));
 
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -1198,7 +1455,7 @@ namespace SBWSFinanceApi.DL
                  + " acc_holder     = {3}, "
                  + " relation       = {4}, "
                  + " cust_cd        = {5} "
-                + " WHERE brn_cd = {6} AND acc_num = {7} AND acc_type_cd=NVL({8},  acc_type_cd )  ";
+                + " WHERE brn_cd = {6} AND acc_num = {7} AND acc_type_cd=NVL({8},  acc_type_cd ) and ardb_cd={9}  ";
 
             for (int i = 0; i < acc.Count; i++)
             {
@@ -1211,7 +1468,9 @@ namespace SBWSFinanceApi.DL
                                  !string.IsNullOrWhiteSpace(acc[i].cust_cd.ToString()) ? string.Concat("'", acc[i].cust_cd, "'") : "cust_cd",
                                  !string.IsNullOrWhiteSpace(acc[i].brn_cd) ? string.Concat("'", acc[i].brn_cd, "'") : "brn_cd",
                                  !string.IsNullOrWhiteSpace(acc[i].acc_num) ? string.Concat("'", acc[i].acc_num, "'") : "acc_num",
-                                 string.Concat("'", acc[i].acc_type_cd, "'")
+                                 string.Concat("'", acc[i].acc_type_cd, "'"),
+                                 !string.IsNullOrWhiteSpace(acc[i].ardb_cd) ? string.Concat("'", acc[i].ardb_cd, "'") : "ardb_cd"
+
                                  );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -1237,7 +1496,7 @@ namespace SBWSFinanceApi.DL
 + ", SANC_STATUS     = NVL({7}, SANC_STATUS    )"
 + ", SRL_NO          = NVL({8}, SRL_NO         )"
 + ", APPROVAL_STATUS = NVL({9}, APPROVAL_STATUS)"
-+ " WHERE LOAN_ID = {10} AND SANC_NO = {11} AND SRL_NO = {12}";
++ " WHERE LOAN_ID = {10} AND SANC_NO = {11} AND SRL_NO = {12} AND ARDB_CD={13} ";
             for (int i = 0; i < acc.Count; i++)
             {
                 _statement = string.Format(_query,
@@ -1253,7 +1512,8 @@ namespace SBWSFinanceApi.DL
           string.Concat("'", acc[i].approval_status, "'"),
           string.Concat("'", acc[i].loan_id, "'"),
           string.Concat("'", acc[i].sanc_no, "'"),
-         string.Concat("'", acc[i].srl_no, "'")
+         string.Concat("'", acc[i].srl_no, "'"),
+         string.Concat("'", acc[i].ardb_cd, "'")
           );
 
                 using (var command = OrclDbConnection.Command(connection, _statement))
@@ -1271,17 +1531,17 @@ namespace SBWSFinanceApi.DL
         internal tm_loan_all GetLoanAllWithChild(tm_loan_all loan)
         {
             tm_loan_all loanRet = new tm_loan_all();
-            string _query = " SELECT MC.BRN_CD,TL.PARTY_CD,TL.ACC_CD,TL.LOAN_ID,TL.LOAN_ACC_NO,TL.PRN_LIMIT,TL.DISB_AMT,TL.DISB_DT, "
-                          + "  TL.CURR_PRN,TL.OVD_PRN,TL.CURR_INTT,TL.OVD_INTT,TL.PRE_EMI_INTT,TL.OTHER_CHARGES,TL.CURR_INTT_RATE,TL.OVD_INTT_RATE,TL.DISB_STATUS,TL.PIRIODICITY,TL.TENURE_MONTH, "
+            string _query = " SELECT TL.ARDB_CD,MC.BRN_CD,TL.PARTY_CD,TL.ACC_CD,TL.LOAN_ID,TL.LOAN_ACC_NO,TL.PRN_LIMIT,TL.DISB_AMT,TL.DISB_DT, "
+                          + "  TL.CURR_PRN,TL.OVD_PRN,TL.CURR_INTT,TL.OVD_INTT,TL.PENAL_INTT,TL.PRE_EMI_INTT,TL.OTHER_CHARGES,TL.CURR_INTT_RATE,TL.OVD_INTT_RATE,TL.DISB_STATUS,TL.PIRIODICITY,TL.TENURE_MONTH, "
                           + " TL.INSTL_START_DT,TL.CREATED_BY,TL.CREATED_DT,TL.MODIFIED_BY,TL.MODIFIED_DT,TL.LAST_INTT_CALC_DT,TL.OVD_TRF_DT,TL.APPROVAL_STATUS,TL.CC_FLAG,TL.CHEQUE_FACILITY,TL.INTT_CALC_TYPE, "
                           + " TL.EMI_FORMULA_NO,TL.REP_SCH_FLAG,TL.LOAN_CLOSE_DT,TL.LOAN_STATUS,TL.INSTL_AMT,TL.INSTL_NO,ACTIVITY_CD,ACTIVITY_DTLS,SECTOR_CD,FUND_TYPE,COMP_UNIT_NO	 "
                           + " ,MC.CUST_NAME "
-                          + " FROM TM_LOAN_ALL TL,MM_CUSTOMER MC WHERE TL.BRN_CD={0} AND TL.LOAN_ID={1} "
-                          + " AND  TL.PARTY_CD=MC.CUST_CD AND TL.BRN_CD=MC.BRN_CD";
+                          + " FROM TM_LOAN_ALL TL,MM_CUSTOMER MC WHERE TL.LOAN_ID={0} AND TL.ARDB_CD = {1} "
+                          + " AND  TL.PARTY_CD=MC.CUST_CD AND TL.ARDB_CD=MC.ARDB_CD";
 
             _statement = string.Format(_query,
-                                          !string.IsNullOrWhiteSpace(loan.brn_cd) ? string.Concat("'", loan.brn_cd, "'") : "brn_cd",
-                                          !string.IsNullOrWhiteSpace(loan.loan_id) ? string.Concat("'", loan.loan_id, "'") : "LOAN_ID"
+                                          !string.IsNullOrWhiteSpace(loan.loan_id) ? string.Concat("'", loan.loan_id, "'") : "LOAN_ID",
+                                          !string.IsNullOrWhiteSpace(loan.ardb_cd) ? string.Concat("'", loan.ardb_cd, "'") : "ardb_cd"
                                            );
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -1295,6 +1555,7 @@ namespace SBWSFinanceApi.DL
                                 while (reader.Read())
                                 {
                                     var d = new tm_loan_all();
+                                    d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                     d.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                     d.party_cd = UtilityM.CheckNull<decimal>(reader["PARTY_CD"]);
                                     d.acc_cd = UtilityM.CheckNull<Int32>(reader["ACC_CD"]);
@@ -1307,6 +1568,7 @@ namespace SBWSFinanceApi.DL
                                     d.ovd_prn = UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
                                     d.curr_intt = UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
                                     d.ovd_intt = UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                    d.penal_intt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
                                     d.pre_emi_intt = UtilityM.CheckNull<decimal>(reader["PRE_EMI_INTT"]);
                                     d.other_charges = UtilityM.CheckNull<decimal>(reader["OTHER_CHARGES"]);
                                     d.curr_intt_rate = UtilityM.CheckNull<double>(reader["CURR_INTT_RATE"]);
@@ -1396,14 +1658,15 @@ namespace SBWSFinanceApi.DL
                                                + " APPROVED_DT            =SYSDATE"
                                                + " WHERE (BRN_CD = {3}) AND "
                                                + " (TRANS_DT = to_date('{4}','dd-mm-yyyy' )) AND  "
-                                               + " (  TRANS_CD = {5} ) ";
+                                               + " (  TRANS_CD = {5} ) AND ( ARDB_CD = {6}) ";
                         _statement = string.Format(_query1,
                                 string.Concat("'", pgp.gs_user_id, "'"),
                                 string.Concat("'", "A", "'"),
                                 string.Concat("'", pgp.gs_user_id, "'"),
                                 string.Concat("'", pgp.brn_cd, "'"),
                                 string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
-                                string.Concat(pgp.ad_trans_cd)
+                                string.Concat(pgp.ad_trans_cd),
+                                string.Concat(pgp.ardb_cd)
                                 );
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
@@ -1427,14 +1690,15 @@ namespace SBWSFinanceApi.DL
                                               + " APPROVED_DT            =SYSDATE"
                                               + " WHERE (BRN_CD = {3}) AND "
                                               + " (TRANS_DT = to_date('{4}','dd-mm-yyyy' )) AND  "
-                                              + " (  TRANS_CD = {5} ) ";
+                                              + " (  TRANS_CD = {5} ) AND (  ARDB_CD = {6} )";
                                     _statement = string.Format(_query2,
                                             string.Concat("'", pgp.gs_user_id, "'"),
                                             string.Concat("'", "A", "'"),
                                             string.Concat("'", pgp.gs_user_id, "'"),
                                             string.Concat("'", pgp.brn_cd, "'"),
                                             string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
-                                            string.Concat(pgp.ad_trans_cd)
+                                            string.Concat(pgp.ad_trans_cd),
+                                            string.Concat("'", pgp.ardb_cd, "'")
                                             );
                                     using (var command = OrclDbConnection.Command(connection, _statement))
                                     {
@@ -1446,13 +1710,14 @@ namespace SBWSFinanceApi.DL
                                               + " APPROVED_DT            =SYSDATE"
                                               + " WHERE (BRN_CD = {2}) AND "
                                               + " (TRF_DT = to_date('{3}','dd-mm-yyyy' )) AND  "
-                                              + " (  TRANS_CD = {4} ) ";
+                                              + " (  TRANS_CD = {4} ) AND (  ARDB_CD = {5} ) ";
                                     _statement = string.Format(_query,
                                             string.Concat("'", "A", "'"),
                                             string.Concat("'", pgp.gs_user_id, "'"),
                                             string.Concat("'", pgp.brn_cd, "'"),
                                             string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
-                                            string.Concat(pgp.ad_trans_cd)
+                                            string.Concat(pgp.ad_trans_cd),
+                                            string.Concat("'", pgp.ardb_cd, "'")
                                             );
                                     using (var command = OrclDbConnection.Command(connection, _statement))
                                     {
@@ -1547,17 +1812,18 @@ namespace SBWSFinanceApi.DL
 
         internal bool InsertLoanSecurityDtls(DbConnection connection, List<td_loan_sanc> tdLoanSancList )
              {
-                     string _queryD=" DELETE FROM TD_LOAN_SANC WHERE  LOAN_ID = {0}";
+                     string _queryD=" DELETE FROM TD_LOAN_SANC WHERE ARDB_CD = {0} AND  LOAN_ID = {1}";
                     _statement = string.Format(_queryD,
-                                               !string.IsNullOrWhiteSpace( tdLoanSancList[0].loan_id ) ? string.Concat("'", tdLoanSancList[0].loan_id, "'") : "-1");
+                                                !string.IsNullOrWhiteSpace(tdLoanSancList[0].ardb_cd) ? string.Concat("'", tdLoanSancList[0].ardb_cd, "'") : "-1",
+            !string.IsNullOrWhiteSpace( tdLoanSancList[0].loan_id ) ? string.Concat("'", tdLoanSancList[0].loan_id, "'") : "-1");
                  
                      using (var command = OrclDbConnection.Command(connection, _statement))
                           {                   
                              command.ExecuteNonQuery();
                            }                        
                      
-                     string _queryI = "INSERT INTO TD_LOAN_SANC( LOAN_ID , SANC_NO , PARAM_CD , PARAM_VALUE , PARAM_TYPE , DATASET_NO , FIELD_NAME)"
-                                    + " VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6} )";
+                     string _queryI = "INSERT INTO TD_LOAN_SANC( LOAN_ID , SANC_NO , PARAM_CD , PARAM_VALUE , PARAM_TYPE , DATASET_NO , FIELD_NAME,ARDB_CD,DEL_FLAG)"
+                                    + " VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6},{7},'N' )";
                     
                      for (int i = 0; i < tdLoanSancList.Count; i++)
                      {
@@ -1568,7 +1834,8 @@ namespace SBWSFinanceApi.DL
                                                   string.Concat("'", tdLoanSancList[i].param_value , "'"),
                                                   string.Concat("'", tdLoanSancList[i].param_type , "'"),
                                                   string.Concat("'", tdLoanSancList[i].dataset_no , "'"),
-                                                  string.Concat("'", tdLoanSancList[i].field_name , "'"));
+                                                  string.Concat("'", tdLoanSancList[i].field_name , "'"),
+                                                  string.Concat("'", tdLoanSancList[i].ardb_cd, "'"));
                  
                          using (var command = OrclDbConnection.Command(connection, _statement))
                          {
@@ -1590,14 +1857,17 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                 {
                     // ad_acc_type_cd NUMBER,as_cust_name VARCHAR2
                     command.CommandType = System.Data.CommandType.StoredProcedure;
-                    var parm = new OracleParameter("ad_loan_type", OracleDbType.Decimal, ParameterDirection.Input);
-                    parm.Value = prm.ad_acc_type_cd;
-                    command.Parameters.Add(parm);
-                    parm = new OracleParameter("as_cust_name", OracleDbType.Varchar2, ParameterDirection.Input);
-                    parm.Value = prm.as_cust_name;
-                    command.Parameters.Add(parm);
-                    parm = new OracleParameter("p_loan_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
-                    command.Parameters.Add(parm);
+                    var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm1.Value = prm.ardb_cd;
+                    command.Parameters.Add(parm1);
+                    var parm2 = new OracleParameter("ad_loan_type", OracleDbType.Decimal, ParameterDirection.Input);
+                    parm2.Value = prm.ad_acc_type_cd;
+                    command.Parameters.Add(parm2);
+                    var parm3 = new OracleParameter("as_cust_name", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm3.Value = prm.as_cust_name;
+                    command.Parameters.Add(parm3);
+                    var parm4 = new OracleParameter("p_loan_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
+                    command.Parameters.Add(parm4);
                     using (var reader = command.ExecuteReader())
                     {
                         try
@@ -1642,11 +1912,14 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                 {
                     // ad_acc_type_cd NUMBER,as_cust_name VARCHAR2
                     command.CommandType = System.Data.CommandType.StoredProcedure;
-                    var parm = new OracleParameter("as_cust_name", OracleDbType.Varchar2, ParameterDirection.Input);
-                    parm.Value = prm.as_cust_name;
-                    command.Parameters.Add(parm);
-                    parm = new OracleParameter("p_loan_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
-                    command.Parameters.Add(parm);
+                    var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm1.Value = prm.ardb_cd;
+                    command.Parameters.Add(parm1);
+                    var parm2 = new OracleParameter("as_cust_name", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm2.Value = prm.as_cust_name;
+                    command.Parameters.Add(parm2);
+                    var parm3 = new OracleParameter("p_loan_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
+                    command.Parameters.Add(parm3);
                     using (var reader = command.ExecuteReader())
                     {
                         try
@@ -1689,7 +1962,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
             string _statement;
             string _procedure = "p_generate_schedule";
             string _query = " SELECT LOAN_ID,REP_ID,DUE_DT,INSTL_PRN,INSTL_PAID,STATUS "
-                            +" FROM TT_REP_SCH WHERE LOAN_ID={0}";
+                            +" FROM TT_REP_SCH WHERE  ARDB_CD = {0} AND LOAN_ID={1} ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -1707,6 +1980,10 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                         {
                             command.CommandType = System.Data.CommandType.StoredProcedure;
 
+                            var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm);
+
                             var parm1 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
                             parm1.Value = prp.loan_id;
                             command.Parameters.Add(parm1);
@@ -1717,6 +1994,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                         }
 
                         _statement = string.Format(_query,
+                         string.Concat("'", prp.ardb_cd, "'"),
                          string.Concat("'", prp.loan_id, "'"));
 
                         using (var command = OrclDbConnection.Command(connection, _statement))

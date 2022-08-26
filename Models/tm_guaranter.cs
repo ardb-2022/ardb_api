@@ -21,7 +21,9 @@ public string desig {get;set;}
 public decimal salary {get;set;}       
 public string sec_58 {get;set;}       
 public string mobile {get;set;}       
-public Int64 srl_no {get;set;}    
+public Int64 srl_no {get;set;}
+        public string ardb_cd { get; set; }
+        public string del_flag { get; set; }
 
     }
 }

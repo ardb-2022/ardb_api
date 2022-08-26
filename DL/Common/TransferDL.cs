@@ -31,6 +31,8 @@ namespace SBWSFinanceApi.DL
                             tm_deposit td=new tm_deposit();
                             td.trans_cd = trf.trans_cd;
                             td.trans_dt = trf.trans_dt;
+                            td.ardb_cd =  trf.ardb_cd;
+                            td.brn_cd  = trf.brn_cd;
                             
                             tm_transferRet = _dac.GetTransfer(connection, td);
                             if (tm_transferRet.Count>0)
@@ -159,18 +161,21 @@ namespace SBWSFinanceApi.DL
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             command.CommandType = System.Data.CommandType.StoredProcedure;
-                            var parm1 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm1.Value = pgp.brn_cd;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = pgp.ardb_cd;
                             command.Parameters.Add(parm1);
-                            var parm2 = new OracleParameter("ad_trf_cd", OracleDbType.Int32, ParameterDirection.Input);
-                            parm2.Value = pgp.ad_trans_cd;
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = pgp.brn_cd;
                             command.Parameters.Add(parm2);
-                            var parm3 = new OracleParameter("as_approved_by", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm3.Value = pgp.gs_user_id;
+                            var parm3 = new OracleParameter("ad_trf_cd", OracleDbType.Int32, ParameterDirection.Input);
+                            parm3.Value = pgp.ad_trans_cd;
                             command.Parameters.Add(parm3);
-                            var parm4 = new OracleParameter("adt_approved_dt", OracleDbType.Date, ParameterDirection.Input);
-                            parm4.Value = pgp.adt_trans_dt;
+                            var parm4 = new OracleParameter("as_approved_by", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm4.Value = pgp.gs_user_id;
                             command.Parameters.Add(parm4);
+                            var parm5 = new OracleParameter("adt_approved_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm5.Value = pgp.adt_trans_dt;
+                            command.Parameters.Add(parm5);
                             updateTdDepTransSuccess=command.ExecuteNonQuery();
 
                         }
@@ -184,14 +189,15 @@ namespace SBWSFinanceApi.DL
                                                + " APPROVED_DT            =SYSDATE"
                                                + " WHERE (BRN_CD = {3}) AND "
                                                + " (TRANS_DT = to_date('{4}','dd-mm-yyyy' )) AND  "
-                                               + " (  TRANS_CD = {5} ) ";
+                                               + " (  TRANS_CD = {5} ) AND ( ARDB_CD = {6} ) AND (DEL_FLAG='N') ";
                         _statement = string.Format(_query1,
                                 string.Concat("'", pgp.gs_user_id, "'"),
                                 string.Concat("'", "A", "'"),
                                 string.Concat("'", pgp.gs_user_id, "'"),
                                 string.Concat("'", pgp.brn_cd, "'"),
                                 string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
-                                string.Concat(pgp.ad_trans_cd)
+                                string.Concat(pgp.ad_trans_cd),
+                                string.Concat("'", pgp.ardb_cd, "'")
                                 );
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
@@ -208,14 +214,15 @@ namespace SBWSFinanceApi.DL
                                               + " APPROVED_DT            =SYSDATE"
                                               + " WHERE (BRN_CD = {3}) AND "
                                               + " (TRANS_DT = to_date('{4}','dd-mm-yyyy' )) AND  "
-                                              + " (  TRANS_CD = {5} ) ";
+                                              + " (  TRANS_CD = {5}) AND ( ARDB_CD = {6} ) AND (DEL_FLAG = 'N') ";
                                     _statement = string.Format(_query2,
                                             string.Concat("'", pgp.gs_user_id, "'"),
                                             string.Concat("'", "A", "'"),
                                             string.Concat("'", pgp.gs_user_id, "'"),
                                             string.Concat("'", pgp.brn_cd, "'"),
                                             string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
-                                            string.Concat(pgp.ad_trans_cd)
+                                            string.Concat(pgp.ad_trans_cd),
+                                            string.Concat("'", pgp.ardb_cd, "'")
                                             );
                                     using (var command = OrclDbConnection.Command(connection, _statement))
                                     {
@@ -227,13 +234,14 @@ namespace SBWSFinanceApi.DL
                                               + " APPROVED_DT            =SYSDATE"
                                               + " WHERE (BRN_CD = {2}) AND "
                                               + " (TRF_DT = to_date('{3}','dd-mm-yyyy' )) AND  "
-                                              + " (  TRANS_CD = {4} ) ";
+                                              + " (  TRANS_CD = {4} ) AND ( ARDB_CD = {5} ) AND (DEL_FLAG = 'N')";
                                     _statement = string.Format(_query,
                                             string.Concat("'", "A", "'"),
                                             string.Concat("'", pgp.gs_user_id, "'"),
                                             string.Concat("'", pgp.brn_cd, "'"),
                                             string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
-                                            string.Concat(pgp.ad_trans_cd)
+                                            string.Concat(pgp.ad_trans_cd),
+                                            string.Concat("'", pgp.ardb_cd, "'")
                                             );
                                     using (var command = OrclDbConnection.Command(connection, _statement))
                                     {
@@ -276,12 +284,13 @@ namespace SBWSFinanceApi.DL
     +" FROM TM_TRANSFER"  
     +" WHERE (BRN_CD = {0}) AND " 
     +" (TRF_DT = to_date('{1}','dd-mm-yyyy' )) AND  "
-    +" (  APPROVAL_STATUS = 'U' ) ";
+    +" (  APPROVAL_STATUS = 'U' ) AND (ARDB_CD = {2}) AND (DEL_FLAG = 'N') ";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                             string.IsNullOrWhiteSpace( tdt.brn_cd) ? "brn_cd" : string.Concat("'",  tdt.brn_cd , "'"),
-                                            tdt.trf_dt!= null ? tdt.trf_dt.Value.ToString("dd/MM/yyyy"): "trf_dt"
+                                            tdt.trf_dt!= null ? tdt.trf_dt.Value.ToString("dd/MM/yyyy"): "trf_dt",
+                                             string.IsNullOrWhiteSpace(tdt.ardb_cd) ? "ardb_cd" : string.Concat("'", tdt.ardb_cd, "'")
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -324,13 +333,14 @@ namespace SBWSFinanceApi.DL
     +" FROM TM_TRANSFER"  
     +" WHERE (BRN_CD = {0}) AND " 
     +" (TRF_DT = to_date('{1}','dd-mm-yyyy' )) AND  "
-    +" (  TRF_CD = {2} ) ";
+    +" (  TRF_CD = {2} ) AND (ARDB_CD = {3}) AND (DEL_FLAG = 'N') ";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                             string.IsNullOrWhiteSpace( tdt.brn_cd) ? "brn_cd" : string.Concat("'",  tdt.brn_cd , "'"),
                                             tdt.trf_dt!= null ? tdt.trf_dt.Value.ToString("dd/MM/yyyy"): "trf_dt",
-                                            tdt.trf_cd !=0 ? Convert.ToString(tdt.trf_cd) : "trf_cd"
+                                            tdt.trf_cd !=0 ? Convert.ToString(tdt.trf_cd) : "trf_cd",
+                                            string.IsNullOrWhiteSpace(tdt.ardb_cd) ? "ardb_cd" : string.Concat("'", tdt.ardb_cd, "'")
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -364,10 +374,10 @@ namespace SBWSFinanceApi.DL
             List<td_def_trans_trf> tdtRets=new List<td_def_trans_trf>();
             string _query="INSERT INTO TM_TRANSFER (TRF_DT,TRF_CD,TRANS_CD,CREATED_BY,"
                         +" CREATED_DT,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT"
-                        +" BRN_CD)"
+                        +" BRN_CD,ARDB_CD,DEL_FLAG)"
                         +" VALUES (to_date('{0}','dd-mm-yyyy'),{1},{2},{3},"
                         +" to_date('{4}','dd-mm-yyyy'),{5},{6},to_date('{7}','dd-mm-yyyy'),"
-                        +" {8})";
+                        +" {8},{9},'N')";
 
             //int VoucherIdMax=GetTVoucherDtlsMaxId(tdt[0]);
             using (var connection = OrclDbConnection.NewConnection)
@@ -388,7 +398,8 @@ namespace SBWSFinanceApi.DL
                                           string.Concat("'",tdt[i].approval_status, "'"),
                                           string.Concat("'",tdt[i].approved_by, "'"),
                                           string.Concat(tdt[i].approved_dt.Value.ToString("dd/MM/yyyy")),
-                                          string.Concat("'", tdt[i].brn_cd, "'")
+                                          string.Concat("'", tdt[i].brn_cd, "'"),
+                                          string.Concat("'", tdt[i].ardb_cd, "'")
                                           );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -423,7 +434,7 @@ namespace SBWSFinanceApi.DL
          +" BRN_CD                 =NVL({8},BRN_CD         )"
     +" WHERE (BRN_CD = {9}) AND " 
     +" (TRF_DT = to_date('{10}','dd-mm-yyyy' )) AND  "
-    +" (  TRF_CD = {11} ) ";
+    +" (  TRF_CD = {11} )  AND (ARDB_CD = {12}) AND (DEL_FLAG = 'N') ";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                  using (var transaction = connection.BeginTransaction())
@@ -444,7 +455,8 @@ namespace SBWSFinanceApi.DL
                                           string.Concat("'", tdt[i].brn_cd, "'"),
                                           string.Concat("'", tdt[i].brn_cd, "'"),
                                           string.Concat(tdt[i].trf_dt.Value.ToString("dd/MM/yyyy")),
-                                          string.Concat(tdt[i].trf_cd)
+                                          string.Concat(tdt[i].trf_cd),
+                                          string.Concat("'", tdt[i].ardb_cd, "'")
                                           );
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {                   
@@ -466,10 +478,10 @@ namespace SBWSFinanceApi.DL
     internal int DeleteTransfer(tm_transfer tdt)
         {
             int _ret=0;
-            string _query="DELETE FROM TM_TRANSFER  "
+            string _query="UPDATE TM_TRANSFER SET DEL_FLAG = 'Y'  "
     +" WHERE (BRN_CD = {0}) AND " 
     +" (TRF_DT = {1}) AND  "
-    +" (  TRF_CD = {2} ) ";
+    +" (  TRF_CD = {2} ) AND (ARDB_CD = {3}) AND DEL_FLAG = 'N' ";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                  using (var transaction = connection.BeginTransaction())
@@ -479,7 +491,8 @@ namespace SBWSFinanceApi.DL
                              _statement = string.Format(_query,
                                           string.Concat("'", tdt.brn_cd, "'"),
                                           string.IsNullOrWhiteSpace(tdt.trf_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", tdt.trf_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
-                                          string.Concat(tdt.trf_cd)
+                                          string.Concat(tdt.trf_cd),
+                                          string.Concat("'", tdt.ardb_cd, "'")
                                           );
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {                   

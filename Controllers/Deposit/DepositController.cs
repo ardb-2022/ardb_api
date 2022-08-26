@@ -61,6 +61,7 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.F_CALCTDINTT_REG(tvd);
         }
+        
         [Route("F_CALC_SB_INTT")]
         [HttpPost]
         public decimal F_CALC_SB_INTT([FromBody] p_gen_param tvd)
@@ -151,7 +152,12 @@ namespace SBWSFinanceApi.Controllers
             return _ll2.ApproveAccountTranaction(tvd);
         }
 
-        
+        [Route("GetInttRate")]
+        [HttpPost]
+        public decimal GetInttRate([FromBody] p_gen_param tvd)
+        {
+            return _ll2.GetInttRate(tvd);
+        }
 
         [Route("isDormantAccount")]
         [HttpPost]
@@ -346,6 +352,27 @@ namespace SBWSFinanceApi.Controllers
             return __ll.GetCustDtls(prm);
         }
 
+        [Route("GetAgentData")]
+        [HttpPost]
+        public List<mm_agent> GetAgentData([FromBody] mm_agent prm)
+        {
+            return __ll.GetAgentData(prm);
+        }
+
+        [Route("GetExportData")]
+        [HttpPost]
+        public List<export_data> GetExportData([FromBody] export_data prm)
+        {
+            return __ll.GetExportData(prm);
+        }
+
+        [Route("GetDataForFile")]
+        [HttpPost]
+        public List<string> GetDataForFile([FromBody] export_data prm)
+        {
+            return __ll.GetDataForFile(prm);
+        }
+
         NeftPayLL _NeftPayLLLL = new NeftPayLL();
         [Route("GetNeftOutDtls")]
         [HttpPost]
@@ -392,7 +419,7 @@ namespace SBWSFinanceApi.Controllers
         {
             return _NeftPayLLLL.GetNeftCharge(pgp);  
         }
-        
-        
+
+       
     }
 }

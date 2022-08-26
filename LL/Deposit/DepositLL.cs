@@ -29,6 +29,11 @@ namespace SBWSFinanceApi.LL
                 return _dac.InsertDeposit(pmc);
         }
 
+        internal decimal GetInttRate(p_gen_param pmc)
+        {
+            return _dac.GetInttRate(pmc);
+        }
+
         internal int UpdateDeposit(tm_deposit pmc)
         {
             if (pmc.temp_flag == 1)
@@ -54,6 +59,21 @@ namespace SBWSFinanceApi.LL
         internal List<tm_depositall> GetDepositWithChild(tm_depositall dep)
         {
             return _dac.GetDepositWithChild(dep);
+        }
+
+        internal List<mm_agent> GetAgentData(mm_agent dep)
+        {
+            return _dac.GetAgentData(dep);
+        }
+
+        internal List<export_data> GetExportData(export_data dep)
+        {
+            return _dac.GetExportData(dep);
+        }
+
+        internal List<string> GetDataForFile(export_data dep)
+        {
+            return _dac.GetDataForFile(dep);
         }
 
         internal string ApproveAccountTranaction(p_gen_param pgp)

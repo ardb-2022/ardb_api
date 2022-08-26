@@ -620,8 +620,8 @@ internal List<mm_constitution> GetConstitution()
          internal List<sm_parameter> GetSystemParameter()
         {
             List<sm_parameter> mamRets=new List<sm_parameter>();
-            string _query=" SELECT PARAM_CD, PARAM_DESC,PARAM_VALUE,EDIT_FLAG"
-                         +" FROM SM_PARAMETER";
+            string _query= " SELECT PARAM_CD, PARAM_DESC,PARAM_VALUE,EDIT_FLAG"
+                         + " FROM SM_PARAMETER";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                 _statement = string.Format(_query);

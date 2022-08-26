@@ -16,8 +16,9 @@ public DateTime? disb_dt			{get;set;}
 public decimal curr_prn			{get;set;}       
 public decimal ovd_prn			{get;set;}	       
 public decimal curr_intt			{get;set;}      
-public decimal ovd_intt			{get;set;}       
-public decimal pre_emi_intt		{get;set;}    
+public decimal ovd_intt			{get;set;}
+        public decimal penal_intt { get; set; }
+        public decimal pre_emi_intt		{get;set;}    
 public decimal other_charges		{get;set;}   
 public double curr_intt_rate		{get;set;}  
 public double ovd_intt_rate		{get;set;}   
@@ -49,8 +50,11 @@ public decimal comp_unit_no	 	{get;set;}
 public string cust_name {get;set;}
 public decimal tot_share_holding {get;set;}
 public DateTime? trans_dt {get;set;}
-public Int64 trans_cd {get;set;}   
-        
+public Int64 trans_cd {get;set;}
+
+        public string ardb_cd { get; set; }
+        public string del_flag { get; set; }
+
 
     }
 }

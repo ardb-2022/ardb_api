@@ -15,11 +15,12 @@ namespace SBWSDepositApi.Deposit
 
             string _query = " SELECT BRN_CD, ACC_TYPE_CD, ACC_NUM, RENW_ID, INTT_AMT, CALC_DT,PAID_STATUS,PAID_DT,TRANS_CD  "
                             + " FROM TD_TDINTT_DTLS"
-                            + " WHERE BRN_CD={0} AND ACC_NUM={1}   AND ACC_TYPE_CD = {2}   ";
+                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2}  AND ACC_TYPE_CD = {3} AND DEL_FLAG ='N'  ORDER BY CALC_DT ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
+                                          !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
                                           (dep.acc_type_cd > 0 ? dep.acc_type_cd.ToString() : "ACC_TYPE_CD"));
