@@ -107,6 +107,59 @@ namespace SBWSFinanceApi.Controllers
            return _ll.GetBlockMaster(mum);
         }
 
+        
+        [Route("InsertServiceAreaMaster")]
+        [HttpPost]
+        public int InsertServiceAreaMaster(mm_service_area mum)
+        {
+            return _ll.InsertServiceAreaMaster(mum);
+        }
+
+        [Route("InsertBlockMaster")]
+        [HttpPost]
+        public int InsertBlockMaster(mm_block mum)
+        {
+            return _ll.InsertBlockMaster(mum);
+        }
+
+        
+        [Route("InsertVillageMaster")]
+        [HttpPost]
+        public int InsertVillageMaster(mm_vill mum)
+        {
+            return _ll.InsertVillageMaster(mum);
+        }
+
+        [Route("UpdateBlock")]
+        [HttpPost]
+        public int UpdateBlock(mm_block mum)
+        {
+            return _ll.UpdateBlock(mum);
+        }
+
+        
+        [Route("UpdateServiceArea")]
+        [HttpPost]
+        public int UpdateServiceArea(mm_service_area mum)
+        {
+            return _ll.UpdateServiceArea(mum);
+        }
+
+        
+        [Route("UpdateVillage")]
+        [HttpPost]
+        public int UpdateVillage(mm_vill mum)
+        {
+            return _ll.UpdateVillage(mum);
+        }
+        
+        [Route("GetSystemDate")]
+        [HttpPost]
+        public day_initialize GetSystemDate(m_branch mum)
+        {
+            return _ll.GetSystemDate(mum);
+        }
+
         [Route("GetKycMaster")]
         [HttpPost]
         public List<mm_kyc> GetKycMaster()

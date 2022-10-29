@@ -20,7 +20,8 @@ public DateTime? dt_of_birth {get; set;}
 public decimal age {get; set;}   
 public string sex {get; set;}   
 public string marital_status {get; set;}   
-public int catg_cd {get; set;}  
+public int catg_cd {get; set;}
+public string catg_desc { get; set; }
 public decimal community {get; set;}   
 public decimal caste {get; set;}    
 public string permanent_address {get; set;}   

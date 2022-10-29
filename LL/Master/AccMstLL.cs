@@ -67,6 +67,40 @@ namespace SBWSFinanceApi.LL
         {
            return _dac.GetBlockMaster(mum);
         }
+        
+         public int InsertServiceAreaMaster(mm_service_area mum)
+        {
+            return _dac.InsertServiceAreaMaster(mum);
+        }
+
+        public int InsertVillageMaster(mm_vill mum)
+        {
+            return _dac.InsertVillageMaster(mum);
+        }
+
+        public int InsertBlockMaster(mm_block mum)
+        {
+            return _dac.InsertBlockMaster(mum);
+        }        
+        public int UpdateBlock(mm_block mum)
+        {
+            return _dac.UpdateBlock(mum);
+        }        
+
+        public int UpdateServiceArea(mm_service_area mum)
+        {
+            return _dac.UpdateServiceArea(mum);
+        }
+        
+        public day_initialize GetSystemDate(m_branch mum)
+        {
+            return _dac.GetSystemDate(mum);
+        }
+
+        public int UpdateVillage(mm_vill mum)
+        {
+            return _dac.UpdateVillage(mum);
+        }
         public List<mm_kyc> GetKycMaster()
         {
            return _dac.GetKycMaster();

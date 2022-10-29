@@ -113,14 +113,15 @@ namespace SBWSFinanceApi.DL
              List<t_voucher_dtls> tvdRets=new List<t_voucher_dtls>();
             string _query="SELECT NARRATION,VOUCHER_ID,VOUCHER_DT,VOUCHER_TYPE,APPROVAL_STATUS FROM T_VOUCHER_NARRATION WHERE  "
                           + "  T_VOUCHER_NARRATION.ardb_cd = {0} AND T_VOUCHER_NARRATION.brn_cd = {1} "
-                          + "  AND T_VOUCHER_NARRATION.voucher_dt = to_date('{2}','dd-mm-yyyy' ) AND T_VOUCHER_NARRATION.del_flag = 'N' ";
-                          
+                          + "  AND T_VOUCHER_NARRATION.APPROVAL_STATUS = 'U' AND T_VOUCHER_NARRATION.del_flag = 'N' ";
+            //   + "  AND T_VOUCHER_NARRATION.voucher_dt = to_date('{2}','dd-mm-yyyy' ) AND T_VOUCHER_NARRATION.del_flag = 'N' ";
+
             using (var connection = OrclDbConnection.NewConnection)
             {              
                 _statement = string.Format(_query,
                                             string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
-                                            string.IsNullOrWhiteSpace(tvd.brn_cd) ? "brn_cd" : string.Concat("'", tvd.brn_cd, "'"),
-                                            tvd.voucher_dt!= null ? Convert.ToString(tvd.voucher_dt).Substring(0, 10): "voucher_dt"                                            
+                                            string.IsNullOrWhiteSpace(tvd.brn_cd) ? "brn_cd" : string.Concat("'", tvd.brn_cd, "'")//,
+                                            //tvd.voucher_dt!= null ? Convert.ToString(tvd.voucher_dt).Substring(0, 10): "voucher_dt"                                            
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -221,7 +222,7 @@ namespace SBWSFinanceApi.DL
             using (var connection = OrclDbConnection.NewConnection)
             {              
                 _statement = string.Format(_query,
-                                            string.IsNullOrWhiteSpace(tvd.brn_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
                                             tvd.voucher_dt!= null ? Convert.ToString(tvd.voucher_dt).Substring(0, 10): "cr_dt",
                                             string.IsNullOrWhiteSpace( tvd.brn_cd) ? "brn_cd" : string.Concat("'",  tvd.brn_cd , "'")
                                             );

@@ -15,13 +15,13 @@ namespace SBWSFinanceApi.DL
 internal List<m_user_master> GetUserIDDtls(m_user_master mum)
         {
             List<m_user_master> mumRets=new List<m_user_master>();
-            string _query=" SELECT BRN_CD, USER_ID, PASSWORD, LOGIN_STATUS, USER_TYPE, USER_FIRST_NAME, USER_MIDDLE_NAME, USER_LAST_NAME "
-                        +" FROM M_USER_MASTER WHERE  USER_ID={0} AND BRN_CD={1} ";
+            string _query=" SELECT ARDB_CD,BRN_CD, USER_ID, PASSWORD, LOGIN_STATUS, USER_TYPE, USER_FIRST_NAME, USER_MIDDLE_NAME, USER_LAST_NAME "
+                        +" FROM M_USER_MASTER WHERE  USER_ID={0} AND ARDB_CD={1} ";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                _statement = string.Format(_query,                
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.brn_cd, "'")
+                                            string.Concat("'",  mum.ardb_cd, "'")
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -31,7 +31,8 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                         {
                             while (reader.Read())
                             {    
-                                var mumt = new m_user_master();                            
+                                var mumt = new m_user_master();
+                                mumt.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 mumt.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                 mumt.user_id = UtilityM.CheckNull<string>(reader["USER_ID"]);
                                 mumt.password=SetUserPass(UtilityM.CheckNull<string>(reader["PASSWORD"]));
@@ -53,8 +54,8 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
         {
             List<m_user_master> sigList = new List<m_user_master>();
             var passkey=GetUserPass(mum.password); 
-            string _query="INSERT INTO M_USER_MASTER (BRN_CD, USER_ID, PASSWORD, LOGIN_STATUS, USER_TYPE, USER_FIRST_NAME, USER_MIDDLE_NAME, USER_LAST_NAME )"
-                          +" VALUES( {0},{1},{2},{3},{4},{5},{6},{7} ) ";
+            string _query="INSERT INTO M_USER_MASTER (ARDB_CD,BRN_CD, USER_ID, PASSWORD, LOGIN_STATUS, USER_TYPE, USER_FIRST_NAME, USER_MIDDLE_NAME, USER_LAST_NAME )"
+                          +" VALUES( {0},{1},{2},{3},{4},{5},{6},{7},{8} ) ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -63,6 +64,7 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                     try
                     {
                         _statement = string.Format(_query,
+                                                   string.Concat("'", mum.ardb_cd, "'"),
                                                    string.Concat("'", mum.brn_cd, "'"),
                                                    string.Concat("'", mum.user_id, "'") ,
                                                    string.Concat("'", passkey, "'"),
@@ -106,7 +108,7 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
          +" USER_FIRST_NAME   = {5} , "
          +" USER_MIDDLE_NAME   = {6} , "
          +" USER_LAST_NAME    = {7}  "
-         +"  WHERE  USER_ID={8} AND BRN_CD={9} ";
+         +"  WHERE  USER_ID={8} AND ARDB_CD={9} ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -124,7 +126,7 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                                                    string.Concat("'", mum.user_middle_name, "'") ,
                                                    string.Concat("'", mum.user_last_name, "'") ,
                                                    string.Concat("'", mum.user_id, "'") ,
-                                                   string.Concat("'", mum.brn_cd, "'")
+                                                   string.Concat("'", mum.ardb_cd, "'")
                                                     );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -147,8 +149,8 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
         {
             int _ret=0;
 
-            string _query=" DELETE FROM M_USER_MASTER "
-                         +" WHERE USER_ID={0} AND BRN_CD={1} ";
+            string _query=" UPDATE M_USER_MASTER SET USER_TYPE = 'D' "
+                         +" WHERE USER_ID={0} AND ARDB_CD = {1} ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -158,7 +160,7 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                     {
                      _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(mum.user_id) ? string.Concat("'", mum.user_id, "'") : "user_id",
-                                          !string.IsNullOrWhiteSpace(mum.brn_cd) ? string.Concat("'", mum.brn_cd, "'") : "brn_cd"
+                                          !string.IsNullOrWhiteSpace(mum.ardb_cd) ? string.Concat("'", mum.ardb_cd, "'") : "ardb_cd"
                                           );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))

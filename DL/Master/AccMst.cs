@@ -230,19 +230,17 @@ internal List<mm_constitution> GetConstitution()
         {
             int _ret =0;
              string _statementins="";
-            string _query=" UPDATE M_USER_MASTER SET LOGIN_STATUS={0} "
-                        +"  WHERE  USER_ID={1} AND BRN_CD={2}";
+            string _query=" UPDATE M_USER_MASTER SET LOGIN_STATUS= {0} "
+                        +"  WHERE  USER_ID={1} AND BRN_CD={2} AND ARDB_CD= {3} ";
             string _qinsaudit = "INSERT INTO SM_AUDIT_TRAIL VALUES "
-                               +" ((SELECT MAX(LOGIN_SRL) +1 FROM SM_AUDIT_TRAIL), "
-                               +" {0}, "
+                               +" ({0},{1},(SELECT NVL(MAX(LOGIN_SRL),0) +1 FROM SM_AUDIT_TRAIL WHERE ARDB_CD={2}), {3}, "
                                +" sysdate, "
-                               +" {1}, "
+                               +" {4}, "
                                +" (SELECT upper(user_first_name|| ' ' ||user_middle_name||' '||user_last_name) "
-                               +" FROM M_USER_MASTER WHERE user_id={2}), "
-                               +" NULL, "
-                               +" {3} )";
+                               +" FROM M_USER_MASTER WHERE ARDB_CD = {5} AND user_id={6}), "
+                               +" NULL )";
             string _qupdaudit = " UPDATE SM_AUDIT_TRAIL SET LOGOUT_DT=SYSDATE "
-                               +" WHERE LOGIN_USER={0} and brn_cd={1} "
+                               +" WHERE LOGIN_USER={0} and brn_cd={1} AND ARDB_CD = {2} "
                                +" AND LOGOUT_DT IS NULL";
 
 
@@ -251,22 +249,27 @@ internal List<mm_constitution> GetConstitution()
                _statement = string.Format(_query,                
                                             string.Concat("'",  mum.login_status, "'"),
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.brn_cd, "'")
+                                            string.Concat("'",  mum.brn_cd, "'"),
+                                            string.Concat("'", mum.ardb_cd, "'")
                                             );
                  if ( mum.login_status=="Y")
                  {
-                 _statementins = string.Format(_qinsaudit,                
+                 _statementins = string.Format(_qinsaudit,
+                                            string.Concat("'", mum.ardb_cd, "'"),
+                                            string.Concat("'", mum.brn_cd, "'"),
+                                            string.Concat("'", mum.ardb_cd, "'"),
                                             string.Concat("'",  mum.user_id, "'"),
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.brn_cd, "'")
+                                            string.Concat("'", mum.ardb_cd, "'"),
+                                            string.Concat("'",  mum.user_id, "'")                                            
                                             );
                  }
                  else
                  {
                  _statementins = string.Format(_qupdaudit,
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.brn_cd, "'")
+                                            string.Concat("'",  mum.brn_cd, "'"),
+                                            string.Concat("'", mum.ardb_cd, "'")
                                             );
                  }
                  using (var transaction = connection.BeginTransaction())
@@ -419,7 +422,117 @@ internal List<mm_constitution> GetConstitution()
             
             }
             return mamRets;
-        }      
+        }
+
+
+        internal int InsertVillageMaster(mm_vill tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_VILL VALUES ({0},{1},{2}, {3}, {4},{5},'0',{6},SYSDATE,0)";
+
+            int VillIdMax = GetVillMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat("'", tvd.state_cd, "'"),
+                                  string.Concat("'", tvd.dist_cd, "'"),
+                                  string.Concat("'", tvd.block_cd, "'"),
+                                  string.Concat(VillIdMax),
+                                  string.Concat("'", tvd.vill_name, "'"),
+                                  string.Concat("'", tvd.service_area_cd, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = VillIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        internal int GetVillMaxId(mm_vill tvd)
+        {
+            int maxVillCd = 0;
+            string _query = "Select  nvl(max(to_number(vill_cd)) + 1, 1) max_vill_cd"
+                            + " From   mm_vill "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxVillCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_VILL_CD"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxVillCd;
+        }
+
+        internal int UpdateVillage(mm_vill tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_vill"
+                            + " Set vill_name = {0} "
+                            + " Where  ardb_cd = {1} AND vill_cd = {2} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.vill_name, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat("'", tvd.vill_cd, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
 
         internal List<mm_service_area> GetServiceAreaMaster(mm_service_area mum)
         {
@@ -453,7 +566,116 @@ internal List<mm_constitution> GetConstitution()
             
             }
             return mamRets;
-        }   
+        }
+
+
+        internal int InsertServiceAreaMaster(mm_service_area tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_SERVICE_AREA VALUES ({0},{1},{2}, {3}, {4},{5},SYSDATE)";
+
+            int ServiceIdMax = GetServiceMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat("'", tvd.state_cd, "'"),
+                                  string.Concat("'", tvd.dist_cd, "'"),
+                                  string.Concat(ServiceIdMax),
+                                  string.Concat("'", tvd.service_area_name, "'"),
+                                  string.Concat("'", tvd.block_cd, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = ServiceIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        internal int GetServiceMaxId(mm_service_area tvd)
+        {
+            int maxServiceCd = 0;
+            string _query = "Select  nvl(max(to_number(service_area_cd)) + 1, 1) max_service_area_cd"
+                            + " From   mm_service_area "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxServiceCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_SERVICE_AREA_CD"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxServiceCd;
+        }
+
+        internal int UpdateServiceArea(mm_service_area tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_service_area"
+                            + " Set service_area_name = {0} "
+                            + " Where  ardb_cd = {1} AND service_area_cd = {2} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.service_area_name, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat("'", tvd.service_area_cd, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
 
         internal List<mm_block> GetBlockMaster(mm_block mum)
         {
@@ -487,7 +709,115 @@ internal List<mm_constitution> GetConstitution()
             
             }
             return mamRets;
-        }    
+        }
+
+
+        internal int InsertBlockMaster(mm_block tvd)
+        {
+            int _ret = 0;
+           
+            string _query = "INSERT INTO MM_BLOCK VALUES ({0},{1},{2}, {3}, {4},SYSDATE)";
+            
+            int BlockIdMax = GetBlockMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                               _statement = string.Format(_query,
+                                         string.Concat("'", tvd.ardb_cd, "'"),
+                                         string.Concat("'", tvd.state_cd, "'"),
+                                         string.Concat("'", tvd.dist_cd, "'"),
+                                         string.Concat(BlockIdMax),
+                                         string.Concat("'", tvd.block_name, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = BlockIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        internal int GetBlockMaxId(mm_block tvd)
+        {
+            int maxBlockCd = 0;
+            string _query = "Select  nvl(max(to_number(block_cd)) + 1, 1) max_block_cd"
+                            + " From   mm_block "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxBlockCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_BLOCK_CD"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxBlockCd;
+        }
+
+        internal int UpdateBlock(mm_block tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_block"
+                            + " Set block_name = {0} "
+                            + " Where  ardb_cd = {1} AND block_cd = {2} ";
+            
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {                        
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.block_name, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat("'", tvd.block_cd, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
 
         internal List<mm_kyc> GetKycMaster()
         {
@@ -646,7 +976,38 @@ internal List<mm_constitution> GetConstitution()
             
             }
             return mamRets;
-        }   
+        }
+
+        internal day_initialize GetSystemDate(m_branch mum)
+        {
+            day_initialize m1 = new day_initialize(); 
+
+            string _query = " SELECT to_char(OPERATION_DT,'DD/MM/YYYY') SYS_DATE "
+                         + " FROM MM_DAY_OPERATION WHERE ARDB_CD = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new day_initialize();
+                                mam.sys_date = UtilityM.CheckNull<string>(reader["SYS_DATE"]);
+                                m1 = mam;
+                            }
+                        }
+                    }
+                }
+
+            }
+            return m1;
+        }
 
         internal List<mm_operation> GetOperationMaster()
         {

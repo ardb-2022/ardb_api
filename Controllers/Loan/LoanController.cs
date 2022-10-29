@@ -32,6 +32,161 @@ namespace SBWSFinanceApi.Controllers
         {         
             return _ll.PopulateCropAmtDueDt(prp); 
         }
+        
+
+        [Route("PopulateLoanDetailedList")]
+        [HttpPost]
+        public List<tt_detailed_list_loan> PopulateLoanDetailedList(p_report_param prp)
+        {
+            return _ll.PopulateLoanDetailedList(prp);
+        }
+
+        
+        [Route("GetDefaultList")]
+        [HttpPost]
+        public List<tt_detailed_list_loan> GetDefaultList(p_report_param prp)
+        {
+            return _ll.GetDefaultList(prp);
+        }
+
+        
+        [Route("PopulateLoanDisburseReg")]
+        [HttpPost]
+        public List<tm_loan_all> PopulateLoanDisburseReg(p_report_param prp)
+        {
+            return _ll.PopulateLoanDisburseReg(prp);
+        }
+
+        [Route("PopulateLoanDisburseRegAccwise")]
+        [HttpPost]
+        public List<tm_loan_all> PopulateLoanDisburseRegAccwise(p_report_param prp)
+        {
+            return _ll.PopulateLoanDisburseRegAccwise(prp);
+        }
+        
+        [Route("PopulateAdvRecovStmt")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateAdvRecovStmt(p_report_param prp)
+        {
+            return _ll.PopulateAdvRecovStmt(prp);
+        }
+        
+        [Route("PopulateInttRecovStmt")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateInttRecovStmt(p_report_param prp)
+        {
+            return _ll.PopulateInttRecovStmt(prp);
+        }
+        
+        [Route("PopulateLoanOpenRegister")]
+        [HttpPost]
+        public List<tt_loan_opn_cls> PopulateLoanOpenRegister(p_report_param prp)
+        {
+            return _ll.PopulateLoanOpenRegister(prp);
+        }
+        
+        [Route("PopulateNPAList")]
+        [HttpPost]
+        public List<tt_npa> PopulateNPAList(p_report_param prp)
+        {
+            return _ll.PopulateNPAList(prp);
+        }
+
+        [Route("PopulateLoanCloseRegister")]
+        [HttpPost]
+        public List<tt_loan_opn_cls> PopulateLoanCloseRegister(p_report_param prp)
+        {
+            return _ll.PopulateLoanCloseRegister(prp);
+        }
+
+
+        [Route("PopulateRecoveryRegister")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateRecoveryRegister(p_report_param prp)
+        {
+            return _ll.PopulateRecoveryRegister(prp);
+        }
+
+        [Route("PopulateRecoveryRegisterAccwise")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateRecoveryRegisterAccwise(p_report_param prp)
+        {
+            return _ll.PopulateRecoveryRegisterAccwise(prp);
+        }
+
+        [Route("PopulateLoanStatement")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateLoanStatement(p_report_param prp)
+        {
+            return _ll.PopulateLoanStatement(prp);
+        }
+
+        
+        [Route("GetDemandList")]
+        [HttpPost]
+        public List<demand_list> GetDemandList(p_report_param prp)
+        {
+            return _ll.GetDemandList(prp);
+        }
+
+        [Route("GetDemandListMemberwise")]
+        [HttpPost]
+        public List<demandDM> GetDemandListMemberwise(p_report_param prp)
+        {
+            return _ll.GetDemandListMemberwise(prp);
+        }
+
+        
+        [Route("GetDemandBlockwisegroup")]
+        [HttpPost]
+        public List<blockwise_type> GetDemandBlockwisegroup(p_report_param prp)
+        {
+            return _ll.GetDemandBlockwisegroup(prp);
+        }
+
+
+        [Route("GetDemandBlockwise")]
+        [HttpPost]
+        public List<demand_list> GetDemandBlockwise(p_report_param prp)
+        {
+            return _ll.GetDemandBlockwise(prp);
+        }
+
+        [Route("GetDemandActivitywise")]
+        [HttpPost]
+        public List<demand_list> GetDemandActivitywise(p_report_param prp)
+        {
+            return _ll.GetDemandActivitywise(prp);
+        }
+
+        [Route("GetRecoveryList")]
+        [HttpPost]
+        public List<recovery_list> GetRecoveryList(p_report_param prp)
+        {
+            return _ll.GetRecoveryList(prp);
+        }
+
+        [Route("GetDemandCollectionBlockwise")]
+        [HttpPost]
+        public List<recovery_list> GetDemandCollectionBlockwise(p_report_param prp)
+        {
+            return _ll.GetDemandCollectionBlockwise(prp);
+        }
+
+        [Route("GetDemandCollectionActivitywise")]
+        [HttpPost]
+        public List<recovery_list> GetDemandCollectionActivitywise(p_report_param prp)
+        {
+            return _ll.GetDemandCollectionActivitywise(prp);
+        }
+
+        [Route("PopulateLoanSubCashBook")]
+        [HttpPost]
+        public List<tt_loan_sub_cash_book> PopulateLoanSubCashBook(p_report_param prp)
+        {
+            return _ll.PopulateLoanSubCashBook(prp);
+        }
+
 
         [Route("InsertSubsidyData")]
         [HttpPost]

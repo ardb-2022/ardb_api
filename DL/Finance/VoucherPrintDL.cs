@@ -15,7 +15,7 @@ namespace SBWSFinanceApi.DL
         {
             List<t_voucher_narration> tvnRets=new List<t_voucher_narration>();
             string _query="SELECT NARRATION,VOUCHER_DT,VOUCHER_ID,VOUCHER_TYPE,APPROVAL_STATUS FROM T_VOUCHER_NARRATION WHERE  "
-                        +" T_VOUCHER_NARRATION.brn_cd = {0} AND  T_VOUCHER_NARRATION.voucher_dt BETWEEN TO_DATE('{1}','dd-mm-yyyy') AND TO_DATE('{2}','dd-mm-yyyy') ";
+                        + " T_VOUCHER_NARRATION.ardb_cd = {0} AND T_VOUCHER_NARRATION.brn_cd = {1} AND  T_VOUCHER_NARRATION.voucher_dt BETWEEN TO_DATE('{2}','dd-mm-yyyy') AND TO_DATE('{3}','dd-mm-yyyy') ";
         
             string _query1=" SELECT T_VOUCHER_DTLS.VOUCHER_DT,"   
          +" T_VOUCHER_DTLS.ACC_CD,"   
@@ -33,10 +33,12 @@ namespace SBWSFinanceApi.DL
 		 +" T_VOUCHER_DTLS.INSTRUMENT_NO"        
     	 +" FROM T_VOUCHER_DTLS,"   
          +" M_ACC_MASTER"  
-   	     +" WHERE ( T_VOUCHER_DTLS.BRN_CD = {0} )  AND "
-		 +" ( T_VOUCHER_DTLS.ACC_CD = m_acc_master.acc_cd ) AND"   
-         +" ( T_VOUCHER_DTLS.VOUCHER_DT = TO_DATE('{1}','dd-mm-yyyy')) AND" 
-         +" ( T_VOUCHER_DTLS.VOUCHER_ID = {2} ) AND" 
+   	     + " WHERE ( T_VOUCHER_DTLS.ARDB_CD = {0} )  AND "
+         + " ( T_VOUCHER_DTLS.BRN_CD = {1} )  AND "
+         + " ( T_VOUCHER_DTLS.ARDB_CD = m_acc_master.ardb_cd ) AND"
+         + " ( T_VOUCHER_DTLS.ACC_CD = m_acc_master.acc_cd ) AND"   
+         +" ( T_VOUCHER_DTLS.VOUCHER_DT = TO_DATE('{2}','dd-mm-yyyy')) AND" 
+         +" ( T_VOUCHER_DTLS.VOUCHER_ID = {3} ) AND" 
 		 +" ( T_VOUCHER_DTLS.DEBIT_CREDIT_FLAG = 'D' )"  
          +" UNION"   
          +" SELECT T_VOUCHER_DTLS.VOUCHER_DT,"   
@@ -54,17 +56,21 @@ namespace SBWSFinanceApi.DL
 		 +" T_VOUCHER_DTLS.AMOUNT CREDIT,"
    		 +" T_VOUCHER_DTLS.INSTRUMENT_NO"
          +" FROM T_VOUCHER_DTLS,"   
-         +" M_ACC_MASTER"  
-          +" WHERE ( T_VOUCHER_DTLS.BRN_CD = {0} )  AND "
-		 +" ( T_VOUCHER_DTLS.ACC_CD = m_acc_master.acc_cd ) AND"   
-         +" ( T_VOUCHER_DTLS.VOUCHER_DT = TO_DATE('{1}','dd-mm-yyyy')) AND" 
-         +" ( T_VOUCHER_DTLS.VOUCHER_ID = {2} ) AND" 
-		 +" ( T_VOUCHER_DTLS.DEBIT_CREDIT_FLAG = 'C' )"  ;
+         +" M_ACC_MASTER"
+         + " WHERE ( T_VOUCHER_DTLS.ARDB_CD = {0} )  AND "
+         + " ( T_VOUCHER_DTLS.BRN_CD = {1} )  AND "
+         + " ( T_VOUCHER_DTLS.ARDB_CD = m_acc_master.ardb_cd ) AND"
+         + " ( T_VOUCHER_DTLS.ACC_CD = m_acc_master.acc_cd ) AND"
+         + " ( T_VOUCHER_DTLS.VOUCHER_DT = TO_DATE('{2}','dd-mm-yyyy')) AND"
+         + " ( T_VOUCHER_DTLS.VOUCHER_ID = {3} ) AND"
+         + " ( T_VOUCHER_DTLS.DEBIT_CREDIT_FLAG = 'C' )"  ;
+
              using (var connection = OrclDbConnection.NewConnection)
             {
                 try{
               
                 _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
                                             string.IsNullOrWhiteSpace( tvd.brn_cd) ? "brn_cd" : string.Concat("'",  tvd.brn_cd , "'"),
                                             tvd.from_dt!= null ?  tvd.from_dt.ToString("dd/MM/yyyy"): "from_dt",
                                              tvd.to_dt!= null ?  tvd.to_dt.ToString("dd/MM/yyyy"): "to_dt"
@@ -94,6 +100,7 @@ namespace SBWSFinanceApi.DL
                 {
                     List<t_voucher_dtls> tvdRets=new List<t_voucher_dtls>();
                     _statement = string.Format(_query1,
+                    string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'"),
                     string.IsNullOrWhiteSpace( tvd.brn_cd) ? "brn_cd" : string.Concat("'",  tvd.brn_cd , "'"),
                     tvnRets[i].voucher_dt!= null ?  tvnRets[i].voucher_dt.ToString("dd/MM/yyyy"): "voucher_dt",
                     tvnRets[i].voucher_id !=0 ? Convert.ToString( tvnRets[i].voucher_id) : "voucher_id"

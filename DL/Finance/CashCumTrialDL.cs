@@ -39,15 +39,18 @@ namespace SBWSFinanceApi.DL
                             using (var command = OrclDbConnection.Command(connection, _statement))
                             {
                                     command.CommandType = System.Data.CommandType.StoredProcedure;
-                                    var parm1 = new OracleParameter("as_brn_cd", OracleDbType.Int32, ParameterDirection.Input);
-                                    parm1.Value = prp.brn_cd;
+                                    var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Int32, ParameterDirection.Input);
+                                    parm1.Value = prp.ardb_cd;
                                     command.Parameters.Add(parm1);
-                                    var parm2 = new OracleParameter("adt_from_dt", OracleDbType.Date, ParameterDirection.Input);
-                                    parm2.Value = prp.from_dt;
+                                    var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Int32, ParameterDirection.Input);
+                                    parm2.Value = prp.brn_cd;
                                     command.Parameters.Add(parm2);
-                                     var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
-                                    parm3.Value = prp.to_dt;
+                                    var parm3 = new OracleParameter("adt_from_dt", OracleDbType.Date, ParameterDirection.Input);
+                                    parm3.Value = prp.from_dt;
                                     command.Parameters.Add(parm3);
+                                     var parm4 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                                    parm4.Value = prp.to_dt;
+                                    command.Parameters.Add(parm4);
                                     command.ExecuteNonQuery();
                                     //transaction.Commit();
                             }

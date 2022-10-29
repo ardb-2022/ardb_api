@@ -79,7 +79,7 @@ namespace SBWSDepositApi.Deposit
                                     d.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
                                     d.user_acc_num = UtilityM.CheckNull<string>(reader["USER_ACC_NUM"]);
                                     d.lock_mode = UtilityM.CheckNull<string>(reader["LOCK_MODE"]);
-                                    d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                    d.loan_id = UtilityM.CheckNull<decimal>(reader["LOAN_ID"]);
                                     d.cert_no = UtilityM.CheckNull<string>(reader["CERT_NO"]);
                                     d.bonus_amt = UtilityM.CheckNull<decimal>(reader["BONUS_AMT"]);
                                     d.penal_intt_rt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RT"]);

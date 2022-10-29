@@ -122,6 +122,115 @@ namespace SBWSFinanceApi.LL
              return _dac.PopulateLoanRepSch(prp);
         }
 
+        
+        internal List<tt_detailed_list_loan> PopulateLoanDetailedList(p_report_param prp)
+        {
+            return _dac.PopulateLoanDetailedList(prp);
+        }
+
+        internal List<demand_list> GetDemandList(p_report_param prp)
+        {
+            return _dac.GetDemandList(prp);
+        }
+
+        internal List<demandDM> GetDemandListMemberwise(p_report_param prp)
+        {
+            return _dac.GetDemandListMemberwise(prp);
+        }
+        
+        internal List<blockwise_type> GetDemandBlockwisegroup(p_report_param prp)
+        {
+            return _dac.GetDemandBlockwisegroup(prp);
+        }
+
+        internal List<demand_list> GetDemandBlockwise(p_report_param prp)
+        {
+            return _dac.GetDemandBlockwise(prp);
+        }
+        
+
+        internal List<demand_list> GetDemandActivitywise(p_report_param prp)
+        {
+            return _dac.GetDemandActivitywise(prp);
+        }
+
+        internal List<recovery_list> GetDemandCollectionBlockwise(p_report_param prp)
+        {
+            return _dac.GetDemandCollectionBlockwise(prp);
+        }
+
+        
+        internal List<recovery_list> GetDemandCollectionActivitywise(p_report_param prp)
+        {
+            return _dac.GetDemandCollectionActivitywise(prp);
+        }
+
+        internal List<recovery_list> GetRecoveryList(p_report_param prp)
+        {
+            return _dac.GetRecoveryList(prp);
+        }        
+        
+
+        internal List<tt_detailed_list_loan> GetDefaultList(p_report_param prp)
+        {
+            return _dac.GetDefaultList(prp);
+        }
+
+        
+        internal List<tm_loan_all> PopulateLoanDisburseReg(p_report_param prp)
+        {
+            return _dac.PopulateLoanDisburseReg(prp);
+        }
+        
+        internal List<tm_loan_all> PopulateLoanDisburseRegAccwise(p_report_param prp)
+        {
+            return _dac.PopulateLoanDisburseRegAccwise(prp);
+        }
+
+        internal List<gm_loan_trans> PopulateRecoveryRegister(p_report_param prp)
+        {
+            return _dac.PopulateRecoveryRegister(prp);
+        }
+        
+        internal List<gm_loan_trans> PopulateAdvRecovStmt(p_report_param prp)
+        {
+            return _dac.PopulateAdvRecovStmt(prp);
+        }
+        
+        internal List<gm_loan_trans> PopulateInttRecovStmt(p_report_param prp)
+        {
+            return _dac.PopulateInttRecovStmt(prp);
+        }
+        internal List<tt_loan_opn_cls> PopulateLoanOpenRegister(p_report_param prp)
+        {
+            return _dac.PopulateLoanOpenRegister(prp);
+        }
+        internal List<tt_loan_opn_cls> PopulateLoanCloseRegister(p_report_param prp)
+        {
+            return _dac.PopulateLoanCloseRegister(prp);
+        }
+
+        internal List<tt_npa> PopulateNPAList(p_report_param prp)
+        {
+            return _dac.PopulateNPAList(prp);
+        }
+
+        internal List<gm_loan_trans> PopulateRecoveryRegisterAccwise(p_report_param prp)
+        {
+            return _dac.PopulateRecoveryRegisterAccwise(prp);
+        }
+
+        internal List<tt_loan_sub_cash_book> PopulateLoanSubCashBook(p_report_param prp)
+        {
+            return _dac.PopulateLoanSubCashBook(prp);
+        }
+
+
+        internal List<gm_loan_trans> PopulateLoanStatement(p_report_param prp)
+        {
+            return _dac.PopulateLoanStatement(prp);
+        }
+
         KccMstDL _dackcc = new KccMstDL(); 
         internal string InsertKccData(KccMstDM acc)
         {

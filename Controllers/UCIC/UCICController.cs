@@ -44,9 +44,13 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.GetCustomerDtls(pmc);
         }
-
-
-
+        
+        [Route("GetMemberDtls")]
+        [HttpPost]
+        public List<mm_customer> GetMemberDtls([FromBody] mm_customer pmc)
+        {
+            return _ll.GetMemberDtls(pmc);
+        }
 
         [Route("InsertCustomerDtls")]
         [HttpPost]
@@ -73,6 +77,13 @@ namespace SBWSFinanceApi.Controllers
         public List<tm_deposit> GetDepositDtls([FromBody] mm_customer pmc)
         {
             return _ll.GetDepositDtls(pmc);
+        }
+        
+        [Route("GetLoanDtls")]
+        [HttpPost]
+        public List<tm_loan_all> GetLoanDtls([FromBody] mm_customer pmc)
+        {
+            return _ll.GetLoanDtls(pmc);
         }
 
         ShgLL _ll1 = new ShgLL();

@@ -7,6 +7,7 @@ namespace SBWSDepositApi.Models
         public string ardb_cd { get; set; }
         public string brn_cd { get; set; }
         public int acc_type_cd { get; set; }
+        public string acc_type_desc { get; set; }
         public string acc_num { get; set; }
         public int renew_id { get; set; }
         public decimal cust_cd { get; set; }
@@ -30,6 +31,12 @@ namespace SBWSDepositApi.Models
         public decimal ext_instl_tot { get; set; }
         public string mat_status { get; set; }
         public string acc_status { get; set; }
+        public string cust_name { get; set; }
+        public string month { get; set; }
+        public string year { get; set; }
+
+        public string trans_mode { get; set; }
+        public string trans_type { get; set; }
         public decimal curr_bal { get; set; }
         public decimal clr_bal { get; set; }
         public string standing_instr_flag { get; set; }
@@ -43,7 +50,7 @@ namespace SBWSDepositApi.Models
         public DateTime? approved_dt { get; set; }
         public string user_acc_num { get; set; }
         public string lock_mode { get; set; }
-        public string loan_id { get; set; }
+        public decimal loan_id { get; set; }
         public string cert_no { get; set; }
         public decimal bonus_amt { get; set; }
         public decimal penal_intt_rt { get; set; }

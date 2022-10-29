@@ -11,5 +11,7 @@ namespace SBWSFinanceApi.Models
         public string img_cont { get; set; }
       //  public byte[] img_cont_byte { get; set; }
         public string status { get; set; }
+
+        public string ardb_cd { get; set; }
     }
 }

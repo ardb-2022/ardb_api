@@ -5,7 +5,8 @@ namespace SBWSFinanceApi.Models
 {
     public class mm_shg_member
     {
-public decimal shg_id {get;set;}   
+        public string ardb_cd { get; set; }
+        public decimal shg_id {get;set;}   
 public decimal shg_member_id {get;set;}   
 public string shg_member_name {get;set;}   
 public string guardian_name {get;set;}   

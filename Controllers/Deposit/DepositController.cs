@@ -217,6 +217,93 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll2.UpdateDepositLockUnlock(tvd);
         }
+
+        [Route("PopulateSubCashBookDeposit")]
+        [HttpPost]
+        public List<tt_dep_sub_cash_book> PopulateSubCashBookDeposit([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateSubCashBookDeposit(pgp);
+        }
+
+        [Route("PopulateDLSavings")]
+        [HttpPost]
+        public List<tt_sbca_dtl_list> PopulateDLSavings([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateDLSavings(pgp);
+        }
+        
+        [Route("PopulateDLDds")]
+        [HttpPost]
+        public List<tt_sbca_dtl_list> PopulateDLDds([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateDLDds(pgp);
+        }
+
+        [Route("PopulateDLRecuring")]
+        [HttpPost]
+        public List<tt_sbca_dtl_list> PopulateDLRecuring([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateDLRecuring(pgp);
+        }
+
+        
+        [Route("PopulateDLFixedDeposit")]
+        [HttpPost]
+        public List<tt_sbca_dtl_list> PopulateDLFixedDeposit([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateDLFixedDeposit(pgp);
+        }
+
+        [Route("PopulateASSaving")]
+        [HttpPost]
+        public List<tt_acc_stmt> PopulateASSaving([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateASSaving(pgp);
+        }
+        
+        [Route("PopulateASDds")]
+        [HttpPost]
+        public List<tt_dds_statement> PopulateASDds([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateASDds(pgp);
+        }
+
+
+        [Route("PopulateASRecuring")]
+        [HttpPost]
+        public List<tm_deposit> PopulateASRecuring([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateASRecuring(pgp);
+        }
+
+        [Route("PopulateASFixedDeposit")]
+        [HttpPost]
+        public List<tm_deposit> PopulateASFixedDeposit([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateASFixedDeposit(pgp);
+        }
+        
+        [Route("PopulateOpenCloseRegister")]
+        [HttpPost]
+        public List<tt_opn_cls_register> PopulateOpenCloseRegister([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateOpenCloseRegister(pgp);
+        }
+        
+        [Route("PopulateNearMatDetails")]
+        [HttpPost]
+        public List<tm_deposit> PopulateNearMatDetails([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateNearMatDetails(pgp);
+        }
+
+        [Route("PassBookPrint")]
+        [HttpPost]
+        public List<passbook_print> PassBookPrint([FromBody] p_report_param pgp)
+        {
+            return _ll2.PassBookPrint(pgp);
+        }
+
         [Route("GetDailyDeposit")]
         [HttpPost]
         public List<tm_daily_deposit> GetDailyDeposit(tm_deposit dep)
@@ -373,6 +460,72 @@ namespace SBWSFinanceApi.Controllers
             return __ll.GetDataForFile(prm);
         }
 
+        [Route("GetUnapprovedAgentTrans")]
+        [HttpPost]
+        public mm_agent_trans GetUnapprovedAgentTrans([FromBody] mm_agent_trans prm)
+        {
+            return __ll.GetUnapprovedAgentTrans(prm);
+        }
+
+        [Route("UpdateUnapprovedAgentTrans")]
+        [HttpPost]
+        public int UpdateUnapprovedAgentTrans([FromBody] mm_agent_trans prm)
+        {
+            return __ll.UpdateUnapprovedAgentTrans(prm);
+        }
+        
+        [Route("UpdateUnapprovedDdsTrans")]
+        [HttpPost]
+        public int UpdateUnapprovedDdsTrans([FromBody] List<tm_daily_deposit> prm)
+        {
+            return __ll.UpdateUnapprovedDdsTrans(prm);
+        }
+
+        [Route("GetUnapprovedDdsTrans")]
+        [HttpPost]
+        public List<tm_daily_deposit> GetUnapprovedDdsTrans([FromBody] mm_agent_trans prm)
+        {
+            return __ll.GetUnapprovedDdsTrans(prm);
+        }
+
+        [Route("GetDdsAccountData")]
+        [HttpPost]
+        public List<tm_daily_deposit> GetDdsAccountData([FromBody] export_data prm)
+        {
+            return __ll.GetDdsAccountData(prm);
+        }      
+
+
+        [Route("ApproveDdsImportData")]
+        [HttpPost]
+        public int ApproveDdsImportData([FromBody] mm_agent_trans prm)
+        {
+            return __ll.ApproveDdsImportData(prm);
+        }
+
+
+        [Route("CheckDuplicateAgentData")]
+        [HttpPost]
+        public decimal CheckDuplicateAgentData([FromBody] mm_agent_trans prm)
+        {
+            return __ll.CheckDuplicateAgentData(prm);
+        }
+        
+
+        [Route("PopulateImportData")]
+        [HttpPost]
+        public int PopulateImportData([FromBody] export_data prm)
+        {
+            return __ll.PopulateImportData(prm);
+        }
+
+        [Route("InsertImportDataFile")]
+        [HttpPost]
+        public int InsertImportDataFile([FromBody] List<string> prm)
+        {
+            return __ll.InsertImportDataFile(prm);
+        }
+
         NeftPayLL _NeftPayLLLL = new NeftPayLL();
         [Route("GetNeftOutDtls")]
         [HttpPost]
@@ -419,7 +572,7 @@ namespace SBWSFinanceApi.Controllers
         {
             return _NeftPayLLLL.GetNeftCharge(pgp);  
         }
+        
 
-       
     }
 }

@@ -33,40 +33,40 @@ namespace SBWSFinanceApi.DL
        +" TT_DAY_SCROLL.TRF_PAY,"
        +" (SELECT ABS(NVL(TM_ACC_BALANCE.BALANCE_AMT, 0))"
        +"   FROM TM_ACC_BALANCE                          "
-       +"  WHERE TM_ACC_BALANCE.BRN_CD = {0}             "
-       +"    AND TM_ACC_BALANCE.BALANCE_DT =             "
+       + "  WHERE TM_ACC_BALANCE.ARDB_CD = {0} AND TM_ACC_BALANCE.BRN_CD = {1}     "
+       + "    AND TM_ACC_BALANCE.BALANCE_DT =             "
        +"        (SELECT MAX(TM_ACC_BALANCE.BALANCE_DT)  "
        +"           FROM TM_ACC_BALANCE                  "
-       +"          WHERE TM_ACC_BALANCE.BRN_CD = {0}     "
-       +"            AND TM_ACC_BALANCE.BALANCE_DT <     "
+       + "          WHERE TM_ACC_BALANCE.ARDB_CD = {0} AND TM_ACC_BALANCE.BRN_CD = {1}     "
+       + "            AND TM_ACC_BALANCE.BALANCE_DT <     "
        +"                TT_DAY_SCROLL.TRANS_DT)         "
        +"    AND TM_ACC_BALANCE.ACC_CD = TT_DAY_SCROLL.CASH_ACC_CD) CASH_OPNG_BAL, "
        +" (SELECT ABS(NVL(TM_ACC_BALANCE.BALANCE_AMT, 0))                          "
        +"   FROM TM_ACC_BALANCE                                                    "
        +"  WHERE TM_ACC_BALANCE.BALANCE_DT = TT_DAY_SCROLL.TRANS_DT                "
-       +"    AND TM_ACC_BALANCE.BRN_CD = {0}                                       "
-       +"    AND TM_ACC_BALANCE.BALANCE_DT BETWEEN to_date('{1}','dd-mm-yyyy' ) AND to_date('{2}','dd-mm-yyyy' ) "
+       + "    AND TM_ACC_BALANCE.ARDB_CD = {0} AND TM_ACC_BALANCE.BRN_CD = {1}                                       "
+       + "    AND TM_ACC_BALANCE.BALANCE_DT BETWEEN to_date('{2}','dd-mm-yyyy' ) AND to_date('{3}','dd-mm-yyyy' ) "
        +"    AND TM_ACC_BALANCE.ACC_CD = TT_DAY_SCROLL.CASH_ACC_CD) CASH_CLOS_BAL, "
        +" TT_DAY_SCROLL.CASH_ACC_CD,                                               "
        +" (SELECT ABS(NVL(TM_ACC_BALANCE.BALANCE_AMT, 0))                          "
        +"    FROM TM_ACC_BALANCE                                                   "
-       +"   WHERE TM_ACC_BALANCE.BRN_CD = {0}                                      "
-       +"     AND TM_ACC_BALANCE.BALANCE_DT =                                      "
+       + "   WHERE TM_ACC_BALANCE.ARDB_CD = {0} AND TM_ACC_BALANCE.BRN_CD = {1}                                      "
+       + "     AND TM_ACC_BALANCE.BALANCE_DT =                                      "
        +"         (SELECT MAX(TM_ACC_BALANCE.BALANCE_DT)                           "
        +"            FROM TM_ACC_BALANCE                                           "
-       +"           WHERE TM_ACC_BALANCE.BRN_CD= {0}"
-       +"             AND TM_ACC_BALANCE.BALANCE_DT <                              "
+       + "           WHERE TM_ACC_BALANCE.ARDB_CD = {0} AND TM_ACC_BALANCE.BRN_CD= {1} "
+       + "             AND TM_ACC_BALANCE.BALANCE_DT <                              "
        +"                 TT_DAY_SCROLL.TRANS_DT)                                  "
        +"     AND TM_ACC_BALANCE.ACC_CD = TT_DAY_SCROLL.CASH_ACC_CD_SL) CASH_OPNG_BAL_SL, "
        +" (SELECT ABS(NVL(TM_ACC_BALANCE.BALANCE_AMT, 0))                                 "
        +"    FROM TM_ACC_BALANCE                                                          "
        +"   WHERE TM_ACC_BALANCE.BALANCE_DT = TT_DAY_SCROLL.TRANS_DT                      "
-       +"     AND TM_ACC_BALANCE.BRN_CD = {0}                                             "
-       +"     AND TM_ACC_BALANCE.BALANCE_DT BETWEEN to_date('{1}','dd-mm-yyyy' ) AND to_date('{2}','dd-mm-yyyy' ) "
+       + "     AND TM_ACC_BALANCE.ARDB_CD = {0} AND TM_ACC_BALANCE.BRN_CD = {1}                                             "
+       + "     AND TM_ACC_BALANCE.BALANCE_DT BETWEEN to_date('{2}','dd-mm-yyyy' ) AND to_date('{3}','dd-mm-yyyy' ) "
        +"     AND TM_ACC_BALANCE.ACC_CD = TT_DAY_SCROLL.CASH_ACC_CD_SL) CASH_CLOS_BAL_SL, "
        +" TT_DAY_SCROLL.CASH_ACC_CD_SL                                                    "
        +"  FROM TT_DAY_SCROLL                                                                   "
-       +" WHERE TT_DAY_SCROLL.TRANS_DT BETWEEN to_date('{1}','dd-mm-yyyy' ) AND to_date('{2}','dd-mm-yyyy' )"
+       +" WHERE TT_DAY_SCROLL.TRANS_DT BETWEEN to_date('{2}','dd-mm-yyyy' ) AND to_date('{3}','dd-mm-yyyy' )"
        +"   AND (TT_DAY_SCROLL.CASH_RECP + TT_DAY_SCROLL.TRF_RECP +                             "
        +"       TT_DAY_SCROLL.CASH_PAY + TT_DAY_SCROLL.TRF_PAY) > 0                             "
        +" ORDER BY TT_DAY_SCROLL.TRANS_DT ASC,                                                  "
@@ -82,7 +82,11 @@ namespace SBWSFinanceApi.DL
                             using (var command = OrclDbConnection.Command(connection, _statement))
                             {
                                     command.CommandType = System.Data.CommandType.StoredProcedure;
-                                    
+
+                                    var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                                    parm1.Value = prp.ardb_cd;
+                                    command.Parameters.Add(parm1);
+
                                     var parm2 = new OracleParameter("adt_from_dt", OracleDbType.Date, ParameterDirection.Input);
                                     parm2.Value = prp.from_dt;
                                     command.Parameters.Add(parm2);
@@ -100,10 +104,10 @@ namespace SBWSFinanceApi.DL
                             }
 
                              _statement = string.Format(_query2,
+                                            string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
                                             string.IsNullOrWhiteSpace( prp.brn_cd) ? "brn_cd" : string.Concat("'",  prp.brn_cd , "'"),
                                             prp.from_dt!= null ? prp.from_dt.ToString("dd/MM/yyyy"): "from_dt",
-                                            prp.to_dt != null ?  prp.to_dt.ToString("dd/MM/yyyy"): "to_dt",
-                                            prp.gp_acc_cd !=0 ? Convert.ToString(prp.gp_acc_cd) : "gp_acc_cd"
+                                            prp.to_dt != null ?  prp.to_dt.ToString("dd/MM/yyyy"): "to_dt"
                                             );
 
                             using (var command = OrclDbConnection.Command(connection, _statement))

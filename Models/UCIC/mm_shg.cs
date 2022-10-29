@@ -5,6 +5,7 @@ namespace SBWSFinanceApi.Models
 {
     public sealed class mm_shg
     {
+public string ardb_cd { get; set; }
 public decimal shg_id {get;set;}   
 public string chairman_name {get;set;}   
 public string secretary_name {get;set;}   

@@ -16,7 +16,13 @@ namespace SBWSFinanceApi.LL
         {         
            
             return _dac.GetCustomerDtls(pmc);
-        }  
+        }
+        
+        internal List<mm_customer> GetMemberDtls(mm_customer pmc)
+        {
+
+            return _dac.GetMemberDtls(pmc);
+        }
         internal decimal InsertCustomerDtls(mm_customer pmc)
         {         
            
@@ -48,7 +54,13 @@ namespace SBWSFinanceApi.LL
 
             return _dac.GetDepositDtls(pmc);
         }
-
         
+        internal List<tm_loan_all> GetLoanDtls(mm_customer pmc)
+        {
+
+            return _dac.GetLoanDtls(pmc);
+        }
+
+
     }
 }

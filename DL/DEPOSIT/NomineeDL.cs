@@ -24,15 +24,15 @@ namespace SBWSDepositApi.Deposit
          +" PERCENTAGE,  "
          +" RELATION,DEL_FLAG     "
          +" FROM TD_NOMINEE_TEMP "
-         +" WHERE ARDB_CD ={0} AND BRN_CD = {1} AND NOM_ID = {2} AND nom_id = {3}";
+         +" WHERE ARDB_CD ={0} AND BRN_CD = {1} AND ACC_TYPE_CD = {2} AND ACC_NUM = {3}  AND DEL_FLAG='N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(nom.ardb_cd) ? string.Concat("'", nom.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'")   : "brn_cd",
-                                          !string.IsNullOrWhiteSpace(nom.acc_num) ? string.Concat("'", nom.acc_num, "'") : "acc_num",
-                                          !string.IsNullOrWhiteSpace(nom.nom_id.ToString()) ? string.Concat("'", nom.nom_id, "'") : "nom_id"
+                                          !string.IsNullOrWhiteSpace(nom.acc_type_cd.ToString()) ? string.Concat("'", nom.acc_type_cd, "'") : "acc_type_cd",
+                                          !string.IsNullOrWhiteSpace(nom.acc_num) ? string.Concat("'", nom.acc_num, "'") : "acc_num"
                                            );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -127,7 +127,7 @@ namespace SBWSDepositApi.Deposit
          +" phone_no    = {7} , "
          +" percentage  = {8} , "
          +" relation    = {9}  "
-         +" WHERE ardb_cd={10} and  brn_cd = {11} AND acc_num = {12} AND nom_id = {13} AND DEL_FLAG='N' ";
+         +" WHERE ardb_cd={10} and  brn_cd = {11} AND acc_type_cd ={12} and acc_num = {13} AND nom_id = {14} AND DEL_FLAG='N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -149,6 +149,7 @@ namespace SBWSDepositApi.Deposit
                                           !string.IsNullOrWhiteSpace(nom.relation) ? string.Concat("'", nom.relation, "'") : "relation",
                                           !string.IsNullOrWhiteSpace(nom.ardb_cd) ? string.Concat("'", nom.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'") : "brn_cd",
+                                          !string.IsNullOrWhiteSpace(nom.acc_type_cd.ToString()) ? string.Concat("'", nom.acc_type_cd, "'") : "acc_type_cd",
                                           !string.IsNullOrWhiteSpace(nom.acc_num) ? string.Concat("'", nom.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(nom.nom_id.ToString()) ? string.Concat("'", nom.nom_id, "'") : "nom_id"
                                           );
@@ -174,7 +175,7 @@ namespace SBWSDepositApi.Deposit
             int _ret=0;
 
             string _query=" DELETE FROM TD_NOMINEE_TEMP "
-                         +" WHERE ardb_cd = {0} and  brn_cd = {1} AND acc_num = {2}  AND nom_id = {3} ";
+                         +" WHERE ardb_cd = {0} and  brn_cd = {1} AND acc_type_cd ={2} and acc_num = {3}  AND nom_id = {4} AND DEL_FLAG='N'  ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -185,6 +186,7 @@ namespace SBWSDepositApi.Deposit
                      _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(nom.ardb_cd) ? string.Concat("'", nom.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'") : "brn_cd",
+                                          !string.IsNullOrWhiteSpace(nom.acc_type_cd.ToString()) ? string.Concat("'", nom.acc_type_cd, "'") : "acc_type_cd",
                                           !string.IsNullOrWhiteSpace(nom.acc_num) ? string.Concat("'", nom.acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(nom.nom_id.ToString()) ? string.Concat("'", nom.nom_id, "'") : "nom_id"
                                            );
@@ -221,13 +223,14 @@ namespace SBWSDepositApi.Deposit
          +" PERCENTAGE,  "
          +" RELATION ,ARDB_CD,DEL_FLAG    "
          +" FROM TD_NOMINEE "
-         +" WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_NUM = {2} AND DEL_FLAG='N' ";
+         +" WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_TYPE_CD = {2} AND ACC_NUM = {3} AND DEL_FLAG='N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(nom.ardb_cd) ? string.Concat("'", nom.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'")   : "brn_cd",
+                                          !string.IsNullOrWhiteSpace(nom.acc_type_cd.ToString()) ? string.Concat("'", nom.acc_type_cd, "'") : "acc_type_cd",
                                           !string.IsNullOrWhiteSpace(nom.acc_num) ? string.Concat("'", nom.acc_num, "'") : "acc_num"                                          
                                            );
                 using (var command = OrclDbConnection.Command(connection, _statement))

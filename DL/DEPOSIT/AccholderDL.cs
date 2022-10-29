@@ -185,12 +185,13 @@ namespace SBWSDepositApi.Deposit
              +" RELATION,      "
              +" CUST_CD        "
              +" FROM TD_ACCHOLDER "
-             +" WHERE BRN_CD = {0} AND ACC_NUM = {1} ";
+             +" WHERE ARDB_CD = {0} AND ACC_TYPE_CD = {1} AND ACC_NUM = {2} AND DEL_FLAG = 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
-                                          !string.IsNullOrWhiteSpace(acc.brn_cd) ? string.Concat("'", acc.brn_cd, "'")   : "brn_cd",
+                                          !string.IsNullOrWhiteSpace(acc.ardb_cd) ? string.Concat("'", acc.ardb_cd, "'") : "ardb_cd",
+                                          (acc.acc_type_cd > 0) ? acc.acc_type_cd.ToString() : "ACC_TYPE_CD",
                                           !string.IsNullOrWhiteSpace(acc.acc_num) ? string.Concat("'", acc.acc_num, "'") : "acc_num"                                          
                                            );
 

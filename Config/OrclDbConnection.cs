@@ -27,7 +27,7 @@ namespace SBWSFinanceApi.Config
             get
             {
                 //BankConfigMst BC = new BankConfigMstLL().ReadAllConfiguration();
-                BankConfig bc = getBankConfigFromDB();
+                //BankConfig bc = getBankConfigFromDB();
 
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
@@ -169,8 +169,8 @@ namespace SBWSFinanceApi.Config
                 //BankConfig bc = getBankConfigFromDB();
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
-                sb.DataSource = "10.65.65.246:1521/orcl"; // ez connect -- no tns names!
-                sb.UserID = "sig_demo";
+                sb.DataSource = "202.65.156.246:1521/orcl"; // ez connect -- no tns names!
+                sb.UserID = "cfs2022";
                 sb.Password = "signature";
 
                 // Use below 3 for PRD deployment

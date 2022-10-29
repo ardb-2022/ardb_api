@@ -196,6 +196,75 @@ namespace SBWSDepositApi.Deposit
             }
             return amount;
         }
+
+
+      /*  internal decimal F_CALC_DDS_INTT(p_gen_param prm)
+        {
+            decimal amount = 0;
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, "P_DDS_INTT_NEW"))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm.Value = prm.ardb_cd;
+                            command.Parameters.Add(parm);
+                            parm = new OracleParameter("as_acc_num", OracleDbType.Decimal, ParameterDirection.Input);
+                            parm.Value = prm.as_acc_num;
+                            command.Parameters.Add(parm);
+                            parm = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm.Value = prm.to_dt;
+                            command.Parameters.Add(parm);
+                            using (var reader = command.ExecuteReader())
+                            {
+                                string _query = "SELECT F_CALC_INTEREST_DDS({0},{1},to_date('{2}','dd-mm-yyyy' )) AMOUNT FROM DUAL";
+                                try
+                                {
+                                    _statement = string.Format(_query,
+                                                     string.Concat("'", prm.ardb_cd, "'"),
+                                                     string.Concat("'", prm.as_acc_num, "'"),
+                                                     string.Concat("to_date('", prm.to_dt.ToString("dd/MM/yyyy"), "' ,'dd/MM/yyyy')")                                                     
+                                                    );
+                                    using (var command2 = OrclDbConnection.Command(connection, _statement))
+                                    {
+                                        using (var reader2 = command2.ExecuteReader())
+                                        {
+                                            if (reader.HasRows)
+                                            {
+                                                while (reader.Read())
+                                                {
+                                                    amount = UtilityM.CheckNull<decimal>(reader2["AMOUNT"]);
+                                                }
+                                            }
+                                        }
+                                         catch (Exception ex)
+                                        {
+                                            transaction.Rollback();
+                                            amount = 0;
+                                        }
+                            }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        var abc = ex.Message;
+                        transaction.Rollback();
+                        amount = 0;
+                    }
+                }
+            }
+            return amount;
+        }*/
+
+
+
         // internal decimal F_CALC_SB_INTT(p_gen_param prp)
         // {
         //     decimal amount = 0;
@@ -652,7 +721,7 @@ namespace SBWSDepositApi.Deposit
                                 d.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
                                 d.user_acc_num = UtilityM.CheckNull<string>(reader["USER_ACC_NUM"]);
                                 d.lock_mode = UtilityM.CheckNull<string>(reader["LOCK_MODE"]);
-                                d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                d.loan_id = UtilityM.CheckNull<decimal>(reader["LOAN_ID"]);
                                 d.cert_no = UtilityM.CheckNull<string>(reader["CERT_NO"]);
                                 d.bonus_amt = UtilityM.CheckNull<decimal>(reader["BONUS_AMT"]);
                                 d.penal_intt_rt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RT"]);
@@ -742,7 +811,7 @@ namespace SBWSDepositApi.Deposit
                                 d.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
                                 d.user_acc_num = UtilityM.CheckNull<string>(reader["USER_ACC_NUM"]);
                                 d.lock_mode = UtilityM.CheckNull<string>(reader["LOCK_MODE"]);
-                                d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                d.loan_id = UtilityM.CheckNull<decimal>(reader["LOAN_ID"]);
                                 d.cert_no = UtilityM.CheckNull<string>(reader["CERT_NO"]);
                                 d.bonus_amt = UtilityM.CheckNull<decimal>(reader["BONUS_AMT"]);
                                 d.penal_intt_rt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RT"]);
@@ -1645,6 +1714,7 @@ namespace SBWSDepositApi.Deposit
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
                     command.ExecuteNonQuery();
+                    
                 }
             }
 
@@ -3353,7 +3423,7 @@ namespace SBWSDepositApi.Deposit
                                 d.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
                                 d.user_acc_num = UtilityM.CheckNull<string>(reader["USER_ACC_NUM"]);
                                 d.lock_mode = UtilityM.CheckNull<string>(reader["LOCK_MODE"]);
-                                d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                d.loan_id = UtilityM.CheckNull<decimal>(reader["LOAN_ID"]);
                                 d.cert_no = UtilityM.CheckNull<string>(reader["CERT_NO"]);
                                 d.bonus_amt = UtilityM.CheckNull<decimal>(reader["BONUS_AMT"]);
                                 d.penal_intt_rt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RT"]);
