@@ -23,8 +23,20 @@ namespace SBWSFinanceApi.LL
         internal int UpdateUserMaster(m_user_master mum)
         {
              return _dac.UpdateUserMaster(mum);
-        }  
-       internal int InsertUserMaster(m_user_master mum)
+        }
+        
+        internal int UpdateUserIdStatus(List<m_user_master> mum)
+        {
+            return _dac.UpdateUserIdStatus(mum);
+        }
+
+        internal List<m_user_master> GetUserIDStatus(m_user_master mum)
+        {
+
+            return _dac.GetUserIDStatus(mum);
+        }
+
+        internal int InsertUserMaster(m_user_master mum)
        {
             return _dac.InsertUserMaster(mum);
        }  

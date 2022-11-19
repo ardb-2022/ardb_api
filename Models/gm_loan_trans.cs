@@ -36,5 +36,6 @@ namespace SBWSFinanceApi.Models
         public decimal ovd_intt { get; set; }
         public decimal penal_intt { get; set; }
         public decimal recov_amt { get; set; }
+        public string acc_name { get; set; }
     }
 }

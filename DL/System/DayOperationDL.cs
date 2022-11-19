@@ -32,11 +32,14 @@ internal p_gen_param W_DAY_CLOSE(p_gen_param prp)
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                            command.CommandType = System.Data.CommandType.StoredProcedure;
-                                    
-                            var parm1 = new OracleParameter("AS_BRN_CD", OracleDbType.Varchar2, ParameterDirection.Input);
-                            parm1.Value = prp.brn_cd;
+
+                            var parm1 = new OracleParameter("AS_ARDB_CD", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
                             command.Parameters.Add(parm1);
 
+                            var parm2 = new OracleParameter("AS_BRN_CD", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
+                            command.Parameters.Add(parm2);
                                                                
                             var parm3 = new OracleParameter("gs_user_type", OracleDbType.Varchar2, ParameterDirection.Input);
                             parm3.Value = prp.gs_user_type;
@@ -71,8 +74,10 @@ internal p_gen_param W_DAY_CLOSE(p_gen_param prp)
                     {
                         transaction.Rollback();
                     }
+                    transaction.Commit();
                 }
             }
+            
             return prp;
         }
 
@@ -96,10 +101,14 @@ internal p_gen_param W_DAY_CLOSE(p_gen_param prp)
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                            command.CommandType = System.Data.CommandType.StoredProcedure;
-                                    
-                            var parm1 = new OracleParameter("adt_tmp_dt", OracleDbType.Date, ParameterDirection.Input);
-                            parm1.Value = prp.adt_trans_dt;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
                             command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("adt_tmp_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm2.Value = prp.adt_trans_dt;
+                            command.Parameters.Add(parm2);
 
 
                             var parm4 = new OracleParameter("gs_user_id", OracleDbType.Varchar2, ParameterDirection.Input);
@@ -127,47 +136,118 @@ internal p_gen_param W_DAY_CLOSE(p_gen_param prp)
                     {
                         transaction.Rollback();
                     }
+                    transaction.Commit();
                 }
             }
             return prp;
         }
-        
+
+           /* internal List<sd_day_operation> GetDayOperation(sd_day_operation pmc)
+            {
+                List<sd_day_operation> custRets = new List<sd_day_operation>();
+                string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY'";
+                string _query = "SELECT OPERATION_DT, BRN_CD, CLS_BAL, CLS_FLAG,CLOSED_BY, CLOSED_DT  "
+             + "  FROM SD_DAY_OPERATION  "
+             + " WHERE    ARDB_CD = {0} AND OPERATION_DT = {1} ";
+                using (var connection = OrclDbConnection.NewConnection)
+                {
+                    using (var command = OrclDbConnection.Command(connection, _alter))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+
+                    _statement = string.Format(_query,
+                                               string.IsNullOrWhiteSpace(pmc.ardb_cd) ? "ardb_cd" : string.Concat("'", pmc.ardb_cd, "'"),
+                                               //pmc.operation_dt != null ? string.Concat("'", pmc.operation_dt.Value.ToString("dd/MM/yyyy"), "'") : "OPERATION_DT"
+                                                // string.IsNullOrWhiteSpace(pmc.operation_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", pmc.operation_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )")
+                                                // string.IsNullOrWhiteSpace(pmc.operation_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", pmc.operation_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )")
+                                                string.Concat("'", pmc.operation_dt.ToString("dd/MM/yyyy"), "'")
+                                                );
+                    using (var command = OrclDbConnection.Command(connection, _statement))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    var mc = new sd_day_operation();
+                                    mc.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                    mc.operation_dt = UtilityM.CheckNull<DateTime>(reader["OPERATION_DT"]);
+                                    mc.cls_bal = UtilityM.CheckNull<decimal>(reader["CLS_BAL"]);
+                                    mc.cls_flg = UtilityM.CheckNull<string>(reader["CLS_FLAG"]);
+                                    mc.closed_by = UtilityM.CheckNull<string>(reader["CLOSED_BY"]);
+                                    mc.closed_dt = UtilityM.CheckNull<DateTime>(reader["CLOSED_DT"]);
+
+                                    custRets.Add(mc);
+                                }
+                            }
+                        }
+                    }
+                }
+                return custRets;
+            }*/
+
+
         internal List<sd_day_operation> GetDayOperation(sd_day_operation pmc)
         {
             List<sd_day_operation> custRets = new List<sd_day_operation>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
             string _query = "SELECT OPERATION_DT, BRN_CD, CLS_BAL, CLS_FLAG,CLOSED_BY, CLOSED_DT  "
-         + "  FROM SD_DAY_OPERATION  "
-         + " WHERE    OPERATION_DT = {0}";
+             + "  FROM SD_DAY_OPERATION  "
+             + " WHERE    ARDB_CD = {0} AND OPERATION_DT = (SELECT MAX(OPERATION_DT) FROM SD_DAY_OPERATION WHERE  ARDB_CD = {1})  ";
+
+
+
             using (var connection = OrclDbConnection.NewConnection)
             {
-
-                _statement = string.Format(_query,
-                                           string.IsNullOrWhiteSpace(pmc.operation_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", pmc.operation_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )")
-                                            );
-                using (var command = OrclDbConnection.Command(connection, _statement))
+                using (var transaction = connection.BeginTransaction())
                 {
-                    using (var reader = command.ExecuteReader())
+                    try
                     {
-                        if (reader.HasRows)
+                        using (var command = OrclDbConnection.Command(connection, _alter))
                         {
-                            while (reader.Read())
-                            {
-                                var mc = new sd_day_operation();
-                                mc.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
-                                mc.operation_dt = UtilityM.CheckNull<DateTime>(reader["OPERATION_DT"]);
-                                mc.cls_bal = UtilityM.CheckNull<decimal>(reader["CLS_BAL"]);
-                                mc.cls_flg = UtilityM.CheckNull<string>(reader["CLS_FLAG"]);
-                                mc.closed_by = UtilityM.CheckNull<string>(reader["CLOSED_BY"]);
-                                mc.closed_dt = UtilityM.CheckNull<DateTime>(reader["CLOSED_DT"]);
+                            command.ExecuteNonQuery();
+                        }
 
-                                custRets.Add(mc);
+                        _statement = string.Format(_query,
+                                      string.IsNullOrWhiteSpace(pmc.ardb_cd) ? "ardb_cd" : string.Concat("'", pmc.ardb_cd, "'"),
+                                      string.IsNullOrWhiteSpace(pmc.ardb_cd) ? "ardb_cd" : string.Concat("'", pmc.ardb_cd, "'")
+                                      );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var mc = new sd_day_operation();
+                                        mc.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                        mc.operation_dt = UtilityM.CheckNull<DateTime>(reader["OPERATION_DT"]);
+                                        mc.cls_bal = UtilityM.CheckNull<decimal>(reader["CLS_BAL"]);
+                                        mc.cls_flg = UtilityM.CheckNull<string>(reader["CLS_FLAG"]);
+                                        mc.closed_by = UtilityM.CheckNull<string>(reader["CLOSED_BY"]);
+                                        mc.closed_dt = UtilityM.CheckNull<DateTime>(reader["CLOSED_DT"]);
+
+                                        custRets.Add(mc);
+                                    }
+                                }
                             }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        custRets = null;
                     }
                 }
             }
             return custRets;
         }
 
-   }
+    }
 }

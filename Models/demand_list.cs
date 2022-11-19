@@ -13,6 +13,7 @@ namespace SBWSFinanceApi.Models
         public DateTime from_dt { get; set; }
         public DateTime to_dt { get; set; }
         public string fund_type { get; set; }
+        public string acc_name { get; set; }
 
         public string block_name { get; set; }
         public string party_name { get; set; }

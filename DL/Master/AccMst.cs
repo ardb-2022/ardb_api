@@ -13,7 +13,7 @@ namespace SBWSFinanceApi.DL
         {
             List<m_acc_master> mamRets=new List<m_acc_master>();
             string _query=" SELECT ARDB_CD,SCHEDULE_CD, SUB_SCHEDULE_CD, ACC_CD, ACC_NAME, ACC_TYPE, IMPL_FLAG, ONLINE_FLAG, MIS_ACC_CD, TRADING_FLAG, STOCK_CD, N_TRIAL_CD"
-                         +" FROM M_ACC_MASTER WHERE ARDB_CD = {0}";
+                         +" FROM M_ACC_MASTER WHERE ARDB_CD = {0} ";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                 _statement = string.Format(_query,
@@ -982,7 +982,7 @@ internal List<mm_constitution> GetConstitution()
         {
             day_initialize m1 = new day_initialize(); 
 
-            string _query = " SELECT to_char(OPERATION_DT,'DD/MM/YYYY') SYS_DATE "
+            string _query = " SELECT to_char(OPERATION_DT,'DD/MM/YYYY') SYS_DATE,to_char(PREV_OPERATION_DT,'DD/MM/YYYY') PREV_DATE "
                          + " FROM MM_DAY_OPERATION WHERE ARDB_CD = {0} ";
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -999,6 +999,7 @@ internal List<mm_constitution> GetConstitution()
                             {
                                 var mam = new day_initialize();
                                 mam.sys_date = UtilityM.CheckNull<string>(reader["SYS_DATE"]);
+                                mam.prev_date = UtilityM.CheckNull<string>(reader["PREV_DATE"]);
                                 m1 = mam;
                             }
                         }

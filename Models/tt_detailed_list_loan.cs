@@ -16,7 +16,8 @@ namespace SBWSFinanceApi.Models
         public string acc_name {get; set;}
          public string acc_num {get; set;}
          public string block_name {get; set;}
-         public DateTime computed_till_dt {get; set;}
+        public string activity_name { get; set; }
+        public DateTime computed_till_dt {get; set;}
         public DateTime list_dt { get; set; }
     }
 }

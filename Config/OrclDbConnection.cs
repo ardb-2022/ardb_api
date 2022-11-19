@@ -31,7 +31,7 @@ namespace SBWSFinanceApi.Config
 
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
-                sb.DataSource = "202.65.156.246:1521/orcl"; // local
+                sb.DataSource = "202.65.156.246:1521/orcl";// "10.65.65.246:1521/orcl";   //local
                 sb.UserID = "cfs2022";
                 sb.Password = "signature";
 

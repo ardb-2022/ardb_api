@@ -1570,12 +1570,13 @@ namespace SBWSDepositApi.Deposit
         {
             decimal inttrate = 0 ;
 
-            string _query = "Select f_get_intt_rate({0},{1},{2}) INTT_RATE "
+            string _query = "Select f_get_intt_rate({0},{1},{2},{3}) INTT_RATE "
                             + " From   Dual ";
             using (var connection = OrclDbConnection.NewConnection)
             {
 
                 _statement = string.Format(_query,
+                                            pmc.ardb_cd,
                                             pmc.acc_type_cd,
                                             pmc.catg_cd,
                                             pmc.no_of_days

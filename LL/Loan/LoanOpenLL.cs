@@ -138,6 +138,11 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDemandListMemberwise(prp);
         }
         
+        internal List<recoveryDM> GetRecoveryListGroupwise(p_report_param prp)
+        {
+            return _dac.GetRecoveryListGroupwise(prp);
+        }
+
         internal List<blockwise_type> GetDemandBlockwisegroup(p_report_param prp)
         {
             return _dac.GetDemandBlockwisegroup(prp);
@@ -181,13 +186,18 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.PopulateLoanDisburseReg(prp);
         }
-        
+
+        internal List<demand_notice> GetDemandNotice(p_report_param prp)
+        {
+            return _dac.GetDemandNotice(prp);
+        }
+
         internal List<tm_loan_all> PopulateLoanDisburseRegAccwise(p_report_param prp)
         {
             return _dac.PopulateLoanDisburseRegAccwise(prp);
         }
 
-        internal List<gm_loan_trans> PopulateRecoveryRegister(p_report_param prp)
+        internal List<accwiserecovery_type> PopulateRecoveryRegister(p_report_param prp)
         {
             return _dac.PopulateRecoveryRegister(prp);
         }

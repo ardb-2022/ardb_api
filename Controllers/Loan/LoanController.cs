@@ -102,9 +102,17 @@ namespace SBWSFinanceApi.Controllers
 
         [Route("PopulateRecoveryRegister")]
         [HttpPost]
-        public List<gm_loan_trans> PopulateRecoveryRegister(p_report_param prp)
+        public List<accwiserecovery_type> PopulateRecoveryRegister(p_report_param prp)
         {
             return _ll.PopulateRecoveryRegister(prp);
+        }
+
+        
+        [Route("GetDemandNotice")]
+        [HttpPost]
+        public List<demand_notice> GetDemandNotice(p_report_param prp)
+        {
+            return _ll.GetDemandNotice(prp);
         }
 
         [Route("PopulateRecoveryRegisterAccwise")]
@@ -137,6 +145,14 @@ namespace SBWSFinanceApi.Controllers
         }
 
         
+        [Route("GetRecoveryListGroupwise")]
+        [HttpPost]
+        public List<recoveryDM> GetRecoveryListGroupwise(p_report_param prp)
+        {
+            return _ll.GetRecoveryListGroupwise(prp);
+        }
+
+
         [Route("GetDemandBlockwisegroup")]
         [HttpPost]
         public List<blockwise_type> GetDemandBlockwisegroup(p_report_param prp)

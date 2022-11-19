@@ -50,6 +50,95 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
             }
             return mumRets;
         }
+
+
+        internal List<m_user_master> GetUserIDStatus(m_user_master mum)
+        {
+            List<m_user_master> mumRets = new List<m_user_master>();
+            string _query = " SELECT USER_ID, LOGIN_STATUS , USER_TYPE "
+                        + " FROM M_USER_MASTER WHERE  ARDB_CD={0} AND BRN_CD = {1}";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                             string.Concat("'", mum.ardb_cd, "'"),
+                                             string.Concat("'", mum.brn_cd, "'")
+                                             );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mumt = new m_user_master();                               
+                                mumt.user_id = UtilityM.CheckNull<string>(reader["USER_ID"]);
+                                mumt.login_status = UtilityM.CheckNull<string>(reader["LOGIN_STATUS"]);
+                                mumt.user_type = UtilityM.CheckNull<string>(reader["USER_TYPE"]);                                
+                                mumRets.Add(mumt);
+
+                            }
+                        }
+                    }
+                }
+            }
+            return mumRets;
+        }
+
+
+
+
+
+        internal int UpdateUserIdStatus(List<m_user_master> tvd)
+        {
+            int _ret = 0;
+            string _query = "Update m_user_master "
+                            + " Set login_status = {0}  "
+                            + " Where  ardb_cd = {1} AND brn_cd = {2}  AND user_id = {3} ";
+                            
+            
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        for (int i = 0; i < tvd.Count; i++)
+                        {
+                            _statement = string.Format(_query,
+                                           string.IsNullOrWhiteSpace(tvd[i].login_status) ? "login_status" : string.Concat("'", tvd[i].login_status, "'"),
+                                           string.IsNullOrWhiteSpace(tvd[i].ardb_cd) ? "ardb_cd" : string.Concat("'", tvd[i].ardb_cd, "'"),
+                                           string.IsNullOrWhiteSpace(tvd[i].brn_cd) ? "brn_cd" : string.Concat("'", tvd[i].brn_cd, "'"),
+                                           string.IsNullOrWhiteSpace(tvd[i].user_id) ? "user_id" : string.Concat("'", tvd[i].user_id, "'")
+                                         );
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.ExecuteNonQuery();
+                                _ret = 0;
+                            }
+                        }
+                        
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+
+
         internal int InsertUserMaster(m_user_master mum)
         {
             List<m_user_master> sigList = new List<m_user_master>();
@@ -100,15 +189,14 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                 passkey = GetUserPass(mum.password);
            
             string _query=" UPDATE M_USER_MASTER " 
-         +" SET BRN_CD  = {0} , "
-         +" USER_ID = {1} , "
-         +" PASSWORD     = NVL({2},PASSWORD) , "
-         +" LOGIN_STATUS      = {3} , "
-         +" USER_TYPE    = {4} , "
-         +" USER_FIRST_NAME   = {5} , "
-         +" USER_MIDDLE_NAME   = {6} , "
-         +" USER_LAST_NAME    = {7}  "
-         +"  WHERE  USER_ID={8} AND ARDB_CD={9} ";
+         + " SET USER_ID = {0} , "
+         +" PASSWORD     = NVL({1},PASSWORD) , "
+         +" LOGIN_STATUS      = {2} , "
+         +" USER_TYPE    = {3} , "
+         +" USER_FIRST_NAME   = {4} , "
+         +" USER_MIDDLE_NAME   = {5} , "
+         +" USER_LAST_NAME    = {6}  "
+         +"  WHERE  USER_ID={7} AND ARDB_CD={8} ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -117,7 +205,6 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                     try
                     {
                      _statement = string.Format(_query,
-                                                   string.Concat("'", mum.brn_cd, "'"),
                                                    string.Concat("'", mum.user_id, "'") ,
                                                    string.Concat("'", passkey==""?null:passkey, "'"),
                                                    string.Concat("'", mum.login_status, "'") ,

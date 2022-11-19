@@ -3361,7 +3361,7 @@ namespace SBWSDepositApi.Deposit
                             + " CLOSING_PRN_AMT, CLOSING_INTT_AMT, PENAL_AMT, EXT_INSTL_TOT, MAT_STATUS, NVL(ACC_STATUS,'O') ACC_STATUS, "
                             + " CURR_BAL, CLR_BAL, STANDING_INSTR_FLAG, CHEQUE_FACILITY_FLAG,                         "
                             + " CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT, APPROVAL_STATUS, APPROVED_BY,       "
-                            + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE, TO_CHAR(LOAN_ID) LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
+                            + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
                             + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD ,DEL_FLAG                                  "
                             + " FROM TM_DEPOSIT  T1                                                               "
                             + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND DEL_FLAG = 'N'  "
