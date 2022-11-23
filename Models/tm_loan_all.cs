@@ -51,6 +51,10 @@ public string cust_name {get;set;}
 public decimal tot_share_holding {get;set;}
 public DateTime? trans_dt {get;set;}
 public Int64 trans_cd {get;set;}
+        public string acc_desc{ get; set; }
+
+        public string block_name { get; set; }
+        public string activity_name { get; set; }
 
         public string ardb_cd { get; set; }
         public string del_flag { get; set; }

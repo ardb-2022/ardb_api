@@ -490,7 +490,7 @@ namespace SBWSFinanceApi.DL
         internal decimal GetCustomerCdMaxId(string ardbCd,string brnCd)
         {
             decimal maxCustCd = 0;
-            string _query = "Select {0} ||  Nvl(max(to_number(substr(to_char(cust_cd),4))) + 1 , 1) MAX_CUST_CD"
+            string _query = "Select {0} || lpad( Nvl(max(to_number(substr(to_char(cust_cd),4))) + 1 , 1),7,'0') MAX_CUST_CD"
             + " From mm_customer"
             + " Where ardb_cd = {1}"
             + "AND brn_cd ={2}";

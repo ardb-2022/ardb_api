@@ -15,7 +15,7 @@ namespace SBWSDepositApi.Deposit
 
             string _query = " SELECT ACC_NUM,INSTL_NUM,DUE_DT,INSTL_DT,STATUS"
                             + " FROM TD_RD_INSTALLMENT"
-                            + " WHERE   ARDB_CD = {0} AND ACC_NUM= {1} AND DEL_FLAG = 'N' ";
+                            + " WHERE   ARDB_CD = {0} AND ACC_NUM= {1} AND DEL_FLAG = 'N' ORDER BY DUE_DT ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {

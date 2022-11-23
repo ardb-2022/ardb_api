@@ -315,7 +315,7 @@ namespace SBWSFinanceApi.DL
         {
             string accNum = "";
 
-            string _query = "Select nvl(max(to_number(substr(loan_id,4))) + 1, 1) ACC_NUM "
+            string _query = "Select lpad(nvl(max(to_number(substr(loan_id,4))) + 1, 1),7,'0') ACC_NUM "
                            + " From  TM_LOAN_ALL "
                            + " Where ardb_cd={0} and brn_cd = {1} ";
             using (var connection = OrclDbConnection.NewConnection)
@@ -2146,11 +2146,13 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _statement;
             string _query = " SELECT A.LOAN_ID,   "
-                            + " A.ACC_CD,         "
+                            + "(SELECT ACC_NAME FROM M_ACC_MASTER WHERE ACC_CD = A.ACC_CD) ACC_NAME,                                         "
                             + " B.TRANS_DT,       "
                             + " A.PARTY_CD,       "
                             + " C.CUST_NAME,       "
                             + " A.BRN_CD,         "
+                            + "(SELECT BLOCK_NAME FROM MM_BLOCK WHERE BLOCK_CD = C.BLOCK_CD) BLOCK_NAME, "
+                            + "(SELECT ACTIVITY_DESC FROM MM_ACTIVITY WHERE ACTIVITY_CD = A.ACTIVITY_CD) ACTIVITY_NAME,"
                             + " SUM(B.DISB_AMT) DISB_AMT   "
                             + " FROM TM_LOAN_ALL A , GM_LOAN_TRANS B , MM_CUSTOMER C "
                             + " WHERE   A.ARDB_CD = B.ARDB_CD AND A.ARDB_CD = C.ARDB_CD AND A.LOAN_ID = B.LOAN_ID           "
@@ -2159,7 +2161,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                             + " AND B.TRANS_TYPE = 'B'                "
                             + " AND A.BRN_CD = {2}                    "
                             + " AND A.ARDB_CD = {3}     "
-                            + " GROUP BY A.LOAN_ID, A.ACC_CD, B.TRANS_DT, A.PARTY_CD, C.CUST_NAME, A.BRN_CD  ORDER BY B.TRANS_DT";
+                            + " GROUP BY A.LOAN_ID, A.ACC_CD,C.BLOCK_CD, B.TRANS_DT,A.ACTIVITY_CD, A.PARTY_CD, C.CUST_NAME, A.BRN_CD  ORDER BY A.ACC_CD,B.TRANS_DT";
 
 
 
@@ -2192,11 +2194,13 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
                                         loanDis.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
                                         loanDis.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
-                                        loanDis.acc_cd = UtilityM.CheckNull<Int32>(reader["ACC_CD"]);
+                                        loanDis.acc_desc = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
                                         loanDis.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
                                         loanDis.party_cd = UtilityM.CheckNull<decimal>(reader["PARTY_CD"]);
                                         loanDis.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
                                         loanDis.disb_amt = UtilityM.CheckNull<decimal>(reader["DISB_AMT"]);
+                                        loanDis.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
+                                        loanDis.activity_name = UtilityM.CheckNull<string>(reader["ACTIVITY_NAME"]);
                                         loanDisReg.Add(loanDis);
                                     }
                                 }
@@ -2443,6 +2447,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                                                                         tca1.tot_block_curr_intt_recov = tca1.tot_block_curr_intt_recov + UtilityM.CheckNull<decimal>(reader["CURR_INTT_RECOV"]);
                                                                         tca1.tot_block_ovd_intt_recov= tca1.tot_block_ovd_intt_recov + UtilityM.CheckNull<decimal>(reader["OVD_INTT_RECOV"]);
                                                                         tca1.tot_block_penal_intt_recov = tca1.tot_block_penal_intt_recov + UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RECOV"]);
+                                                                        tca1.tot_block_recov = tca1.tot_block_recov + UtilityM.CheckNull<decimal>(reader["RECOV_AMT"]);
 
                                                                         tcaRet2.gmloantrans.Add(loanReco);
                                                                         //loanRecoList.Add(loanReco);
@@ -2458,6 +2463,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                                                         tca.tot_acc_curr_intt_recov = tca.tot_acc_curr_intt_recov + tca1.tot_block_curr_intt_recov;
                                                         tca.tot_acc_ovd_intt_recov = tca.tot_acc_ovd_intt_recov + tca1.tot_block_ovd_intt_recov;
                                                         tca.tot_acc_penal_intt_recov = tca.tot_acc_penal_intt_recov + tca1.tot_block_penal_intt_recov;
+                                                        tca.tot_acc_recov = tca.tot_acc_recov + tca1.tot_block_recov;
                                                     }                                                  
 
 
@@ -2612,7 +2618,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                 + " AND GM_LOAN_TRANS.ARDB_CD = A.ARDB_CD "
                 + " AND GM_LOAN_TRANS.ARDB_CD = C.ARDB_CD "
                 + " AND GM_LOAN_TRANS.LOAN_ID = A.LOAN_ID "
-                + " AND A.PARTY_CD = C.CUST_CD  ORDER BY GM_LOAN_TRANS.TRANS_DT";
+                + " AND A.PARTY_CD = C.CUST_CD  ORDER BY GM_LOAN_TRANS.TRANS_DT,GM_LOAN_TRANS.TRANS_CD";
 
 
             using (var connection = OrclDbConnection.NewConnection)
