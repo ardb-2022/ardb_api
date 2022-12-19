@@ -3365,7 +3365,7 @@ namespace SBWSDepositApi.Deposit
                             + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD ,DEL_FLAG                                  "
                             + " FROM TM_DEPOSIT  T1                                                               "
                             + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND DEL_FLAG = 'N'  "
-                            + " AND T1.RENEW_ID = ( SELECT MAX(RENEW_ID) FROM TM_DEPOSIT T2 WHERE  ARDB_CD = {4} AND  T1.BRN_CD = T2.BRN_CD AND T1.ACC_NUM = T2.ACC_NUM AND T1.ACC_TYPE_CD = T1.ACC_TYPE_CD )";
+                            + " AND T1.RENEW_ID = ( SELECT MAX(RENEW_ID) FROM TM_DEPOSIT T2 WHERE  ARDB_CD = {4} AND  T1.BRN_CD = T2.BRN_CD AND T1.ACC_NUM = T2.ACC_NUM AND T1.ACC_TYPE_CD = T2.ACC_TYPE_CD )";
 
             _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
@@ -3690,15 +3690,17 @@ namespace SBWSDepositApi.Deposit
                   + "standing_instr_flag  = NVL({1}, standing_instr_flag ),"
                   + "cheque_facility_flag = NVL({2}, cheque_facility_flag),"
                   + "tds_applicable       = NVL({3}, tds_applicable      ),"
-                  + "modified_by          = NVL({4}, modified_by   ),"
-                  + "modified_dt          = NVL({5}, modified_dt   )"
-                  + "WHERE ardb_cd={6} and brn_cd = NVL({7}, brn_cd) AND acc_num = NVL({8},  acc_num ) AND acc_type_cd=NVL({9},  acc_type_cd ) and del_flag='N' ";
+                  + "cert_no       = NVL({4}, cert_no      ),"
+                  + "modified_by          = NVL({5}, modified_by   ),"
+                  + "modified_dt          = NVL({6}, modified_dt   )"
+                  + "WHERE ardb_cd={7} and brn_cd = NVL({8}, brn_cd) AND acc_num = NVL({9},  acc_num ) AND acc_type_cd=NVL({10},  acc_type_cd ) and del_flag='N' ";
 
             _statement = string.Format(_query,
             string.Concat("'", dep.oprn_instr_cd, "'"),
             string.Concat("'", dep.standing_instr_flag, "'"),
             string.Concat("'", dep.cheque_facility_flag, "'"),
             string.Concat("'", dep.tds_applicable, "'"),
+            string.Concat("'", dep.cert_no, "'"),
             string.Concat("'", dep.modified_by, "'"),
             string.Concat("sysdate"),
             string.Concat("'", dep.ardb_cd, "'"),

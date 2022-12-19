@@ -14,19 +14,27 @@ namespace SBWSFinanceApi.LL
         internal List<tt_cash_cum_trial> PopulateCashCumTrial(p_report_param prp)
         {         
             return _dacCashCumTrialDL.PopulateCashCumTrial(prp);
-        }  
+        }
 
-         TrialBalanceDL _dacTrialBalanceDL = new TrialBalanceDL(); 
+        internal List<tt_cash_cum_trial> PopulateCashCumTrialConso(p_report_param prp)
+        {
+            return _dacCashCumTrialDL.PopulateCashCumTrialConso(prp);
+        }
+
+        TrialBalanceDL _dacTrialBalanceDL = new TrialBalanceDL(); 
         internal List<tt_trial_balance> PopulateTrialBalance(p_report_param prp)
         {         
             return _dacTrialBalanceDL.PopulateTrialBalance(prp);
         }
-
-
-        TrialBalanceDL _dacTrialBalanceDL1 = new TrialBalanceDL();
-        internal List<trailDM> PopulateTrialGroupwise(p_report_param prp)
+        
+       internal List<trailDM> PopulateTrialGroupwise(p_report_param prp)
         {
-            return _dacTrialBalanceDL1.PopulateTrialGroupwise(prp);
+            return _dacTrialBalanceDL.PopulateTrialGroupwise(prp);
+        }
+
+        internal List<trailDM> PopulateTrialGroupwiseConso(p_report_param prp)
+        {
+            return _dacTrialBalanceDL.PopulateTrialGroupwiseConso(prp);
         }
 
         DailyCashBookDL _dacDailyCashBookDL = new DailyCashBookDL(); 
@@ -38,6 +46,16 @@ namespace SBWSFinanceApi.LL
         internal List<tt_cash_account> PopulateDailyCashAccount(p_report_param prp)
         {
             return _dacDailyCashBookDL.PopulateDailyCashAccount(prp);
+        }
+
+        internal List<tt_cash_account> PopulateDailyCashBookConso(p_report_param prp)
+        {
+            return _dacDailyCashBookDL.PopulateDailyCashBookConso(prp);
+        }
+
+        internal List<tt_cash_account> PopulateDailyCashAccountConso(p_report_param prp)
+        {
+            return _dacDailyCashBookDL.PopulateDailyCashAccountConso(prp);
         }
 
         DayScrollBookDL _dacDayScrollBookDL = new DayScrollBookDL(); 
@@ -58,7 +76,7 @@ namespace SBWSFinanceApi.LL
             return _dacProfitandLossDL.PopulateProfitandLoss(prp);
         }
 
-        internal List<tt_gl_trans> GetGeneralLedger(p_report_param prm)
+        internal List<accwisegl> GetGeneralLedger(p_report_param prm)
         {
             var _dac = new RptGeneralLedgerTransactionDtlsDL();
             return _dac.GetGeneralLedger(prm);

@@ -220,7 +220,7 @@ namespace SBWSFinanceApi.Controllers
 
         [Route("PopulateSubCashBookDeposit")]
         [HttpPost]
-        public List<tt_dep_sub_cash_book> PopulateSubCashBookDeposit([FromBody] p_report_param pgp)
+        public List<accwisesubcashbook> PopulateSubCashBookDeposit([FromBody] p_report_param pgp)
         {
             return _ll2.PopulateSubCashBookDeposit(pgp);
         }
@@ -231,7 +231,15 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll2.PopulateDLSavings(pgp);
         }
+
         
+        [Route("PopulateDLSavingsAll")]
+        [HttpPost]
+        public List<conswise_sb_dl> PopulateDLSavingsAll([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateDLSavingsAll(pgp);
+        }
+
         [Route("PopulateDLDds")]
         [HttpPost]
         public List<tt_sbca_dtl_list> PopulateDLDds([FromBody] p_report_param pgp)
@@ -252,6 +260,14 @@ namespace SBWSFinanceApi.Controllers
         public List<tt_sbca_dtl_list> PopulateDLFixedDeposit([FromBody] p_report_param pgp)
         {
             return _ll2.PopulateDLFixedDeposit(pgp);
+        }
+
+        
+        [Route("PopulateDLFixedDepositAll")]
+        [HttpPost]
+        public List<conswise_sb_dl> PopulateDLFixedDepositAll([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateDLFixedDepositAll(pgp);
         }
 
         [Route("PopulateASSaving")]
@@ -446,6 +462,21 @@ namespace SBWSFinanceApi.Controllers
             return __ll.GetAgentData(prm);
         }
 
+        
+        [Route("PopulateActiveSIList")]
+        [HttpPost]
+        public List<standing_instr> PopulateActiveSIList(p_report_param prp)
+        {
+            return __ll.PopulateActiveSIList(prp);
+        }
+        
+        [Route("PopulateExecutedSIList")]
+        [HttpPost]
+        public List<standing_instr> PopulateExecutedSIList(p_report_param prp)
+        {
+            return __ll.PopulateExecutedSIList(prp);
+        }
+
         [Route("GetExportData")]
         [HttpPost]
         public List<export_data> GetExportData([FromBody] export_data prm)
@@ -572,7 +603,21 @@ namespace SBWSFinanceApi.Controllers
         {
             return _NeftPayLLLL.GetNeftCharge(pgp);  
         }
-        
+
+        [Route("NeftInward")]
+        [HttpPost]
+        public List<neft_inward> NeftInward([FromBody] p_report_param prp)
+        {
+            return _NeftPayLLLL.NeftInward(prp);
+        }
+
+        [Route("NeftOutWard")]
+        [HttpPost]
+        public List<td_outward_payment> NeftOutWard([FromBody] p_report_param prp)
+        {
+            return _NeftPayLLLL.NeftOutWard(prp);
+        }
+
 
     }
 }

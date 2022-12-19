@@ -13,6 +13,7 @@ namespace SBWSFinanceApi.Models
         public string user_first_name {get; set;} 
         public string user_middle_name {get; set;} 
         public string user_last_name {get; set;} 
+        public string ip { get; set; }
 
     }
 }

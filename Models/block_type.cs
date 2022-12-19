@@ -16,6 +16,7 @@ namespace SBWSFinanceApi.Models
         public decimal tot_block_ovd_intt_recov { get; set; }
         public decimal tot_block_penal_intt_recov { get; set; }
         public decimal tot_block_recov { get; set; }
+        public decimal tot_count_block { get; set; }
 
     }
 }

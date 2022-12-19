@@ -111,7 +111,13 @@ namespace SBWSFinanceApi.LL
         {         
            
             return _dac.GetLoanDtls(pgp);
-        }        
+        }
+
+        internal List<AccDtlsLov> GetLoanDtls1(p_gen_param pgp)
+        {
+
+            return _dac.GetLoanDtls1(pgp);
+        }
         internal List<AccDtlsLov> GetLoanDtlsByID(p_gen_param pgp)
         {         
            
@@ -182,7 +188,7 @@ namespace SBWSFinanceApi.LL
         }
 
         
-        internal List<tm_loan_all> PopulateLoanDisburseReg(p_report_param prp)
+        internal List<blockwisedisb_type> PopulateLoanDisburseReg(p_report_param prp)
         {
             return _dac.PopulateLoanDisburseReg(prp);
         }
@@ -202,6 +208,11 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateRecoveryRegister(prp);
         }
         
+        internal List<accwiserecovery_type> PopulateRecoveryRegisterFundwise(p_report_param prp)
+        {
+            return _dac.PopulateRecoveryRegisterFundwise(prp);
+        }
+
         internal List<gm_loan_trans> PopulateAdvRecovStmt(p_report_param prp)
         {
             return _dac.PopulateAdvRecovStmt(prp);
@@ -230,7 +241,7 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateRecoveryRegisterAccwise(prp);
         }
 
-        internal List<tt_loan_sub_cash_book> PopulateLoanSubCashBook(p_report_param prp)
+        internal List<accwiseloansubcashbook> PopulateLoanSubCashBook(p_report_param prp)
         {
             return _dac.PopulateLoanSubCashBook(prp);
         }
@@ -239,6 +250,11 @@ namespace SBWSFinanceApi.LL
         internal List<gm_loan_trans> PopulateLoanStatement(p_report_param prp)
         {
             return _dac.PopulateLoanStatement(prp);
+        }
+
+        internal List<gm_loan_trans> PopulateOvdTrfDtls(p_report_param prp)
+        {
+            return _dac.PopulateOvdTrfDtls(prp);
         }
 
         KccMstDL _dackcc = new KccMstDL(); 

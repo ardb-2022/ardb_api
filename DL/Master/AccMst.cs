@@ -231,7 +231,7 @@ internal List<mm_constitution> GetConstitution()
             int _ret =0;
              string _statementins="";
             string _query=" UPDATE M_USER_MASTER SET LOGIN_STATUS= {0} "
-                        +"  WHERE  USER_ID={1} AND BRN_CD={2} AND ARDB_CD= {3} ";
+                        +"  WHERE  USER_ID={1}  AND ARDB_CD= {2} ";
             string _qinsaudit = "INSERT INTO SM_AUDIT_TRAIL VALUES "
                                +" ({0},{1},(SELECT NVL(MAX(LOGIN_SRL),0) +1 FROM SM_AUDIT_TRAIL WHERE ARDB_CD={2}), {3}, "
                                +" sysdate, "
@@ -249,7 +249,6 @@ internal List<mm_constitution> GetConstitution()
                _statement = string.Format(_query,                
                                             string.Concat("'",  mum.login_status, "'"),
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.brn_cd, "'"),
                                             string.Concat("'", mum.ardb_cd, "'")
                                             );
                  if ( mum.login_status=="Y")
@@ -259,7 +258,7 @@ internal List<mm_constitution> GetConstitution()
                                             string.Concat("'", mum.brn_cd, "'"),
                                             string.Concat("'", mum.ardb_cd, "'"),
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  mum.user_id, "'"),
+                                            string.Concat("'", mum.ip, "'"),  // string.Concat("'",  mum.user_id, "'"),
                                             string.Concat("'", mum.ardb_cd, "'"),
                                             string.Concat("'",  mum.user_id, "'")                                            
                                             );

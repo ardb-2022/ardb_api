@@ -11,9 +11,10 @@ namespace SBWSFinanceApi.DL
     internal sealed class RptGeneralLedgerTransactionDtlsDL
     {
         string _statement;
-        internal List<tt_gl_trans> GetGeneralLedger(p_report_param prm)
+        internal List<accwisegl> GetGeneralLedger(p_report_param prm)
         {
-            List<tt_gl_trans> genLdgrTranDtl = new List<tt_gl_trans>();
+            List<accwisegl> genLdgrTranDtl = new List<accwisegl>();
+
             string _spName = "P_GL_TRANS_DTLS";
             string _query = " SELECT ACC_CD , VOUCHER_DT ,DR_AMT,CR_AMT,trans_month,trans_year,OPNG_BAL " +
                           " ,OPNG_BAL+SUM(DR_AMT) OVER (PARTITION BY ACC_CD ORDER BY VOUCHER_DT) -  " +
@@ -33,6 +34,13 @@ namespace SBWSFinanceApi.DL
                                         " TT_GL_TRANS.OPNG_BAL     " +
                                 " ORDER BY  TT_GL_TRANS.ACC_CD , " +
                                         "TT_GL_TRANS.VOUCHER_DT ) ";
+
+
+            string _query1 = " SELECT DISTINCT a.ACC_CD,(SELECT ACC_NAME  FROM M_ACC_MASTER WHERE ARDB_CD = {0} AND ACC_CD = a.ACC_CD) ACC_NAME "
+                            + " FROM TT_GL_TRANS a "
+                            + " ORDER BY a.ACC_CD ";
+
+
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -71,29 +79,61 @@ namespace SBWSFinanceApi.DL
 
                             command.ExecuteNonQuery();
                         }
-                        _statement = string.Format(_query,
-                                            prm.from_dt!= null ? prm.from_dt.ToString("dd/MM/yyyy"): "from_dt",
-                                            prm.to_dt!= null ? prm.to_dt.ToString("dd/MM/yyyy"): "to_dt",
-                                            prm.ad_from_acc_cd !=0 ? Convert.ToString(prm.ad_from_acc_cd) : "ad_from_acc_cd",
-                                            prm.ad_to_acc_cd !=0 ? Convert.ToString(prm.ad_to_acc_cd) : "ad_to_acc_cd");
-                        using (var command = OrclDbConnection.Command(connection, _statement))
+
+                        string _statement1 = string.Format(_query1,                                        
+                                      string.IsNullOrWhiteSpace(prm.ardb_cd) ? "ARDB_CD" : string.Concat("'", prm.ardb_cd, "'"));
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
                         {
-                            using (var reader = command.ExecuteReader())
+                            using (var reader1 = command1.ExecuteReader())
                             {
-                                if (reader.HasRows)
+                                if (reader1.HasRows)
                                 {
-                                    while (reader.Read())
+                                    while (reader1.Read())
                                     {
-                                        var tGenTran = new tt_gl_trans();
-                                        tGenTran.acc_cd = UtilityM.CheckNull<int>(reader["ACC_CD"]);
-                                        tGenTran.voucher_dt = UtilityM.CheckNull<DateTime>(reader["VOUCHER_DT"]);
-                                        tGenTran.dr_amt = UtilityM.CheckNull<decimal>(reader["DR_AMT"]);
-                                        tGenTran.cr_amt = UtilityM.CheckNull<decimal>(reader["CR_AMT"]);
-                                        tGenTran.trans_month = UtilityM.CheckNull<decimal>(reader["trans_month"]);
-                                        tGenTran.trans_year = UtilityM.CheckNull<decimal>(reader["trans_year"]);
-                                        tGenTran.opng_bal = UtilityM.CheckNull<decimal>(reader["OPNG_BAL"]);
-                                        tGenTran.cum_bal = UtilityM.CheckNull<decimal>(reader["CUMBAL"]);
-                                        genLdgrTranDtl.Add(tGenTran);
+                                        accwisegl tcaRet1 = new accwisegl();
+
+                                        var tca = new acc_type();
+                                        tca.acc_cd = UtilityM.CheckNull<Int32>(reader1["ACC_CD"]);
+                                        tca.acc_name = UtilityM.CheckNull<string>(reader1["ACC_NAME"]);
+
+                                        _statement = string.Format(_query,
+                                            prm.from_dt != null ? prm.from_dt.ToString("dd/MM/yyyy") : "from_dt",
+                                            prm.to_dt != null ? prm.to_dt.ToString("dd/MM/yyyy") : "to_dt",
+                                            prm.ad_from_acc_cd != 0 ? Convert.ToString(UtilityM.CheckNull<Int32>(reader1["ACC_CD"])) : "ad_from_acc_cd",
+                                            prm.ad_to_acc_cd != 0 ? Convert.ToString(UtilityM.CheckNull<Int32>(reader1["ACC_CD"])) : "ad_to_acc_cd");
+
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var tGenTran = new tt_gl_trans();
+                                                        tGenTran.acc_cd = UtilityM.CheckNull<int>(reader["ACC_CD"]);
+                                                        tGenTran.voucher_dt = UtilityM.CheckNull<DateTime>(reader["VOUCHER_DT"]);
+                                                        tGenTran.dr_amt = UtilityM.CheckNull<decimal>(reader["DR_AMT"]);
+                                                        tGenTran.cr_amt = UtilityM.CheckNull<decimal>(reader["CR_AMT"]);
+                                                        tGenTran.trans_month = UtilityM.CheckNull<decimal>(reader["trans_month"]);
+                                                        tGenTran.trans_year = UtilityM.CheckNull<decimal>(reader["trans_year"]);
+                                                        tGenTran.opng_bal = UtilityM.CheckNull<decimal>(reader["OPNG_BAL"]);
+                                                        tGenTran.cum_bal = UtilityM.CheckNull<decimal>(reader["CUMBAL"]);
+                                                        tcaRet1.ttgltrans.Add(tGenTran);
+
+                                                        tca.tot_acc_curr_prn_recov = tca.tot_acc_curr_prn_recov + UtilityM.CheckNull<decimal>(reader["DR_AMT"]);
+                                                        tca.tot_acc_ovd_prn_recov = tca.tot_acc_ovd_prn_recov + UtilityM.CheckNull<decimal>(reader["CR_AMT"]);
+                                                        tca.tot_acc_adv_prn_recov = UtilityM.CheckNull<decimal>(reader["OPNG_BAL"]);
+                                                        tca.tot_acc_curr_intt_recov = tca.tot_acc_curr_intt_recov + UtilityM.CheckNull<decimal>(reader["CUMBAL"]);
+
+                                                        tcaRet1.acctype = tca;
+                                                        
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        genLdgrTranDtl.Add(tcaRet1);
                                     }
                                 }
                             }

@@ -61,6 +61,17 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDepositWithChild(dep);
         }
 
+        internal List<standing_instr> PopulateActiveSIList(p_report_param prp)
+        {
+            return _dac.PopulateActiveSIList(prp);
+        }
+
+        
+        internal List<standing_instr> PopulateExecutedSIList(p_report_param prp)
+        {
+            return _dac.PopulateExecutedSIList(prp);
+        }
+
         internal List<mm_agent> GetAgentData(mm_agent dep)
         {
             return _dac.GetAgentData(dep);
@@ -161,7 +172,7 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDailyDeposit(dep);
         }
 
-        internal List<tt_dep_sub_cash_book> PopulateSubCashBookDeposit(p_report_param dep)
+        internal List<accwisesubcashbook> PopulateSubCashBookDeposit(p_report_param dep)
         {
             return _dac.PopulateSubCashBookDeposit(dep);
         }
@@ -171,7 +182,12 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateDLSavings(dep);
         }
 
-        
+        internal List<conswise_sb_dl> PopulateDLSavingsAll(p_report_param dep)
+        {
+            return _dac.PopulateDLSavingsAll(dep);
+        }
+
+
         internal List<tt_sbca_dtl_list> PopulateDLDds(p_report_param dep)
         {
             return _dac.PopulateDLDds(dep);
@@ -187,6 +203,11 @@ namespace SBWSFinanceApi.LL
         internal List<tt_sbca_dtl_list> PopulateDLFixedDeposit(p_report_param dep)
         {
             return _dac.PopulateDLFixedDeposit(dep);
+        }
+        
+        internal List<conswise_sb_dl> PopulateDLFixedDepositAll(p_report_param dep)
+        {
+            return _dac.PopulateDLFixedDepositAll(dep);
         }
 
         internal List<tt_acc_stmt> PopulateASSaving(p_report_param dep)

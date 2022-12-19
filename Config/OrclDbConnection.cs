@@ -27,18 +27,18 @@ namespace SBWSFinanceApi.Config
             get
             {
                 //BankConfigMst BC = new BankConfigMstLL().ReadAllConfiguration();
-                //BankConfig bc = getBankConfigFromDB();
+                BankConfig bc = getBankConfigFromDB();
 
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
-                sb.DataSource = "202.65.156.246:1521/orcl";// "10.65.65.246:1521/orcl";   //local
-                sb.UserID = "cfs2022";
-                sb.Password = "signature";
+               // sb.DataSource = "202.65.156.246:1521/orcl";// "10.65.65.246:1521/orcl";   //local
+               // sb.UserID = "cfstest";
+               // sb.Password = "signature";
 
                 // Use below 3 for PRD deploymen/t
-               //sb.DataSource = bc.db_server_ip;
-               //sb.UserID = bc.user1;
-               //sb.Password = bc.pass1;
+               sb.DataSource = bc.db_server_ip;
+               sb.UserID = bc.user1;
+               sb.Password = bc.pass1;
 
                 // Use below 3 for PRD deploymen/t
                 //sb.DataSource = BC.connstring.Server;

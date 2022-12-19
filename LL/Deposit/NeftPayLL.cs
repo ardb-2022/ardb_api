@@ -17,7 +17,19 @@ namespace SBWSFinanceApi.LL
         {         
               return _dac.GetNeftOutDtls(pmc);
             
-        }  
+        }
+        
+        internal List<neft_inward> NeftInward(p_report_param prp)
+        {
+            return _dac.NeftInward(prp);
+
+        }
+        
+        internal List<td_outward_payment> NeftOutWard(p_report_param prp)
+        {
+            return _dac.NeftOutWard(prp);
+
+        }
 
         internal int InsertNeftOutDtls(td_outward_payment nom)
         {

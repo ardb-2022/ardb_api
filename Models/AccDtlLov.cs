@@ -4,6 +4,7 @@ namespace SBWSFinanceApi.Models
     public sealed class AccDtlsLov
     {
         public string loan_id { get; set; }
+        public Int32 acc_cd { get; set; }
         public string acc_num { get; set; }
         public string cust_name { get; set; }
         public string guardian_name { get; set; }

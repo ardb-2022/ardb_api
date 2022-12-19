@@ -52,7 +52,7 @@ namespace SBWSFinanceApi.Controllers
         
         [Route("PopulateLoanDisburseReg")]
         [HttpPost]
-        public List<tm_loan_all> PopulateLoanDisburseReg(p_report_param prp)
+        public List<blockwisedisb_type> PopulateLoanDisburseReg(p_report_param prp)
         {
             return _ll.PopulateLoanDisburseReg(prp);
         }
@@ -108,6 +108,14 @@ namespace SBWSFinanceApi.Controllers
         }
 
         
+        [Route("PopulateRecoveryRegisterFundwise")]
+        [HttpPost]
+        public List<accwiserecovery_type> PopulateRecoveryRegisterFundwise(p_report_param prp)
+        {
+            return _ll.PopulateRecoveryRegisterFundwise(prp);
+        }
+
+
         [Route("GetDemandNotice")]
         [HttpPost]
         public List<demand_notice> GetDemandNotice(p_report_param prp)
@@ -128,8 +136,15 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.PopulateLoanStatement(prp);
         }
-
         
+        [Route("PopulateOvdTrfDtls")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateOvdTrfDtls(p_report_param prp)
+        {
+            return _ll.PopulateOvdTrfDtls(prp);
+        }
+
+
         [Route("GetDemandList")]
         [HttpPost]
         public List<demand_list> GetDemandList(p_report_param prp)
@@ -198,7 +213,7 @@ namespace SBWSFinanceApi.Controllers
 
         [Route("PopulateLoanSubCashBook")]
         [HttpPost]
-        public List<tt_loan_sub_cash_book> PopulateLoanSubCashBook(p_report_param prp)
+        public List<accwiseloansubcashbook> PopulateLoanSubCashBook(p_report_param prp)
         {
             return _ll.PopulateLoanSubCashBook(prp);
         }
@@ -329,6 +344,16 @@ namespace SBWSFinanceApi.Controllers
            
             return _ll.GetLoanDtls(pgp);
         }
+
+
+        [Route("GetLoanDtls1")]
+        [HttpPost]
+        public List<AccDtlsLov> GetLoanDtls1(p_gen_param pgp)
+        {
+
+            return _ll.GetLoanDtls1(pgp);
+        }
+
 
         [Route("GetLoanDtlsByID")]
         [HttpPost]
