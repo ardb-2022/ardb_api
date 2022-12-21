@@ -30,6 +30,13 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateDailyCashAccount(prp);
         }
 
+        [Route("PopulateWeeklyReturn")]
+        [HttpPost]
+        public List<weekly_return> PopulateWeeklyReturn([FromBody] p_report_param prp)
+        {
+            return _ll.PopulateWeeklyReturn(prp);
+        }
+
         [Route("PopulateDailyCashBookConso")]
         [HttpPost]
         public List<tt_cash_account> PopulateDailyCashBookConso([FromBody] p_report_param prp)

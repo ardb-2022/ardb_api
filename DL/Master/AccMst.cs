@@ -1255,7 +1255,314 @@ internal List<mm_constitution> GetConstitution()
             return _ret;
         }
 
-                                                                                       
 
-}
+
+        internal List<mm_bank_inv> GetBankInvMaster(mm_bank_inv mum)
+        {
+            List<mm_bank_inv> mamRets = new List<mm_bank_inv>();
+            string _query = " SELECT ARDB_CD,BANK_CD,BANK_NAME,BANK_ADDR,PHONE_NO,CREATED_BY,CREATED_DT,MODIFIED_BY,MODIFIED_DT "
+                         + " FROM MM_BANK_INV WHERE ARDB_CD = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new mm_bank_inv();
+                                mam.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                mam.bank_cd = UtilityM.CheckNull<Int32>(reader["BANK_CD"]);
+                                mam.bank_name = UtilityM.CheckNull<string>(reader["BANK_NAME"]);
+                                mam.bank_addr = UtilityM.CheckNull<string>(reader["BANK_ADDR"]);
+                                mam.phone_no = UtilityM.CheckNull<string>(reader["PHONE_NO"]);
+                                mam.created_by = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
+                                mam.created_dt = UtilityM.CheckNull<DateTime>(reader["CREATED_DT"]);
+                                mam.modified_by = UtilityM.CheckNull<string>(reader["MODIFIED_BY"]);
+                                mam.modified_dt = UtilityM.CheckNull<DateTime>(reader["MODIFIED_DT"]);
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+        internal int InsertBankInvMaster(mm_bank_inv tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_BANK_INV VALUES ({0},{1},{2}, {3}, {4},SYSDATE,{5},SYSDATE,{6})";
+
+            int BankIdMax = GetBankMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat(BankIdMax),
+                                  string.Concat("'", tvd.bank_name, "'"),
+                                  string.Concat("'", tvd.bank_addr, "'"),
+                                  string.Concat("'", tvd.phone_no, "'"),
+                                  string.Concat("'", tvd.created_by, "'"),
+                                  string.Concat("'", tvd.modified_by, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = BankIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        internal int GetBankMaxId(mm_bank_inv tvd)
+        {
+            int maxBankCd = 0;
+            string _query = "Select  nvl(max(to_number(bank_cd)) + 1, 1) max_bank_cd"
+                            + " From   mm_bank_inv "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxBankCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_BANK_CD"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxBankCd;
+        }
+
+        internal int UpdateBankInv(mm_bank_inv tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_bank_inv"
+                            + " Set bank_name = {0}, bank_addr = {1}, phone_no = {2}, modified_by = {3},modified_dt = SYSDATE "
+                            + " Where  ardb_cd = {4} AND bank_cd = {5} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.bank_name, "'"),
+                                           string.Concat("'", tvd.bank_addr, "'"),
+                                           string.Concat("'", tvd.phone_no, "'"),
+                                           string.Concat("'", tvd.modified_by, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat(tvd.bank_cd)
+
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+
+
+        internal List<mm_branch_inv> GetBranchInvMaster(mm_branch_inv mum)
+        {
+            List<mm_branch_inv> mamRets = new List<mm_branch_inv>();
+            string _query = " SELECT ARDB_CD,BANK_CD,BRANCH_CD,BRANCH_NAME,BRANCH_ADDR,BRANCH_PHONE,CREATED_BY,CREATED_DT,MODIFIED_BY,MODIFIED_DT "
+                         + " FROM MM_BRANCH_INV WHERE ARDB_CD = {0} AND BANK_CD = {1}";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'") , mum.bank_cd);
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new mm_branch_inv();
+                                mam.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                mam.bank_cd = UtilityM.CheckNull<Int32>(reader["BANK_CD"]);
+                                mam.branch_cd = UtilityM.CheckNull<Int32>(reader["BRANCH_CD"]);
+                                mam.branch_name = UtilityM.CheckNull<string>(reader["BRANCH_NAME"]);
+                                mam.branch_addr = UtilityM.CheckNull<string>(reader["BRANCH_ADDR"]);
+                                mam.branch_phone = UtilityM.CheckNull<string>(reader["BRANCH_PHONE"]);
+                                mam.created_by = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
+                                mam.created_dt = UtilityM.CheckNull<DateTime>(reader["CREATED_DT"]);
+                                mam.modified_by = UtilityM.CheckNull<string>(reader["MODIFIED_BY"]);
+                                mam.modified_dt = UtilityM.CheckNull<DateTime>(reader["MODIFIED_DT"]);
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+        internal int InsertBranchInvMaster(mm_branch_inv tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_BRANCH_INV VALUES ({0},{1},{2}, {3}, {4},{5},SYSDATE,{6},SYSDATE,{7})";
+
+            int BranchIdMax = GetBranchMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat("'", tvd.bank_cd, "'"),
+                                  string.Concat(BranchIdMax),
+                                  string.Concat("'", tvd.branch_name, "'"),
+                                  string.Concat("'", tvd.branch_addr, "'"),
+                                  string.Concat("'", tvd.branch_phone, "'"),
+                                  string.Concat("'", tvd.created_by, "'"),
+                                  string.Concat("'", tvd.modified_by, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = BranchIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal int GetBranchMaxId(mm_branch_inv tvd)
+        {
+            int maxBranchCd = 0;
+            string _query = "Select  nvl(max(to_number(branch_cd)) + 1, 1) max_branch_cd"
+                            + " From   mm_branch_inv "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxBranchCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_BRANCH_CD"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxBranchCd;
+        }
+
+        internal int UpdateBranchInv(mm_branch_inv tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_bank_inv"
+                            + " Set branch_name = {0}, branch_addr = {1}, branch_phone = {2}, modified_by = {3},modified_dt = SYSDATE "
+                            + " Where  ardb_cd = {4} AND branch_cd = {5} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.branch_name, "'"),
+                                           string.Concat("'", tvd.branch_addr, "'"),
+                                           string.Concat("'", tvd.branch_phone, "'"),
+                                           string.Concat("'", tvd.modified_by, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat(tvd.branch_cd)
+
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+
+    }
 }

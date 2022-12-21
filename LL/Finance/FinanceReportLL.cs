@@ -21,6 +21,12 @@ namespace SBWSFinanceApi.LL
             return _dacCashCumTrialDL.PopulateCashCumTrialConso(prp);
         }
 
+        Weekly_ReturnDL _dacWeeklyReturnDL = new Weekly_ReturnDL();
+        internal List<weekly_return> PopulateWeeklyReturn(p_report_param prp)
+        {
+            return _dacWeeklyReturnDL.PopulateWeeklyReturn(prp);
+        }
+
         TrialBalanceDL _dacTrialBalanceDL = new TrialBalanceDL(); 
         internal List<tt_trial_balance> PopulateTrialBalance(p_report_param prp)
         {         

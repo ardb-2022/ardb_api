@@ -42,6 +42,16 @@ namespace SBWSFinanceApi.LL
          {
            return _dac.UpdateUserstatus(mum);
         }
+        
+        public int UpdateBankInv(mm_bank_inv mum)
+        {
+            return _dac.UpdateBankInv(mum);
+        }
+
+        public int UpdateBranchInv(mm_branch_inv mum)
+        {
+            return _dac.UpdateBranchInv(mum);
+        }
 
         public List<mm_category> GetCategoryMaster()
         {
@@ -58,6 +68,16 @@ namespace SBWSFinanceApi.LL
         public List<mm_vill> GetVillageMaster(mm_vill mum)
         {
            return _dac.GetVillageMaster(mum);
+        }
+
+        public List<mm_bank_inv> GetBankInvMaster(mm_bank_inv mum)
+        {
+            return _dac.GetBankInvMaster(mum);
+        }
+
+        public List<mm_branch_inv> GetBranchInvMaster(mm_branch_inv mum)
+        {
+            return _dac.GetBranchInvMaster(mum);
         }
         public List<mm_service_area> GetServiceAreaMaster(mm_service_area mum)
         {
@@ -76,6 +96,16 @@ namespace SBWSFinanceApi.LL
         public int InsertVillageMaster(mm_vill mum)
         {
             return _dac.InsertVillageMaster(mum);
+        }
+        
+        public int InsertBankInvMaster(mm_bank_inv mum)
+        {
+            return _dac.InsertBankInvMaster(mum);
+        }
+
+        public int InsertBranchInvMaster(mm_branch_inv mum)
+        {
+            return _dac.InsertBranchInvMaster(mum);
         }
 
         public int InsertBlockMaster(mm_block mum)

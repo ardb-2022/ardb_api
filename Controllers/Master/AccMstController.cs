@@ -93,6 +93,20 @@ namespace SBWSFinanceApi.Controllers
            return _ll.GetVillageMaster(mum);
         }
 
+        [Route("GetBankInvMaster")]
+        [HttpPost]
+        public List<mm_bank_inv> GetBankInvMaster(mm_bank_inv mum)
+        {
+            return _ll.GetBankInvMaster(mum);
+        }
+
+        [Route("GetBranchInvMaster")]
+        [HttpPost]
+        public List<mm_branch_inv> GetBranchInvMaster(mm_branch_inv mum)
+        {
+            return _ll.GetBranchInvMaster(mum);
+        }
+
         [Route("GetServiceAreaMaster")]
         [HttpPost]
         public List<mm_service_area> GetServiceAreaMaster(mm_service_area mum)
@@ -130,6 +144,20 @@ namespace SBWSFinanceApi.Controllers
             return _ll.InsertVillageMaster(mum);
         }
 
+        [Route("InsertBankInvMaster")]
+        [HttpPost]
+        public int InsertBankInvMaster(mm_bank_inv mum)
+        {
+            return _ll.InsertBankInvMaster(mum);
+        }
+
+        [Route("InsertBranchInvMaster")]
+        [HttpPost]
+        public int InsertBranchInvMaster(mm_branch_inv mum)
+        {
+            return _ll.InsertBranchInvMaster(mum);
+        }
+
         [Route("UpdateBlock")]
         [HttpPost]
         public int UpdateBlock(mm_block mum)
@@ -152,7 +180,23 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.UpdateVillage(mum);
         }
-        
+
+
+        [Route("UpdateBankInv")]
+        [HttpPost]
+        public int UpdateBankInv(mm_bank_inv mum)
+        {
+            return _ll.UpdateBankInv(mum);
+        }
+
+
+        [Route("UpdateBranchInv")]
+        [HttpPost]
+        public int UpdateBranchInv(mm_branch_inv mum)
+        {
+            return _ll.UpdateBranchInv(mum);
+        }
+
         [Route("GetSystemDate")]
         [HttpPost]
         public day_initialize GetSystemDate(m_branch mum)

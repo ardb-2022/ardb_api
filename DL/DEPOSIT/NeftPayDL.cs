@@ -383,8 +383,26 @@ internal int ApproveNeftPaymentTrans(td_outward_payment nom)
                             using (var command = OrclDbConnection.Command(connection, _alter))
                             {
                                     command.ExecuteNonQuery();
-                             }     
-                            _statement = string.Format(_query1);
+                             }
+
+                            _statement = string.Format(_query2);
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.CommandType = System.Data.CommandType.StoredProcedure;
+                                var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                                parm1.Value = nom.ardb_cd;
+                                command.Parameters.Add(parm1);
+                                var parm2 = new OracleParameter("ad_trans_cd", OracleDbType.Int32, ParameterDirection.Input);
+                                parm2.Value = nom.trans_cd;
+                                command.Parameters.Add(parm2);
+                                var parm3 = new OracleParameter("adt_trans_dt", OracleDbType.Date, ParameterDirection.Input);
+                                parm3.Value = nom.trans_dt;
+                                command.Parameters.Add(parm3);
+                                command.ExecuteNonQuery();
+                                //transaction.Commit();
+                            }
+
+                        _statement = string.Format(_query1);
                             using (var command = OrclDbConnection.Command(connection, _statement))
                             {
                                     command.CommandType = System.Data.CommandType.StoredProcedure;
@@ -403,22 +421,7 @@ internal int ApproveNeftPaymentTrans(td_outward_payment nom)
                                     command.ExecuteNonQuery();
                                     //transaction.Commit();
                             }
-                             _statement = string.Format(_query2);
-                            using (var command = OrclDbConnection.Command(connection, _statement))
-                            {
-                                    command.CommandType = System.Data.CommandType.StoredProcedure;
-                                    var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
-                                    parm1.Value = nom.ardb_cd;
-                                    command.Parameters.Add(parm1);
-                                    var parm2 = new OracleParameter("ad_trans_cd", OracleDbType.Int32, ParameterDirection.Input);
-                                    parm2.Value = nom.trans_cd;
-                                    command.Parameters.Add(parm2);
-                                    var parm3 = new OracleParameter("adt_trans_dt", OracleDbType.Date, ParameterDirection.Input);
-                                    parm3.Value = nom.trans_dt;
-                                    command.Parameters.Add(parm3);
-                                    command.ExecuteNonQuery();
-                                    //transaction.Commit();
-                            }
+                            
                              _statement = string.Format(_query3,
                                                 string.Concat("'", nom.approved_by         , "'"),
                                                 string.IsNullOrWhiteSpace( nom.approved_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('",  nom.approved_dt.Value.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
