@@ -20,8 +20,8 @@ namespace SBWSDepositApi.Models
             this.tddeftranstrf = new List<td_def_trans_trf>();
             this.tddeftrans = new td_def_trans_trf();
         }
-         public tm_deposit tmdeposit { get; set; }
-          public tm_deposit tmdepositrenew { get; set; }
+        public tm_deposit tmdeposit { get; set; }
+        public tm_deposit tmdepositrenew { get; set; }
         public List<td_introducer> tdintroducer { get; set; }
         public List<td_nominee> tdnominee { get; set; }
         public List<td_signatory> tdsignatory { get; set; }

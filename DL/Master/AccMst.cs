@@ -1300,7 +1300,7 @@ internal List<mm_constitution> GetConstitution()
         {
             int _ret = 0;
 
-            string _query = "INSERT INTO MM_BANK_INV VALUES ({0},{1},{2}, {3}, {4},SYSDATE,{5},SYSDATE,{6})";
+            string _query = "INSERT INTO MM_BANK_INV VALUES ({0},{1},{2}, {3}, {4},{5},SYSDATE,{6},SYSDATE)";
 
             int BankIdMax = GetBankMaxId(tvd);
 
@@ -1453,7 +1453,7 @@ internal List<mm_constitution> GetConstitution()
         {
             int _ret = 0;
 
-            string _query = "INSERT INTO MM_BRANCH_INV VALUES ({0},{1},{2}, {3}, {4},{5},SYSDATE,{6},SYSDATE,{7})";
+            string _query = "INSERT INTO MM_BRANCH_INV VALUES ({0},{1},{2}, {3}, {4},{5},{6},SYSDATE,{7},SYSDATE)";
 
             int BranchIdMax = GetBranchMaxId(tvd);
 
@@ -1525,7 +1525,7 @@ internal List<mm_constitution> GetConstitution()
         internal int UpdateBranchInv(mm_branch_inv tvd)
         {
             int _ret = 0;
-            string _query = "Update mm_bank_inv"
+            string _query = "Update mm_branch_inv"
                             + " Set branch_name = {0}, branch_addr = {1}, branch_phone = {2}, modified_by = {3},modified_dt = SYSDATE "
                             + " Where  ardb_cd = {4} AND branch_cd = {5} ";
 

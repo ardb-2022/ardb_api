@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DL\INVESTMENT\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="DL\Finance\BalanceSheetDL.cs">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
