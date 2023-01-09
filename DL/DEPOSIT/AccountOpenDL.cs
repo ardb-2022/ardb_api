@@ -61,8 +61,6 @@ namespace SBWSDepositApi.Deposit
         }
 
 
-
-
         internal decimal F_CALCTDINTT_REG(p_gen_param prp)
         {
             decimal amount = 0;
@@ -109,6 +107,7 @@ namespace SBWSDepositApi.Deposit
             }
             return amount;
         }
+
 
         internal decimal F_CALC_SB_INTT(p_gen_param prm)
         {

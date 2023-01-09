@@ -61,7 +61,9 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.F_CALCTDINTT_REG(tvd);
         }
+
         
+
         [Route("F_CALC_SB_INTT")]
         [HttpPost]
         public decimal F_CALC_SB_INTT([FromBody] p_gen_param tvd)

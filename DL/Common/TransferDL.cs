@@ -531,7 +531,7 @@ namespace SBWSFinanceApi.DL
                           + " AND A.ACC_TYPE_CD=C.ACC_CD(+) "
                           + " AND A.ACC_NUM=F.ACC_NUM (+) "
                           + " AND A.BRN_CD=F.BRN_CD(+) "
-                          + " AND A.ARDB_CD=C.ARDB_CD(+) ";
+                          + " AND A.ARDB_CD=C.ARDB_CD(+)  AND A.DEL_FLAG = 'N' ";
             using (var connection = OrclDbConnection.NewConnection)
             {
 

@@ -1886,6 +1886,159 @@ namespace SBWSFinanceApi.DL.INVESTMENT
             return true;
         }
 
+        internal decimal F_CALCTDINTT_INV_REG(p_gen_param prp)
+        {
+            decimal amount = 0;
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = "SELECT F_CALCTDINTT_INV_REG({0},{1},to_date('{2}','dd-mm-yyyy' ),{3},{4},{5}) AMOUNT FROM DUAL";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        _statement = string.Format(_query,
+                                         string.Concat("'", prp.ad_acc_type_cd, "'"),
+                                         string.Concat("'", prp.ad_prn_amt, "'"),
+                                         string.Concat(prp.adt_temp_dt.ToString("dd/MM/yyyy")),
+                                         string.Concat("'", prp.as_intt_type, "'"),
+                                         string.Concat("'", prp.ai_period, "'"),
+                                         string.Concat("'", prp.ad_intt_rt, "'")
+                                        );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        amount = UtilityM.CheckNull<decimal>(reader["AMOUNT"]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        amount = 0;
+                    }
+                }
+            }
+            return amount;
+        }
+
+
+        internal string ApproveInvTranaction(p_gen_param pgp)
+        {
+            string _ret = null;
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        string _query1 = "UPDATE TD_DEP_TRANS SET "
+                                      + " MODIFIED_BY            =NVL({0},MODIFIED_BY    ),"
+                                      + " MODIFIED_DT            =SYSDATE,"
+                                      + " APPROVAL_STATUS        =NVL({1},APPROVAL_STATUS),"
+                                      + " APPROVED_BY            =NVL({2},APPROVED_BY    ),"
+                                      + " APPROVED_DT            =SYSDATE"
+                                      + " WHERE (ARDB_CD = {3}) AND (BRN_CD = {4}) AND "
+                                      + " (TRANS_DT = to_date('{5}','dd-mm-yyyy' )) AND  "
+                                      + " (  TRANS_CD = {6} ) ";
+                        _statement = string.Format(_query1,
+                                string.Concat("'", pgp.gs_user_id, "'"),
+                                string.Concat("'", "A", "'"),
+                                string.Concat("'", pgp.gs_user_id, "'"),
+                                string.Concat("'", pgp.ardb_cd, "'"),
+                                string.Concat("'", pgp.brn_cd, "'"),
+                                string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
+                                string.Concat(pgp.ad_trans_cd)
+                                );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        string _query2 = "UPDATE TD_DEP_TRANS_TRF SET "
+                                  + " MODIFIED_BY            =NVL({0},MODIFIED_BY    ),"
+                                  + " MODIFIED_DT            =SYSDATE,"
+                                  + " APPROVAL_STATUS        =NVL({1},APPROVAL_STATUS),"
+                                  + " APPROVED_BY            =NVL({2},APPROVED_BY    ),"
+                                  + " APPROVED_DT            =SYSDATE"
+                                  + " WHERE (ARDB_CD = {3}) AND (BRN_CD = {4}) AND "
+                                  + " (TRANS_DT = to_date('{5}','dd-mm-yyyy' )) AND  "
+                                  + " (  TRANS_CD = {6} ) ";
+                        _statement = string.Format(_query2,
+                                string.Concat("'", pgp.gs_user_id, "'"),
+                                string.Concat("'", "A", "'"),
+                                string.Concat("'", pgp.gs_user_id, "'"),
+                                string.Concat("'", pgp.ardb_cd, "'"),
+                                string.Concat("'", pgp.brn_cd, "'"),
+                                string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
+                                string.Concat(pgp.ad_trans_cd)
+                                );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        string _query = "UPDATE TM_TRANSFER SET "
+                                  + " APPROVAL_STATUS        =NVL({0},APPROVAL_STATUS),"
+                                  + " APPROVED_BY            =NVL({1},APPROVED_BY    ),"
+                                  + " APPROVED_DT            =SYSDATE"
+                                  + " WHERE (ARDB_CD = {2}) AND (BRN_CD = {3}) AND "
+                                  + " (TRF_DT = to_date('{4}','dd-mm-yyyy' )) AND  "
+                                  + " (  TRANS_CD = {5} ) ";
+                        _statement = string.Format(_query,
+                                string.Concat("'", "A", "'"),
+                                string.Concat("'", pgp.gs_user_id, "'"),
+                                string.Concat("'", pgp.ardb_cd, "'"),
+                                string.Concat("'", pgp.brn_cd, "'"),
+                                string.Concat(pgp.adt_trans_dt.ToString("dd/MM/yyyy")),
+                                string.Concat(pgp.ad_trans_cd)
+                                );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        DepTransactionDL _dl1 = new DepTransactionDL();
+                        _ret = _dl1.P_UPDATE_TD_DEP_TRANS_INVEST(connection, pgp);
+                        if (_ret == "0")
+                        {
+
+                            transaction.Commit();
+                            return "0";
+
+                        }
+                        else
+                        {
+                            transaction.Rollback();
+                            return _ret;
+                        }
+                        //}
+                        //else
+                        //{
+                        //    transaction.Rollback();
+                        //    return _ret;
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+
+                        transaction.Rollback();
+                        return ex.Message.ToString();
+                    }
+
+                }
+            }
+        }        
 
     }
 }

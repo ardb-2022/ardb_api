@@ -32,5 +32,15 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.DeleteInvOpeningData(td);
         }
+
+        internal decimal F_CALCTDINTT_INV_REG(p_gen_param pmc)
+        {
+            return _dac.F_CALCTDINTT_INV_REG(pmc);
+        }
+        
+        internal string ApproveInvTranaction(p_gen_param td)
+        {
+            return _dac.ApproveInvTranaction(td);
+        }
     }
 }

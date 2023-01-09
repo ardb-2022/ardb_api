@@ -20,6 +20,13 @@ namespace SBWSFinanceApi.Controllers
     {
         InvOpenLL _ll = new InvOpenLL();
 
+        [Route("F_CALCTDINTT_INV_REG")]
+        [HttpPost]
+        public decimal F_CALCTDINTT_INV_REG([FromBody] p_gen_param tvd)
+        {
+            return _ll.F_CALCTDINTT_INV_REG(tvd);
+        }
+
         [Route("InsertInvOpeningData")]
         [HttpPost]
         public string InsertInvOpeningData([FromBody] InvOpenDM tvd)
@@ -48,6 +55,13 @@ namespace SBWSFinanceApi.Controllers
         public int DeleteInvOpeningData([FromBody] td_def_trans_trf tvd)
         {
             return _ll.DeleteInvOpeningData(tvd);
+        }
+
+        [Route("ApproveInvTranaction")]
+        [HttpPost]
+        public string ApproveInvTranaction([FromBody] p_gen_param tvd)
+        {
+            return _ll.ApproveInvTranaction(tvd);
         }
 
     }

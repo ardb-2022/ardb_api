@@ -31,7 +31,9 @@ namespace SBWSFinanceApi.LL
         internal decimal F_CALCTDINTT_REG(p_gen_param pmc)
         {         
             return _dac.F_CALCTDINTT_REG(pmc);
-        } 
+        }
+
+        
         internal decimal F_CALC_SB_INTT(p_gen_param pmc)
         {         
             return _dac.F_CALC_SB_INTT(pmc);
