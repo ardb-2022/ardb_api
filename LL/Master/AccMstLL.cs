@@ -87,8 +87,13 @@ namespace SBWSFinanceApi.LL
         {
            return _dac.GetBlockMaster(mum);
         }
-        
-         public int InsertServiceAreaMaster(mm_service_area mum)
+
+        public List<m_acc_master> GetAccGlhead(m_acc_master mum)
+        {
+            return _dac.GetAccGlhead(mum);
+        }
+
+        public int InsertServiceAreaMaster(mm_service_area mum)
         {
             return _dac.InsertServiceAreaMaster(mum);
         }
@@ -115,7 +120,16 @@ namespace SBWSFinanceApi.LL
         public int UpdateBlock(mm_block mum)
         {
             return _dac.UpdateBlock(mum);
-        }        
+        }
+
+        public int InsertAccGlHead(m_acc_master mum)
+        {
+            return _dac.InsertAccGlHead(mum);
+        }
+        public int UpdateAccGlHead(m_acc_master mum)
+        {
+            return _dac.UpdateAccGlHead(mum);
+        }
 
         public int UpdateServiceArea(mm_service_area mum)
         {

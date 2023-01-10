@@ -121,7 +121,14 @@ namespace SBWSFinanceApi.Controllers
            return _ll.GetBlockMaster(mum);
         }
 
-        
+        [Route("GetAccGlhead")]
+        [HttpPost]
+        public List<m_acc_master> GetAccGlhead(m_acc_master mum)
+        {
+            return _ll.GetAccGlhead(mum);
+        }
+
+
         [Route("InsertServiceAreaMaster")]
         [HttpPost]
         public int InsertServiceAreaMaster(mm_service_area mum)
@@ -136,7 +143,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.InsertBlockMaster(mum);
         }
 
-        
+        [Route("InsertAccGlHead")]
+        [HttpPost]
+        public int InsertAccGlHead(m_acc_master mum)
+        {
+            return _ll.InsertAccGlHead(mum);
+        }
+
+
         [Route("InsertVillageMaster")]
         [HttpPost]
         public int InsertVillageMaster(mm_vill mum)
@@ -165,7 +179,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.UpdateBlock(mum);
         }
 
-        
+        [Route("UpdateAccGlHead")]
+        [HttpPost]
+        public int UpdateAccGlHead(m_acc_master mum)
+        {
+            return _ll.UpdateAccGlHead(mum);
+        }
+
+
         [Route("UpdateServiceArea")]
         [HttpPost]
         public int UpdateServiceArea(mm_service_area mum)

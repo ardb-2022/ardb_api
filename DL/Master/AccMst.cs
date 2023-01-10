@@ -47,7 +47,121 @@ namespace SBWSFinanceApi.DL
             
             }
             return mamRets;
-        }  
+        }
+
+
+        internal List<m_acc_master> GetAccGlhead(m_acc_master mum)
+        {
+            List<m_acc_master> mamRets = new List<m_acc_master>();
+            string _query = " SELECT ARDB_CD,ACC_CD,ACC_NAME,ACC_TYPE "
+                         + "FROM M_ACC_MASTER WHERE ARDB_CD = {0} AND ACC_CD = {1}";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'"),
+                                            mum.acc_cd);
+
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new m_acc_master();
+                                mam.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                mam.acc_cd = UtilityM.CheckNull<int>(reader["ACC_CD"]);
+                                mam.acc_name = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
+                                mam.acc_type = UtilityM.CheckNull<string>(reader["ACC_TYPE"]);
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+        internal int InsertAccGlHead(m_acc_master tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO M_ACC_MASTER VALUES ({0},0,0,{1},{2}, {3}, NULL,NULL,NULL,NULL,NULL,NULL)";
+
+           using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  tvd.acc_cd,
+                                  string.Concat("'", tvd.acc_name, "'"),
+                                  string.Concat("'", tvd.acc_type, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        
+        internal int UpdateAccGlHead(m_acc_master tvd)
+        {
+            int _ret = 0;
+            string _query = "Update m_acc_master"
+                            + " Set acc_name = {0} "
+                            + " Where  ardb_cd = {1} AND acc_cd = {2} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.acc_name, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat("'", tvd.acc_cd, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+
+
 
         internal List<mm_acc_type> GetAccountTypeMaster()
         {
