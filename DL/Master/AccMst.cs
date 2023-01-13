@@ -91,7 +91,10 @@ namespace SBWSFinanceApi.DL
 
             string _query = "INSERT INTO M_ACC_MASTER VALUES ({0},0,0,{1},{2}, {3}, NULL,NULL,NULL,NULL,NULL,NULL)";
 
-           using (var connection = OrclDbConnection.NewConnection)
+            string _query1 = "INSERT INTO TM_ACC_BALANCE SELECT ARDB_CD,BRN_CD,BALANCE_DT,{0},0 FROM TM_ACC_BALANCE WHERE ARDB_CD={1} AND ACC_CD=21101";
+
+
+            using (var connection = OrclDbConnection.NewConnection)
             {
 
                 using (var transaction = connection.BeginTransaction())
@@ -108,9 +111,22 @@ namespace SBWSFinanceApi.DL
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             command.ExecuteNonQuery();
+                            //transaction.Commit();
+                            //_ret = 0;
+                        }
+
+                        _statement = string.Format(_query1,
+                                  tvd.acc_cd,
+                                  string.Concat("'", tvd.ardb_cd, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
                             transaction.Commit();
                             _ret = 0;
                         }
+
                     }
                     catch (Exception ex)
                     {

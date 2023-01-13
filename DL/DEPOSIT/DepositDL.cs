@@ -3631,6 +3631,7 @@ namespace SBWSDepositApi.Deposit
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _query = "P_opn_cls_register";
             string _query1 = " SELECT TT_OPN_CLS_REGISTER.ACC_TYPE_CD,"
+                            + " MM_ACC_TYPE.ACC_TYPE_DESC, "
                             + " TT_OPN_CLS_REGISTER.ACC_NUM,           "
                             + " TT_OPN_CLS_REGISTER.CUST_CD,           "
                             + " TT_OPN_CLS_REGISTER.OPN_CLS_DT,        "
@@ -3641,9 +3642,11 @@ namespace SBWSDepositApi.Deposit
                             + " TT_OPN_CLS_REGISTER.INTT_RT,           "
                             + " TT_OPN_CLS_REGISTER.DEP_PERIOD,        "
                             + " TT_OPN_CLS_REGISTER.AGENT_CD,           "
-                            + "  MM_CUSTOMER.CUST_NAME "
-                            + " FROM TT_OPN_CLS_REGISTER   ,MM_CUSTOMER "
-                            + " WHERE TT_OPN_CLS_REGISTER.CUST_CD =MM_CUSTOMER.CUST_CD ";
+                            + " MM_CUSTOMER.CUST_NAME "
+                            + " FROM TT_OPN_CLS_REGISTER  , MM_CUSTOMER, MM_ACC_TYPE "
+                            + " WHERE MM_CUSTOMER.ARDB_CD = {0} "
+                            + " AND TT_OPN_CLS_REGISTER.CUST_CD = MM_CUSTOMER.CUST_CD AND TT_OPN_CLS_REGISTER.ACC_TYPE_CD = MM_ACC_TYPE.ACC_TYPE_CD ";
+
             using (var connection = OrclDbConnection.NewConnection)
             {
                 using (var transaction = connection.BeginTransaction())
@@ -3682,7 +3685,7 @@ namespace SBWSDepositApi.Deposit
                             command.ExecuteNonQuery();
                             //transaction.Commit();
                         }
-                        _statement = string.Format(_query1);
+                        _statement = string.Format(_query1, string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"));
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             using (var reader = command.ExecuteReader())
@@ -3693,6 +3696,7 @@ namespace SBWSDepositApi.Deposit
                                     {
                                         var tca = new tt_opn_cls_register();
                                         tca.acc_type_cd = UtilityM.CheckNull<Int64>(reader["ACC_TYPE_CD"]);
+                                        tca.acc_type_desc = UtilityM.CheckNull<String>(reader["ACC_TYPE_DESC"]);
                                         tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
                                         tca.cust_cd = UtilityM.CheckNull<Int64>(reader["CUST_CD"]);
                                         tca.opn_cls_dt = UtilityM.CheckNull<DateTime>(reader["OPN_CLS_DT"]);
