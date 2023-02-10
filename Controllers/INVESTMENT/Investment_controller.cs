@@ -64,5 +64,19 @@ namespace SBWSFinanceApi.Controllers
             return _ll.ApproveInvTranaction(tvd);
         }
 
+        [Route("PopulateDLFixedDepositInvAll")]
+        [HttpPost]
+        public List<conswise_sb_dl> PopulateDLFixedDepositInvAll([FromBody] p_report_param pgp)
+        {
+            return _ll.PopulateDLFixedDepositInvAll(pgp);
+        }
+
+        [Route("PopulateNearInvReport")]
+        [HttpPost]
+        public List<tt_sbca_dtl_list> PopulateNearInvReport([FromBody] p_report_param pgp)
+        {
+            return _ll.PopulateNearInvReport(pgp);
+        }
+
     }
 }

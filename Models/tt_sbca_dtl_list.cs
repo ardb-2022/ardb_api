@@ -29,6 +29,9 @@ namespace SBWSFinanceApi.Models
 
         public string agent_name { get; set; }
 
+        public string bank_name { get; set; }
+
+        public string branch_name { get; set; }
 
     }
 

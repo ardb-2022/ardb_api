@@ -137,6 +137,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateLoanStatement(prp);
         }
         
+
+        [Route("PopulateLoanStatementBmardb")]
+        [HttpPost]
+        public List<gm_loan_trans> PopulateLoanStatementBmardb(p_report_param prp)
+        {
+            return _ll.PopulateLoanStatementBmardb(prp);
+        }
+
         [Route("PopulateOvdTrfDtls")]
         [HttpPost]
         public List<gm_loan_trans> PopulateOvdTrfDtls(p_report_param prp)

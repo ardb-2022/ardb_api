@@ -19,6 +19,7 @@ namespace SBWSFinanceApi.Models
         public decimal rowcd { get; set; }
         public decimal deposit { get; set; }
         public decimal withdrawal { get; set; }
+        public string ardb_cd { get; set; }
 
     }
 }

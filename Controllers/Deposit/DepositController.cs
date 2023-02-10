@@ -322,6 +322,20 @@ namespace SBWSFinanceApi.Controllers
             return _ll2.PassBookPrint(pgp);
         }
 
+        [Route("GetUpdatePassbookData")]
+        [HttpPost]
+        public List<passbook_print> GetUpdatePassbookData([FromBody] p_report_param pgp)
+        {
+            return _ll2.GetUpdatePassbookData(pgp);
+        }
+        
+        [Route("UpdatePassbookData")]
+        [HttpPost]
+        public int UpdatePassbookData([FromBody] List<passbook_print> pgp)
+        {
+            return _ll2.UpdatePassbookData(pgp);
+        }
+
         [Route("GetDailyDeposit")]
         [HttpPost]
         public List<tm_daily_deposit> GetDailyDeposit(tm_deposit dep)

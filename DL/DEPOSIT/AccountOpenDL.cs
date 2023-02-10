@@ -3690,9 +3690,10 @@ namespace SBWSDepositApi.Deposit
                   + "cheque_facility_flag = NVL({2}, cheque_facility_flag),"
                   + "tds_applicable       = NVL({3}, tds_applicable      ),"
                   + "cert_no       = NVL({4}, cert_no      ),"
-                  + "modified_by          = NVL({5}, modified_by   ),"
-                  + "modified_dt          = NVL({6}, modified_dt   )"
-                  + "WHERE ardb_cd={7} and brn_cd = NVL({8}, brn_cd) AND acc_num = NVL({9},  acc_num ) AND acc_type_cd=NVL({10},  acc_type_cd ) and del_flag='N' ";
+                  + "user_acc_num       = NVL({5}, user_acc_num      ),"
+                  + "modified_by          = NVL({6}, modified_by   ),"
+                  + "modified_dt          = NVL({7}, modified_dt   )"
+                  + "WHERE ardb_cd={8} and brn_cd = NVL({9}, brn_cd) AND acc_num = NVL({10},  acc_num ) AND acc_type_cd=NVL({11},  acc_type_cd ) and renew_id={12} and del_flag='N' ";
 
             _statement = string.Format(_query,
             string.Concat("'", dep.oprn_instr_cd, "'"),
@@ -3700,12 +3701,14 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.cheque_facility_flag, "'"),
             string.Concat("'", dep.tds_applicable, "'"),
             string.Concat("'", dep.cert_no, "'"),
+             string.Concat("'", dep.user_acc_num, "'"),
             string.Concat("'", dep.modified_by, "'"),
             string.Concat("sysdate"),
             string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
-            string.Concat("'", dep.acc_type_cd, "'")
+            string.Concat("'", dep.acc_type_cd, "'"),
+            string.Concat("'", dep.renew_id, "'")
                         );
 
             using (var command = OrclDbConnection.Command(connection, _statement))

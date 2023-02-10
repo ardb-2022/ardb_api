@@ -32,8 +32,8 @@ namespace SBWSFinanceApi.Config
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
                 //sb.DataSource = "202.65.156.246:1521/orcl";// "10.65.65.246:1521/orcl";   //local
-                //sb.UserID = "cfstest";
-                //sb.Password = "signature";
+                //sb.UserID = "bmardbcfs";
+                //sb.Password = "bmardbcfs21101";
 
                 // Use below 3 for PRD deploymen/t
                sb.DataSource = bc.db_server_ip;
@@ -75,10 +75,10 @@ namespace SBWSFinanceApi.Config
                 {
 
                     string _query = " SELECT BANK_NAME "
-                                                    + ",DB_SERVER_IP ,USER1 ,PASS1 ,USER2 "
-                                                    + ",PASS2 ,UPDATED_DT "
-                                                    + " FROM BANK_CONFIG WHERE ACTIVE_FLAG = 'Y' "
-                                                    + " AND BANK_NAME = '{0}' ";
+                                    + ",DB_SERVER_IP ,USER1 ,PASS1 ,USER2 "
+                                    + ",PASS2 ,UPDATED_DT "
+                                    + " FROM BANK_CONFIG WHERE ACTIVE_FLAG = 'Y' "
+                                    + " AND BANK_NAME = '{0}' ";
                     _query = string.Format(_query, folderName);
                     using (var command = OrclDbConnection.Command(connection, _query))
                     {
@@ -166,17 +166,17 @@ namespace SBWSFinanceApi.Config
             get
             {
                 // BankConfigMst BC = new BankConfigMstLL().ReadAllConfiguration();
-                //BankConfig bc = getBankConfigFromDB();
+                BankConfig bc = getBankConfigFromDB();
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
-                sb.DataSource = "202.65.156.246:1521/orcl"; // ez connect -- no tns names!
-                sb.UserID = "cfs2022";
-                sb.Password = "signature";
+                //sb.DataSource = "202.65.156.246:1521/orcl"; // ez connect -- no tns names!
+                //sb.UserID = "cfs2022";
+                //sb.Password = "signature";
 
                 // Use below 3 for PRD deployment
-                //sb.DataSource = bc.db_server_ip;
-                //sb.UserID = bc.user2;
-                //sb.Password = bc.pass2;
+                sb.DataSource = bc.db_server_ip;
+                sb.UserID = bc.user2;
+                sb.Password = bc.pass2;
                 // sb.DataSource="202.65.156.246:1521/orcl";
 
                 // string constr = "User ID=sig_demo;Password=signature;Data Source=10.65.65.246:1521/orcl";  

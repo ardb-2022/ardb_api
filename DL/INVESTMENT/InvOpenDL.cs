@@ -25,7 +25,7 @@ namespace SBWSFinanceApi.DL.INVESTMENT
                             + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
                             + " BONUS_INTT_RT, BANK_CD, BRANCH_CD,DEL_FLAG                                   "
                             + " FROM TM_DEPOSIT_INV                                                                  "
-                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND DEL_FLAG = 'N' ";
+                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND nvl(ACC_STATUS,'O') = 'O' AND DEL_FLAG = 'N' ";
 
             _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
@@ -98,7 +98,6 @@ namespace SBWSFinanceApi.DL.INVESTMENT
             }
             return depRet;
         }
-
 
         internal tm_deposit_inv GetDepositRenewTemp(DbConnection connection, tm_deposit_inv dep)
         {
@@ -1737,8 +1736,9 @@ namespace SBWSFinanceApi.DL.INVESTMENT
                     {
                         if (!String.IsNullOrWhiteSpace(acc.acc_num))
                         {
-                            DeleteDepositInv(connection, acc);
-
+                            if (acc.trans_mode == "O") { 
+                                DeleteDepositInv(connection, acc);
+                                }
                             DeleteDepositRenewInv(connection, acc);
 
                             DeleteTransfer(connection, acc);
@@ -2038,7 +2038,222 @@ namespace SBWSFinanceApi.DL.INVESTMENT
 
                 }
             }
-        }        
+        }
+
+
+        internal List<conswise_sb_dl> PopulateDLFixedDepositInvAll(p_report_param prp)
+        {
+            List<conswise_sb_dl> tcaRet = new List<conswise_sb_dl>();
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = " p_td_prov_intt_detail_list_inv";
+            string _query1 = " SELECT DISTINCT  TT_TDPROV_INTT_INV.ACC_TYPE_CD, "
+                                + " TT_TDPROV_INTT_INV.ACC_NUM,       "
+                                + " TT_TDPROV_INTT_INV.OPENING_DT,    "
+                                + " TT_TDPROV_INTT_INV.MAT_DT,        "
+                                + " TT_TDPROV_INTT_INV.PRN_AMT,       "
+                                + " TT_TDPROV_INTT_INV.INTT_RT,       "
+                                + " TT_TDPROV_INTT_INV.PROV_INTT_AMT, "
+                                + " TT_TDPROV_INTT_INV.CONSTITUTION_CD,"
+                                + " TT_TDPROV_INTT_INV.BANK_CD,   "
+                                + " TT_TDPROV_INTT_INV.BRANH_CD   "
+                                + " FROM TT_TDPROV_INTT_INV"
+                                + " WHERE  ( TT_TDPROV_INTT_INV.CONSTITUTION_CD = {0} ) AND  "
+                                + "  ( TT_TDPROV_INTT_INV.BANK_CD = {1} ) AND  "
+                                + " ( TT_TDPROV_INTT_INV.BRANH_CD = {2} )    "
+                                + "  ORDER BY TT_TDPROV_INTT_INV.ACC_NUM ";
+
+
+            string _query2 = " SELECT  DISTINCT TT_TDPROV_INTT_INV.CONSTITUTION_CD,TT_TDPROV_INTT_INV.BANK_CD,TT_TDPROV_INTT_INV.BRANH_CD "
+                            + " FROM TT_TDPROV_INTT_INV ";
+
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        _statement = string.Format(_query);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+                            var parm2 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm2.Value = prp.from_dt;
+                            command.Parameters.Add(parm2);
+                           
+                            command.ExecuteNonQuery();
+                           // transaction.Commit();
+                        }
+
+
+                        string _statement1 = string.Format(_query2);
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        conswise_sb_dl tcaRet1 = new conswise_sb_dl();
+
+                                        var tca1 = new cons_type();
+                                        
+                                        tca1.constitution_desc = UtilityM.CheckNull<string>(reader1["CONSTITUTION_CD"]);
+                                        tca1.bank_cd = UtilityM.CheckNull<string>(reader1["BANK_CD"]);
+                                        tca1.branch_cd = UtilityM.CheckNull<string>(reader1["BRANH_CD"]);
+
+                                        _statement = string.Format(_query1,
+                                      string.Concat("'", UtilityM.CheckNull<string>(reader1["CONSTITUTION_CD"]), "'"),
+                                      string.Concat("'", UtilityM.CheckNull<string>(reader1["BANK_CD"]), "'"),
+                                      string.Concat("'", tca1.branch_cd = UtilityM.CheckNull<string>(reader1["BRANH_CD"]),"'"));
+                                        // prp.const_cd != 0 ? string.Concat("'", UtilityM.CheckNull<int>(reader1["CONSTITUTION_CD"]), "'") : "'0'");
+
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var tca = new tt_sbca_dtl_list();
+                                                        tca.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
+                                                        tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                                        tca.bank_name = UtilityM.CheckNull<string>(reader["BANK_CD"]);
+                                                        tca.branch_name = UtilityM.CheckNull<string>(reader["BRANH_CD"]);
+                                                        tca.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
+                                                        //var x = UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]).Substring(0, 2);
+                                                        // tca.constitution_cd = Convert.ToInt16(UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]).Substring(0, 2).Trim());
+                                                        //tca.INSTL_AMT = UtilityM.CheckNull<decimal>(reader["INSTL_AMT"]);
+                                                        tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
+                                                        tca.INTT_RT = Convert.ToDecimal(UtilityM.CheckNull<float>(reader["INTT_RT"]));
+                                                        tca.PROV_INTT_AMT = UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
+                                                        tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MAT_DT"]);
+
+                                                        tca1.tot_cons_count = tca1.tot_cons_count + 1;
+                                                        tca1.tot_cons_balance = tca1.tot_cons_balance + UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
+                                                        tca1.tot_cons_intt_balance = tca1.tot_cons_intt_balance + UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
+                                                        tcaRet1.ttsbcadtllist.Add(tca);
+
+                                                        //tcaRet.Add(tca);
+                                                    }
+
+                                                }
+                                            }
+                                        }
+
+                                        tcaRet1.constype = tca1;
+                                        tcaRet.Add(tcaRet1);
+
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        tcaRet = null;
+                    }
+                }
+            }
+            return tcaRet;
+        }
+
+
+        internal List<tt_sbca_dtl_list> PopulateNearInvReport(p_report_param prp)
+        {
+            List<tt_sbca_dtl_list> tcaRet = new List<tt_sbca_dtl_list>();
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = "p_near_mat_inv";
+            string _query1 = " SELECT DISTINCT  TT_TDPROV_INTT_INV.ACC_TYPE_CD, "
+                                + " TT_TDPROV_INTT_INV.ACC_NUM,       "
+                                + " TT_TDPROV_INTT_INV.OPENING_DT,    "
+                                + " TT_TDPROV_INTT_INV.MAT_DT,        "
+                                + " TT_TDPROV_INTT_INV.PRN_AMT,       "
+                                + " TT_TDPROV_INTT_INV.INTT_RT,       "
+                                + " TT_TDPROV_INTT_INV.PROV_INTT_AMT, "
+                                + " TT_TDPROV_INTT_INV.CONSTITUTION_CD,"
+                                + " TT_TDPROV_INTT_INV.BANK_CD,   "
+                                + " TT_TDPROV_INTT_INV.BRANH_CD   "
+                                + " FROM TT_TDPROV_INTT_INV";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        _statement = string.Format(_query);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+                            var parm2 = new OracleParameter("adt_form_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm2.Value = prp.from_dt;
+                            command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.to_dt;
+                            command.Parameters.Add(parm3);
+
+                            command.ExecuteNonQuery();
+                            //transaction.Commit();
+                        }
+                        _statement = string.Format(_query1);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var tca = new tt_sbca_dtl_list();
+                                        tca.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
+                                        tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                        tca.bank_name = UtilityM.CheckNull<string>(reader["BANK_CD"]);
+                                        tca.branch_name = UtilityM.CheckNull<string>(reader["BRANH_CD"]);
+                                        tca.constitution_desc = UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]);
+                                        tca.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
+                                        tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
+                                        tca.INTT_RT = Convert.ToDecimal(UtilityM.CheckNull<float>(reader["INTT_RT"]));
+                                        tca.PROV_INTT_AMT = UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
+                                        tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MAT_DT"]);
+                                        tcaRet.Add(tca);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        tcaRet = null;
+                    }
+                }
+            }
+            return tcaRet;
+        }
+
+
 
     }
 }

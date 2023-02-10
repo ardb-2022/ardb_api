@@ -1566,6 +1566,8 @@ namespace SBWSDepositApi.Deposit
             return standingInstrExeList;
         }
 
+
+
         internal decimal GetInttRate(p_gen_param pmc)
         {
             decimal inttrate = 0 ;
@@ -3028,8 +3030,8 @@ namespace SBWSDepositApi.Deposit
                                         tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
                                         tca.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
                                         tca.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
-                                        var x = UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]).Substring(0, 2);
-                                        tca.constitution_cd = Convert.ToInt16(UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]).Substring(0, 2).Trim());
+                                        //var x = UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]).Substring(0, 2);
+                                        //tca.constitution_cd = Convert.ToInt16(UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]).Substring(0, 2).Trim());
                                         //tca.INSTL_AMT = UtilityM.CheckNull<decimal>(reader["INSTL_AMT"]);
                                         tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
                                         tca.INTT_RT = Convert.ToDecimal(UtilityM.CheckNull<float>(reader["INTT_RT"]));
@@ -3911,6 +3913,146 @@ namespace SBWSDepositApi.Deposit
 
 
 
+        internal List<passbook_print> GetUpdatePassbookData(p_report_param prp)
+        {
+            List<passbook_print> passBookPrint = new List<passbook_print>();
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+
+            // prp.from_dt = prp.from_dt.Date;
+            // prp.to_dt = prp.to_dt.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+            string _query = " SELECT MD_PASSBOOK_PRINT_STATUS.TRANS_DT,         "
+                  + " MD_PASSBOOK_PRINT_STATUS.TRANS_CD,                        "
+                  + " MD_PASSBOOK_PRINT_STATUS.ACC_TYPE_CD,                     "
+                  + " MD_PASSBOOK_PRINT_STATUS.ACC_NUM,                         "
+                  + " MD_PASSBOOK_PRINT_STATUS.TRANS_TYPE,                      "
+                  + " MD_PASSBOOK_PRINT_STATUS.INSTRUMENT_NUM,                  "
+                  + " MD_PASSBOOK_PRINT_STATUS.AMOUNT,                          "
+                  + " Lower(MD_PASSBOOK_PRINT_STATUS.PARTICULARS) PARTICULARS,  "
+                  + " MD_PASSBOOK_PRINT_STATUS.PRINTED_FLAG,                    "
+                  + " f_passbook_balance({0},{1}, {2}, to_date('{3}', 'dd-mm-yyyy hh24:mi:ss') ) BALANCE_AMT,            "
+                  + " 0 RUNNING_BAL,                                                             "
+                  + " 0 ROWCD                                                                    "
+                  + " FROM MD_PASSBOOK_PRINT_STATUS                                              "
+                  + " WHERE ((MD_PASSBOOK_PRINT_STATUS.ACC_TYPE_CD = {4} ) AND                   "
+                  + "       (MD_PASSBOOK_PRINT_STATUS.ACC_NUM = '{5}' ))                         "
+                  + " AND   (MD_PASSBOOK_PRINT_STATUS.ARDB_CD = '{6}') AND (MD_PASSBOOK_PRINT_STATUS.PRINTED_FLAG IN ('N','Y'))                        "
+                  + " AND   (MD_PASSBOOK_PRINT_STATUS.TRANS_DT BETWEEN to_date('{7}', 'dd-mm-yyyy hh24:mi:ss') AND to_date('{8}', 'dd-mm-yyyy hh24:mi:ss') ) "
+                  + " ORDER BY MD_PASSBOOK_PRINT_STATUS.TRANS_DT, MD_PASSBOOK_PRINT_STATUS.TRANS_CD ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_query,
+                                                   prp.ardb_cd,
+                                                   prp.acc_type_cd.ToString(),
+                                                   prp.acc_num,
+                                                   prp.to_dt.ToString("dd/MM/yyyy HH:mm:ss"),
+                                                   prp.acc_type_cd.ToString(),
+                                                   prp.acc_num,
+                                                   prp.ardb_cd,
+                                                   prp.from_dt != null ? prp.from_dt.ToString("dd/MM/yyyy HH:mm:ss") : "from_dt",
+                                                   prp.to_dt != null ? prp.to_dt.ToString("dd/MM/yyyy HH:mm:ss") : "to_dt"
+                                                   );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var pb = new passbook_print();
+
+                                        pb.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                        pb.trans_cd = UtilityM.CheckNull<decimal>(reader["TRANS_CD"]);
+                                       // pb.acc_type_cd = UtilityM.CheckNull<Int16>(reader["ACC_TYPE_CD"]);
+                                        pb.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                        pb.trans_type = UtilityM.CheckNull<string>(reader["TRANS_TYPE"]);
+                                        pb.amount = UtilityM.CheckNull<decimal>(reader["AMOUNT"]);
+                                        pb.particulars = UtilityM.CheckNull<string>(reader["PARTICULARS"]);
+                                        pb.printed_flag = UtilityM.CheckNull<string>(reader["PRINTED_FLAG"]);
+                                        pb.balance_amt = UtilityM.CheckNull<decimal>(reader["BALANCE_AMT"]);
+                                        pb.running_bal = UtilityM.CheckNull<decimal>(reader["RUNNING_BAL"]);
+                                        pb.rowcd = UtilityM.CheckNull<decimal>(reader["ROWCD"]);
+
+                                        passBookPrint.Add(pb);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        passBookPrint = null;
+                    }
+                }
+            }
+
+            return passBookPrint;
+        }
+
+
+        internal int UpdatePassbookData(List<passbook_print> prp)
+        {
+            int _ret = 0;
+
+           string _query = "UPDATE MD_PASSBOOK_PRINT_STATUS  "
+                           + " SET PRINTED_FLAG = {0} "
+                           + " WHERE ARDB_CD = {1} "
+                           + " AND ACC_TYPE_CD = {2} "
+                           + " AND ACC_NUM = {3} "
+                           + " AND TRANS_DT = to_date({4},'DD/MM/YYYY') "
+                           + " AND TRANS_CD = {5} "
+                           + " AND DEL_FLAG = 'N' ";
+
+
+            
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        for (int i = 0; i < prp.Count; i++)
+                        {
+                            _statement = string.Format(_query,
+                        string.Concat("'", prp[i].printed_flag, "'"),
+                        string.Concat("'", prp[i].ardb_cd, "'"),
+                        prp[i].acc_type_cd,
+                        string.Concat("'", prp[i].acc_num, "'"),
+                        string.Concat("'", prp[i].trans_dt.ToString("dd/MM/yyyy"), "'"),
+                        prp[i].trans_cd
+                        );
+
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.ExecuteNonQuery();
+
+                            }
+                        }
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
 
     }
 }

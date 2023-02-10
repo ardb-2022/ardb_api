@@ -28,6 +28,11 @@ namespace SBWSFinanceApi.LL
             return _dac.UpdateInvOpeningData(td);
         }
 
+        internal List<conswise_sb_dl> PopulateDLFixedDepositInvAll(p_report_param dep)
+        {
+            return _dac.PopulateDLFixedDepositInvAll(dep);
+        }
+
         internal int DeleteInvOpeningData(td_def_trans_trf td)
         {
             return _dac.DeleteInvOpeningData(td);
@@ -41,6 +46,11 @@ namespace SBWSFinanceApi.LL
         internal string ApproveInvTranaction(p_gen_param td)
         {
             return _dac.ApproveInvTranaction(td);
+        }
+
+        internal List<tt_sbca_dtl_list> PopulateNearInvReport(p_report_param dep)
+        {
+            return _dac.PopulateNearInvReport(dep);
         }
     }
 }

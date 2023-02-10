@@ -252,6 +252,13 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateLoanStatement(prp);
         }
 
+        internal List<gm_loan_trans> PopulateLoanStatementBmardb(p_report_param prp)
+        {
+            return _dac.PopulateLoanStatementBmardb(prp);
+        }
+
+        
+
         internal List<gm_loan_trans> PopulateOvdTrfDtls(p_report_param prp)
         {
             return _dac.PopulateOvdTrfDtls(prp);

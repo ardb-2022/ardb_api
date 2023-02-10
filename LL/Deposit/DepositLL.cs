@@ -243,6 +243,15 @@ namespace SBWSFinanceApi.LL
         internal List<passbook_print> PassBookPrint(p_report_param dep)
         {
             return _dac.PassBookPrint(dep);
+        }        
+
+        internal List<passbook_print> GetUpdatePassbookData(p_report_param dep)
+        {
+            return _dac.GetUpdatePassbookData(dep);
+        }        
+        internal int UpdatePassbookData(List<passbook_print> dep)
+        {
+            return _dac.UpdatePassbookData(dep);
         }
 
     }

@@ -12,5 +12,6 @@ namespace SBWSFinanceApi.Models
         public string phone { get; set; }
         public DateTime? opening_dt { get; set; }
         public DateTime? disb_dt { get; set; }
+        public Decimal Outstanding { get; set; }
     }
 }

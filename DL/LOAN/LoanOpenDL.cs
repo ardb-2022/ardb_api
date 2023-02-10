@@ -3010,6 +3010,85 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
         }
 
 
+        internal List<gm_loan_trans> PopulateLoanStatementBmardb(p_report_param prp)
+        {
+            List<gm_loan_trans> loanStmtList = new List<gm_loan_trans>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _query = "SELECT a.TRANS_DT,"
+                            + " a.ISSUE_AMT, "
+                            + "a.CURR_PRN_RECOV,"
+                            + "a.OVD_PRN_RECOV,"
+                            + "a.ADV_PRN_RECOV,"
+                            + "a.CURR_INTT_RECOV,"
+                            + "a.OVD_INTT_RECOV,"
+                            + "a.PENAL_INTT_RECOV,"
+                            + "a.CURR_PRN_BAL + a.OVD_PRN_BAL PRN_BAL,"
+                            + "a.CURR_INTT_BAL + a.OVD_INTT_BAL + a.PENAL_INTT_BAL INTT_BAL,"
+                            + "a.PARTICULARS "
+                            + "FROM MD_LOAN_PASSBOOK a"
+                            + " WHERE a.ARDB_CD = {0} "
+                            + "AND a.LOAN_ID = {1} "
+                            + "AND a.TRANS_DT BETWEEN to_date('{2}', 'dd-mm-yyyy') AND to_date('{3}', 'dd-mm-yyyy') "
+                            + "ORDER BY a.TRANS_DT";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_query,
+                                      string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ARDB_CD" : string.Concat("'", prp.ardb_cd, "'"),
+                                      string.IsNullOrWhiteSpace(prp.loan_id) ? "LOAN_ID" : string.Concat("'", prp.loan_id, "'"),
+                                      prp.from_dt != null ? prp.from_dt.ToString("dd/MM/yyyy") : "TRANS_DT",
+                                      prp.to_dt != null ? prp.to_dt.ToString("dd/MM/yyyy") : "TRANS_DT");
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var loanStmt = new gm_loan_trans();
+
+                                        loanStmt.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                        loanStmt.disb_amt = UtilityM.CheckNull<decimal>(reader["ISSUE_AMT"]);                                       
+                                        loanStmt.curr_prn_recov = UtilityM.CheckNull<decimal>(reader["CURR_PRN_RECOV"]);
+                                        loanStmt.adv_prn_recov = UtilityM.CheckNull<decimal>(reader["ADV_PRN_RECOV"]);
+                                        loanStmt.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["OVD_PRN_RECOV"]);
+                                        loanStmt.curr_intt_recov = UtilityM.CheckNull<decimal>(reader["CURR_INTT_RECOV"]);
+                                        loanStmt.ovd_intt_recov = UtilityM.CheckNull<decimal>(reader["OVD_INTT_RECOV"]);
+                                        loanStmt.penal_intt_recov = UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RECOV"]);
+                                        loanStmt.curr_prn = UtilityM.CheckNull<decimal>(reader["PRN_BAL"]);
+                                        loanStmt.curr_intt = UtilityM.CheckNull<decimal>(reader["INTT_BAL"]);
+                                        loanStmt.acc_typ_dsc = UtilityM.CheckNull<string>(reader["PARTICULARS"]);
+
+                                        loanStmtList.Add(loanStmt);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanStmtList = null;
+                    }
+                }
+            }
+            return loanStmtList;
+        }
+
+
         internal List<gm_loan_trans> PopulateOvdTrfDtls(p_report_param prp)
         {
             List<gm_loan_trans> loanStmtList = new List<gm_loan_trans>();
