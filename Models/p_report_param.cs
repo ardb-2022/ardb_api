@@ -24,7 +24,11 @@ namespace SBWSFinanceApi.Models
          public int ad_to_acc_cd {get; set;}
         public int const_cd { get; set; }
         public int acc_type_cd { get; set; }
-        public string fund_type { get; set; }      
+        public string fund_type { get; set; }
+
+        public int lines_printed { get; set; }
+
+        public string cust_cd { get; set; }
 
 
 

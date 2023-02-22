@@ -244,9 +244,38 @@ namespace SBWSFinanceApi.Controllers
 
         [Route("PopulateDLDds")]
         [HttpPost]
-        public List<tt_sbca_dtl_list> PopulateDLDds([FromBody] p_report_param pgp)
+        public List<agentwiseDL> PopulateDLDds([FromBody] p_report_param pgp)
         {
             return _ll2.PopulateDLDds(pgp);
+        }
+
+        [Route("GetPassbookline")]
+        [HttpPost]
+        public int GetPassbookline([FromBody] p_report_param pgp)
+        {
+            return _ll2.GetPassbookline(pgp);
+        }
+
+        [Route("UpdatePassbookline")]
+        [HttpPost]
+        public int UpdatePassbookline([FromBody] p_report_param pgp)
+        {
+            return _ll2.UpdatePassbookline(pgp);
+        }
+
+        [Route("PopulateSlabwiseDeposit")]
+        [HttpPost]
+        public List<agentwiseDL> PopulateSlabwiseDeposit([FromBody] p_report_param pgp)
+        {
+            return _ll2.PopulateSlabwiseDeposit(pgp);
+        }
+
+        
+        [Route("GetDdsInterest")]
+        [HttpPost]
+        public decimal GetDdsInterest([FromBody] p_report_param pgp)
+        {
+            return _ll2.GetDdsInterest(pgp);
         }
 
         [Route("PopulateDLRecuring")]
@@ -334,6 +363,13 @@ namespace SBWSFinanceApi.Controllers
         public int UpdatePassbookData([FromBody] List<passbook_print> pgp)
         {
             return _ll2.UpdatePassbookData(pgp);
+        }
+        
+        [Route("GetInterestCertificate")]
+        [HttpPost]
+        public List<tt_td_intt_cert> GetInterestCertificate([FromBody] p_report_param pgp)
+        {
+            return _ll2.GetInterestCertificate(pgp);
         }
 
         [Route("GetDailyDeposit")]

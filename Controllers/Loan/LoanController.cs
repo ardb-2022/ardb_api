@@ -41,7 +41,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateLoanDetailedList(prp);
         }
 
-        
+        [Route("PopulateLoanDetailedListAll")]
+        [HttpPost]
+        public List<tt_detailed_list_loan> PopulateLoanDetailedListAll(p_report_param prp)
+        {
+            return _ll.PopulateLoanDetailedListAll(prp);
+        }
+
+
         [Route("GetDefaultList")]
         [HttpPost]
         public List<tt_detailed_list_loan> GetDefaultList(p_report_param prp)
@@ -90,6 +97,14 @@ namespace SBWSFinanceApi.Controllers
         public List<tt_npa> PopulateNPAList(p_report_param prp)
         {
             return _ll.PopulateNPAList(prp);
+        }
+
+
+        [Route("PopulateNPAListAll")]
+        [HttpPost]
+        public List<tt_npa> PopulateNPAListAll(p_report_param prp)
+        {
+            return _ll.PopulateNPAListAll(prp);
         }
 
         [Route("PopulateLoanCloseRegister")]
@@ -406,10 +421,45 @@ namespace SBWSFinanceApi.Controllers
         {         
            
             return _ll.DeleteKccData(loan);
-        }  
-        
-        
-       
+        }
+
+        [Route("LoanGetPassbookline")]
+        [HttpPost]
+        public int LoanGetPassbookline([FromBody] p_report_param pgp)
+        {
+            return _ll.LoanGetPassbookline(pgp);
+        }
+
+        [Route("LoanUpdatePassbookline")]
+        [HttpPost]
+        public int LoanUpdatePassbookline([FromBody] p_report_param pgp)
+        {
+            return _ll.LoanUpdatePassbookline(pgp);
+        }
+
+        [Route("LoanPassBookPrint")]
+        [HttpPost]
+        public List<LoanPassbook_Print> LoanPassBookPrint([FromBody] p_report_param pgp)
+        {
+            return _ll.LoanPassBookPrint(pgp);
+        }
+
+        [Route("LoanGetUpdatePassbookData")]
+        [HttpPost]
+        public List<LoanPassbook_Print> LoanGetUpdatePassbookData([FromBody] p_report_param pgp)
+        {
+            return _ll.LoanGetUpdatePassbookData(pgp);
+        }
+
+        [Route("LoanUpdatePassbookData")]
+        [HttpPost]
+        public int LoanUpdatePassbookData([FromBody] List<LoanPassbook_Print> pgp)
+        {
+            return _ll.LoanUpdatePassbookData(pgp);
+        }
+
+
+
     }
 }
    

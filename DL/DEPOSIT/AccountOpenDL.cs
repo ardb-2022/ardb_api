@@ -357,14 +357,14 @@ namespace SBWSDepositApi.Deposit
         {
             float int_rate = 0;
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
-            string _query = "Select intr.intt_rate INT_RATE "
+            string _query = " SELECT INT_RATE FROM (Select intr.intt_rate INT_RATE "
                             + " From mm_acc_type_group act, mm_interest intr "
                             + "  Where intr.ardb_cd= {0} and act.acc_type_cd = {1} "
                             + " and intr.acc_type_cd = act.acc_group_cd "
                             + " and intr.effective_dt <= {2} "
                             + " and intr.catg_cd      = {3} "
-                            + "and intr.no_of_days >= {4} + 1 "
-                            + " and rownum = 1 ";
+                            + "and intr.no_of_days >= {4} + 1  ORDER BY intr.EFFECTIVE_DT DESC ,intr.NO_OF_DAYS)"
+                            + " Where rownum = 1 ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {

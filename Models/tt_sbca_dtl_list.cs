@@ -33,6 +33,8 @@ namespace SBWSFinanceApi.Models
 
         public string branch_name { get; set; }
 
+        public int no_of_account { get; set; }
+
     }
 
 }

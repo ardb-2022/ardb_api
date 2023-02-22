@@ -134,6 +134,11 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateLoanDetailedList(prp);
         }
 
+        internal List<tt_detailed_list_loan> PopulateLoanDetailedListAll(p_report_param prp)
+        {
+            return _dac.PopulateLoanDetailedListAll(prp);
+        }
+
         internal List<demand_list> GetDemandList(p_report_param prp)
         {
             return _dac.GetDemandList(prp);
@@ -236,6 +241,11 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateNPAList(prp);
         }
 
+        internal List<tt_npa> PopulateNPAListAll(p_report_param prp)
+        {
+            return _dac.PopulateNPAListAll(prp);
+        }
+
         internal List<gm_loan_trans> PopulateRecoveryRegisterAccwise(p_report_param prp)
         {
             return _dac.PopulateRecoveryRegisterAccwise(prp);
@@ -284,6 +294,30 @@ namespace SBWSFinanceApi.LL
         {
             return _dackcc.GetKccData(td);
         }
-    
+
+        internal int LoanGetPassbookline(p_report_param dep)
+        {
+            return _dac.LoanGetPassbookline(dep);
+        }
+
+        internal int LoanUpdatePassbookline(p_report_param dep)
+        {
+            return _dac.LoanUpdatePassbookline(dep);
+        }
+
+        internal List<LoanPassbook_Print> LoanPassBookPrint(p_report_param dep)
+        {
+            return _dac.LoanPassBookPrint(dep);
+        }
+
+        internal List<LoanPassbook_Print> LoanGetUpdatePassbookData(p_report_param dep)
+        {
+            return _dac.LoanGetUpdatePassbookData(dep);
+        }
+        internal int LoanUpdatePassbookData(List<LoanPassbook_Print> dep)
+        {
+            return _dac.LoanUpdatePassbookData(dep);
+        }
+
     }
 }

@@ -186,11 +186,30 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.PopulateDLSavingsAll(dep);
         }
+        
+        internal decimal GetDdsInterest(p_report_param dep)
+        {
+            return _dac.GetDdsInterest(dep);
+        }
 
+        internal int GetPassbookline(p_report_param dep)
+        {
+            return _dac.GetPassbookline(dep);
+        }
+        
+        internal int UpdatePassbookline(p_report_param dep)
+        {
+            return _dac.UpdatePassbookline(dep);
+        }
 
-        internal List<tt_sbca_dtl_list> PopulateDLDds(p_report_param dep)
+        internal List<agentwiseDL> PopulateDLDds(p_report_param dep)
         {
             return _dac.PopulateDLDds(dep);
+        }
+
+        internal List<agentwiseDL> PopulateSlabwiseDeposit(p_report_param dep)
+        {
+            return _dac.PopulateSlabwiseDeposit(dep);
         }
 
 
@@ -252,6 +271,11 @@ namespace SBWSFinanceApi.LL
         internal int UpdatePassbookData(List<passbook_print> dep)
         {
             return _dac.UpdatePassbookData(dep);
+        }
+
+        internal List<tt_td_intt_cert> GetInterestCertificate(p_report_param dep)
+        {
+            return _dac.GetInterestCertificate(dep);
         }
 
     }

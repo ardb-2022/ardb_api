@@ -778,16 +778,22 @@ namespace SBWSFinanceApi.DL
         internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
         {
             List<tm_deposit> depo = new List<tm_deposit>();
-            string _query = " SELECT TM_DEPOSIT.ACC_TYPE_CD, TM_DEPOSIT.ACC_NUM, "
-                           + " Decode(TM_DEPOSIT.ACC_TYPE_CD, 1,TM_DEPOSIT.CLR_BAL,7,TM_DEPOSIT.CLR_BAL,8,TM_DEPOSIT.CLR_BAL,6, f_get_rd_prn ({0},TM_DEPOSIT.ACC_NUM,SYSDATE),TM_DEPOSIT.PRN_AMT) Balance, "
-                           + " TM_DEPOSIT.CUST_CD,MM_CUSTOMER.CUST_NAME,TM_DEPOSIT.ACC_STATUS,  "
-                           + " TM_DEPOSIT.PRN_AMT PRN_AMT, TM_DEPOSIT.INTT_AMT INTT_AMT, "
-                           + " TM_DEPOSIT.INSTL_AMT INSTL_AMT "
-                           + " FROM  TM_DEPOSIT,MM_CUSTOMER   "
-                           + " WHERE   TM_DEPOSIT.ARDB_CD = MM_CUSTOMER.ARDB_CD AND TM_DEPOSIT.CUST_CD = MM_CUSTOMER.CUST_CD   "
-                           + " And    TM_DEPOSIT.CUST_CD = {1}  "
-                           + " AND TM_DEPOSIT.ARDB_CD = {2} "
-                           + " Order By TM_DEPOSIT.ACC_TYPE_CD  ";
+            string _query = " SELECT a.ACC_TYPE_CD, a.ACC_NUM, "
+                           + " Decode(a.ACC_TYPE_CD, 1,a.CLR_BAL,7,a.CLR_BAL,8,a.CLR_BAL,9,a.CLR_BAL,6,f_get_rd_prn ({0},a.ACC_NUM,SYSDATE),a.PRN_AMT) Balance, "
+                           + " a.CUST_CD,b.CUST_NAME, a.ACC_STATUS,  "
+                           + " a.PRN_AMT PRN_AMT, a.INTT_AMT INTT_AMT, "
+                           + " a.INSTL_AMT INSTL_AMT "
+                           + " FROM  TM_DEPOSIT a , MM_CUSTOMER b   "
+                           + " WHERE   a.ARDB_CD = b.ARDB_CD AND a.CUST_CD = b.CUST_CD   "
+                           + " And     a.CUST_CD = {1} "
+                           + " AND     a.ARDB_CD = {2} "
+                           + " AND     a.RENEW_ID = (SELECT max(RENEW_ID) "
+                           + "                      FROM TM_DEPOSIT c "
+                           + "                      WHERE a.ARDB_CD = c.ARDB_CD"
+                           + "                      AND a.ACC_TYPE_CD = c.ACC_TYPE_CD"
+                           + "                      AND a.ACC_NUM = c.ACC_NUM) "
+                           + " Order By a.ACC_TYPE_CD  ";
+
             using (var connection = OrclDbConnection.NewConnection)
             {
 

@@ -1128,7 +1128,7 @@ namespace SBWSDepositApi.Deposit
 + " AND  V_TRANS_DTLS.ACC_TYPE_CD = {3}  AND "
 + "  V_TRANS_DTLS.ACC_NUM = {4}  AND "
 + "  V_TRANS_DTLS.APPROVAL_STATUS IN  ({5},{6})  AND "
-+ " V_TRANS_DTLS.TRANS_TYPE <> {7} ORDER BY  NVL(V_TRANS_DTLS.CREATED_DT,V_TRANS_DTLS.TRANS_DT) DESC";
++ " V_TRANS_DTLS.TRANS_TYPE <> {7} ORDER BY  V_TRANS_DTLS.TRANS_DT DESC,V_TRANS_DTLS.TRANS_CD DESC";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
@@ -3164,6 +3164,7 @@ namespace SBWSDepositApi.Deposit
 
                                                         tca1.tot_cons_count = tca1.tot_cons_count + 1;
                                                         tca1.tot_cons_balance = tca1.tot_cons_balance + UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
+                                                        tca1.tot_cons_intt_balance = tca1.tot_cons_intt_balance + UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
 
                                                         tcaRet1.ttsbcadtllist.Add(tca);
 
@@ -3194,9 +3195,9 @@ namespace SBWSDepositApi.Deposit
         }
 
 
-        internal List<tt_sbca_dtl_list> PopulateDLDds(p_report_param prp)
+        internal List<agentwiseDL> PopulateDLDds(p_report_param prp)
         {
-            List<tt_sbca_dtl_list> tcaRet = new List<tt_sbca_dtl_list>();
+            List<agentwiseDL> tcaRet = new List<agentwiseDL>();
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _query = "p_dds_prov_intt_new";
             string _query1 = " SELECT TT_DDS_PROV_INTT.ACC_TYPE_CD,  "
@@ -3208,7 +3209,13 @@ namespace SBWSDepositApi.Deposit
                             + " TT_DDS_PROV_INTT.PRN_AMT,    "
                             + " TT_DDS_PROV_INTT.INTT_AMT   "
                             + " FROM TT_DDS_PROV_INTT,MM_AGENT " 
-                            + " WHERE  TT_DDS_PROV_INTT.AGENT_CD = MM_AGENT.AGENT_CD  and MM_AGENT.ARDB_CD = {0} AND TT_DDS_PROV_INTT.PRN_AMT > 0  ORDER BY TT_DDS_PROV_INTT.ACC_NUM ";
+                            + " WHERE  TT_DDS_PROV_INTT.AGENT_CD = MM_AGENT.AGENT_CD  and MM_AGENT.ARDB_CD = {0} " 
+                            + "  AND TT_DDS_PROV_INTT.PRN_AMT > 0  AND MM_AGENT.AGENT_NAME = {1} ORDER BY TT_DDS_PROV_INTT.ACC_NUM ";
+
+            string _query2 = " SELECT DISTINCT MM_AGENT.AGENT_NAME "
+                            + " FROM TT_DDS_PROV_INTT,MM_AGENT "
+                            + " WHERE  TT_DDS_PROV_INTT.AGENT_CD = MM_AGENT.AGENT_CD  and MM_AGENT.ARDB_CD = {0} AND TT_DDS_PROV_INTT.PRN_AMT > 0   ";
+
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -3237,27 +3244,158 @@ namespace SBWSDepositApi.Deposit
                             command.ExecuteNonQuery();
                             transaction.Commit();
                         }
-                        _statement = string.Format(_query1,
-                                       string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"));
+
+
+                        string _statement1 = string.Format(_query2,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"));
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        agentwiseDL tcaRet1 = new agentwiseDL();
+
+                                        tcaRet1.agentname = UtilityM.CheckNull<string>(reader1["AGENT_NAME"]);
+
+
+                                        _statement = string.Format(_query1,
+                                       string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"), string.Concat("'", UtilityM.CheckNull<string>(reader1["AGENT_NAME"]), "'"));
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var tca = new tt_sbca_dtl_list();
+                                                        tca.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
+                                                        tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                                        tca.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                                        tca.agent_name = UtilityM.CheckNull<string>(reader["AGENT_NAME"]);
+                                                        tca.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
+                                                        tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MATURITY_DT"]);
+                                                        tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
+                                                        tca.intt_prov_amt = UtilityM.CheckNull<decimal>(reader["INTT_AMT"]);
+
+                                                        tcaRet1.tot_prn = tcaRet1.tot_prn + tca.PRN_AMT;
+                                                        tcaRet1.tot_count = tcaRet1.tot_count + 1;
+
+                                                        tcaRet1.ttsbcadtllist.Add(tca);
+
+                                                        //tcaRet.Add(tca);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        tcaRet.Add(tcaRet1);
+                                    }
+                                }
+                            }
+                        }
+                                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        tcaRet = null;
+                    }
+                }
+            }
+            return tcaRet;
+        }
+
+
+
+        internal List<agentwiseDL> PopulateSlabwiseDeposit(p_report_param prp)
+        {
+            List<agentwiseDL> tcaRet = new List<agentwiseDL>();
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = "p_slabwise_deposit";
+            string _query1 = " SELECT TT_SLABWISE_DEPOSIT_NEW.ACC_TYPE_CD ,  "
+                            + " TT_SLABWISE_DEPOSIT_NEW.CONSTITUTION_CD ,       "
+                            + " TT_SLABWISE_DEPOSIT_NEW.NO_OF_ACCOUNT ,     "
+                            + " TT_SLABWISE_DEPOSIT_NEW.BALANCE_AMT     "
+                            + " FROM TT_SLABWISE_DEPOSIT_NEW "
+                            + " WHERE  TT_SLABWISE_DEPOSIT_NEW.ACC_TYPE_CD = {0} " ;
+
+            string _query2 = " SELECT DISTINCT TT_SLABWISE_DEPOSIT_NEW.ACC_TYPE_CD "
+                           + " FROM TT_SLABWISE_DEPOSIT_NEW " ;
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        _statement = string.Format(_query);
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
-                            using (var reader = command.ExecuteReader())
-                            {
-                                if (reader.HasRows)
-                                {
-                                    while (reader.Read())
-                                    {
-                                        var tca = new tt_sbca_dtl_list();
-                                        tca.acc_type_cd = UtilityM.CheckNull<int>(reader["ACC_TYPE_CD"]);
-                                        tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
-                                        tca.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
-                                        tca.agent_name= UtilityM.CheckNull<string>(reader["AGENT_NAME"]);
-                                        tca.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
-                                        tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MATURITY_DT"]);
-                                        tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
-                                        tca.intt_prov_amt = UtilityM.CheckNull<decimal>(reader["INTT_AMT"]);                                       
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
+                            command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
 
-                                        tcaRet.Add(tca);
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                        }
+
+
+                        string _statement1 = string.Format(_query2);
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        agentwiseDL tcaRet1 = new agentwiseDL();
+
+                                        tcaRet1.agentname = UtilityM.CheckNull<string>(reader1["ACC_TYPE_CD"]);
+
+
+                                        _statement = string.Format(_query1, string.Concat("'", UtilityM.CheckNull<string>(reader1["ACC_TYPE_CD"]), "'"));
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var tca = new tt_sbca_dtl_list();
+                                                        tca.acc_type_desc = UtilityM.CheckNull<string>(reader["ACC_TYPE_CD"]);
+                                                        tca.constitution_desc = UtilityM.CheckNull<string>(reader["CONSTITUTION_CD"]);
+                                                        tca.no_of_account = UtilityM.CheckNull<int>(reader["NO_OF_ACCOUNT"]);
+                                                        tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["BALANCE_AMT"]);
+
+                                                        tcaRet1.tot_prn = tcaRet1.tot_prn + tca.PRN_AMT;
+                                                        tcaRet1.tot_count = tcaRet1.tot_count + tca.no_of_account;
+
+                                                        tcaRet1.ttsbcadtllist.Add(tca);
+
+                                                        //tcaRet.Add(tca);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        tcaRet.Add(tcaRet1);
                                     }
                                 }
                             }
@@ -3272,6 +3410,71 @@ namespace SBWSDepositApi.Deposit
             }
             return tcaRet;
         }
+
+
+
+        internal decimal GetDdsInterest(p_report_param prp)
+        {
+            decimal ld_intt = 0;
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = "p_dds_intt_new";
+            string _query1 = " SELECT   f_calc_interest_dds({0},{1},substr({2},1,10)) INTT_AMT From dual ";
+                                
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        _statement = string.Format(_query);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+                            var parm2 = new OracleParameter("as_acc_num", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.acc_num;
+                            command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                        }
+                        _statement = string.Format(_query1,
+                                       string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                       string.IsNullOrWhiteSpace(prp.acc_num) ? "acc_num" : string.Concat("'", prp.acc_num, "'"),
+                                       string.Concat("'", prp.from_dt, "'") );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {                                       
+
+                                        ld_intt = UtilityM.CheckNull<decimal>(reader["INTT_AMT"]);                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        ld_intt = -1;
+                    }
+                }
+            }
+            return ld_intt;
+        }
+
 
 
         internal List<tt_acc_stmt> PopulateASSaving(p_report_param prp)
@@ -4053,6 +4256,208 @@ namespace SBWSDepositApi.Deposit
             }
             return _ret;
         }
+
+
+        internal int UpdatePassbookline(p_report_param prp)
+        {
+            int _ret = 0;
+
+            string _query = "UPDATE MD_PASSBOOK_ACC_LINE  "
+                            + " SET LINES_PRINTED = {0} "
+                            + " WHERE ARDB_CD = {1} "
+                            + " AND ACC_TYPE_CD = {2} "
+                            + " AND ACC_NUM = {3} "
+                            + " AND DEL_FLAG = 'N' ";
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                       
+                            _statement = string.Format(_query,
+                                                    prp.lines_printed,
+                                                    string.Concat("'", prp.ardb_cd, "'"),
+                                                    prp.acc_type_cd,
+                                                    string.Concat("'", prp.acc_num, "'"));
+
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.ExecuteNonQuery();
+
+                            }
+                    
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+
+        internal int GetPassbookline(p_report_param prp)
+        {
+
+            int lines_printed = 0;
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+
+            // prp.from_dt = prp.from_dt.Date;
+            // prp.to_dt = prp.to_dt.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+            string _query = " SELECT MD_PASSBOOK_ACC_LINE.LINES_PRINTED         "
+                  + " FROM MD_PASSBOOK_ACC_LINE                                              "
+                  + " WHERE (MD_PASSBOOK_ACC_LINE.ACC_TYPE_CD = {0} ) AND                   "
+                  + "       (MD_PASSBOOK_ACC_LINE.ACC_NUM = '{1}' )                         "
+                  + " AND   (MD_PASSBOOK_ACC_LINE.ARDB_CD = '{2}') AND (MD_PASSBOOK_ACC_LINE.DEL_FLAG = 'N')  ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_query,
+                                                   prp.acc_type_cd,
+                                                   prp.acc_num,
+                                                   prp.ardb_cd);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        lines_printed = UtilityM.CheckNull<int>(reader["LINES_PRINTED"]);                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        lines_printed = -1 ;
+                    }
+                }
+            }
+
+            return lines_printed;
+        }
+
+
+
+        internal List<tt_td_intt_cert> GetInterestCertificate(p_report_param prp)
+        {
+            List<tt_td_intt_cert> tcaRet = new List<tt_td_intt_cert>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = "p_td_intt_cert";
+            string _query1 = " SELECT  MM_ACC_TYPE.ACC_TYPE_DESC, "
+                            + " TT_TD_INTT_CERT.ACC_NUM,           "
+                            + " TT_TD_INTT_CERT.CUST_NAME,           "
+                            + " TT_TD_INTT_CERT.GUARDIAN_NAME,           "
+                            + " TT_TD_INTT_CERT.ADDRESS,        "
+                            + " TT_TD_INTT_CERT.OPENING_DT,           "
+                            + " TT_TD_INTT_CERT.MAT_DT,          "
+                            + " TT_TD_INTT_CERT.PRN_AMT,         "
+                            + " TT_TD_INTT_CERT.INTT_RT,           "
+                            + " TT_TD_INTT_CERT.PROV_INTT_AMT,        "
+                            + " TT_TD_INTT_CERT.ACC_CLOSE_DT           "
+                            + " FROM TT_TD_INTT_CERT,MM_ACC_TYPE "
+                            + " WHERE TT_TD_INTT_CERT.ACC_TYPE_CD = MM_ACC_TYPE.ACC_TYPE_CD ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        _statement = string.Format(_query);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("as_cust_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.cust_cd;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_from_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm4.Value = prp.to_dt;
+                            command.Parameters.Add(parm4);                            
+
+                            command.ExecuteNonQuery();
+                            
+                        }
+                        _statement = string.Format(_query1);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var tca = new tt_td_intt_cert();
+                                        tca.acc_type_cd = UtilityM.CheckNull<string>(reader["ACC_TYPE_DESC"]);
+                                        tca.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                        tca.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                        tca.guardian_name = UtilityM.CheckNull<string>(reader["GUARDIAN_NAME"]);
+                                        tca.address = UtilityM.CheckNull<string>(reader["ADDRESS"]);
+                                        tca.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
+                                        tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MAT_DT"]);
+                                        tca.prn_amt = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
+                                        tca.intt_rt = UtilityM.CheckNull<Single>(reader["INTT_RT"]);
+                                        tca.prov_intt_amt = UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
+                                        tca.acc_close_dt = UtilityM.CheckNull<DateTime>(reader["ACC_CLOSE_DT"]);
+
+                                        tcaRet.Add(tca);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        tcaRet = null;
+                    }
+                }
+            }
+            return tcaRet;
+        }
+
 
     }
 }

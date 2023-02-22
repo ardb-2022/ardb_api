@@ -19,5 +19,7 @@ namespace SBWSFinanceApi.Models
         public string activity_name { get; set; }
         public DateTime computed_till_dt {get; set;}
         public DateTime list_dt { get; set; }
+
+        public string ledger_folio_no { get; set; }
     }
 }
