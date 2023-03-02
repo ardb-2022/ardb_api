@@ -514,7 +514,35 @@ namespace SBWSFinanceApi.Controllers
             return __ll.GetAgentData(prm);
         }
 
+        [Route("POPULATE_SB_INTT")]
+        [HttpPost]
+        public List<sb_intt_list> POPULATE_SB_INTT([FromBody] p_gen_param prm)
+        {
+            return __ll.POPULATE_SB_INTT(prm);
+        }
+
+        [Route("POST_SB_INTT")]
+        [HttpPost]
+        public int POST_SB_INTT([FromBody] p_gen_param prm)
+        {
+            return __ll.POST_SB_INTT(prm);
+        }
         
+        [Route("GetAgentCommission")]
+        [HttpPost]
+        public List<tt_agent_comm> GetAgentCommission([FromBody] p_gen_param prm)
+        {
+            return __ll.GetAgentCommission(prm);
+        }
+        
+        [Route("PostAgentCommission")]
+        [HttpPost]
+        public int PostAgentCommission([FromBody] p_gen_param prm)
+        {
+            return __ll.PostAgentCommission(prm);
+        }
+
+
         [Route("PopulateActiveSIList")]
         [HttpPost]
         public List<standing_instr> PopulateActiveSIList(p_report_param prp)

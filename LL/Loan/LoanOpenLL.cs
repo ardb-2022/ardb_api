@@ -319,5 +319,31 @@ namespace SBWSFinanceApi.LL
             return _dac.LoanUpdatePassbookData(dep);
         }
 
+        internal List<td_loan_charges> GetLoanCharges(p_report_param loan)
+        {
+            return _dac.GetLoanCharges(loan);
+        }
+
+        internal int InsertLoanChargesData(td_loan_charges loan)
+        {
+            return _dac.InsertLoanChargesData(loan);
+        }
+
+        internal int UpdateLoanChargesData(td_loan_charges loan)
+        {
+            return _dac.UpdateLoanChargesData(loan);
+        }
+        
+        internal int ApproveLoanChargesData(td_loan_charges loan)
+        {
+            return _dac.ApproveLoanChargesData(loan);
+        }
+
+        internal int DeleteLoanChargesData(td_loan_charges loan)
+        {
+            return _dac.DeleteLoanChargesData(loan);
+        }
+
+
     }
 }

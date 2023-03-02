@@ -5865,6 +5865,238 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
             return lines_printed;
         }
 
+
+        internal List<td_loan_charges> GetLoanCharges(p_report_param loan)
+        {
+            List<td_loan_charges> loanRet = new List<td_loan_charges>();
+            string _query = " SELECT ARDB_CD,LOAN_ID,CHARGE_ID,CHARGE_TYPE,to_date(CHARGE_DT,'dd/mm/yyyy'),CHARGE_AMT,APPROVAL_STATUS,REMARKS "
+                     + " FROM TD_LOAN_CHARGES  "
+                     + " WHERE ARDB_CD = {0} AND LOAN_ID={1} ";
+
+            _statement = string.Format(_query,
+                                        !string.IsNullOrWhiteSpace(loan.ardb_cd) ? string.Concat("'", loan.ardb_cd, "'") : "ARDB_CD",
+                                        !string.IsNullOrWhiteSpace(loan.loan_id) ? string.Concat("'", loan.loan_id, "'") : "LOAN_ID");
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+            {
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        {
+                            while (reader.Read())
+                            {
+                                var d = new td_loan_charges();
+                                d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                d.charge_id = UtilityM.CheckNull<int>(reader["CHARGE_ID"]);
+                                d.charge_type = UtilityM.CheckNull<string>(reader["CHARGE_TYPE"]);
+                                d.charge_dt = UtilityM.CheckNull<DateTime>(reader["CHARGE_DT"]);
+                                d.charge_amt = UtilityM.CheckNull<decimal>(reader["CHARGE_AMT"]);
+                                d.approval_status = UtilityM.CheckNull<string>(reader["APPROVAL_STATUS"]);
+                                d.remarks = UtilityM.CheckNull<string>(reader["REMARKS"]);
+                                loanRet.Add(d);
+                            }
+                        }
+                    }
+                }
+            }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanRet = null;
+                    }
+                }
+            }
+            return loanRet;
+        }
+
+
+        internal int InsertLoanChargesData(td_loan_charges prp)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO TD_LOAN_CHARGES  "
+                            + " VALUES({0},{1},{2},{3},{4},{5},'U',{6},{7},SYSDATE,NULL,NULL,NULL,NULL,'N')";
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                        string.Concat("'", prp.ardb_cd, "'"),
+                        string.Concat("'", prp.loan_id, "'"),
+                        prp.charge_id,
+                        string.Concat("'", prp.charge_type, "'"),
+                        string.Concat("'", prp.charge_dt.ToString("dd/MM/yyyy"), "'"),
+                        prp.charge_amt,
+                        string.Concat("'", prp.remarks, "'"),
+                        prp.created_by
+                        );
+
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.ExecuteNonQuery();
+
+                            }
+                    
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal int UpdateLoanChargesData(td_loan_charges prp)
+        {
+            int _ret = 0;
+
+            string _query = " UPDATE TD_LOAN_CHARGES  "
+                          + " SET CHARGE_TYPE = {0} , CHARGE_DT = {1} , CHARGE_AMT = {2}, REMARKS= {3}, MODIFIED_BY= {4}, MODIFIED_DT = SYSDATE  "
+                          + " WHERE ARDB_CD = {5} AND LOAN_ID= {6} AND CHARGE_ID = {7}";
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                        string.Concat("'", prp.charge_type, "'"),
+                        string.Concat("'", prp.charge_dt.ToString("dd/MM/yyyy"), "'"),
+                        prp.charge_amt,
+                        string.Concat("'", prp.remarks, "'"),
+                        string.Concat("'", prp.modified_by, "'"),
+                        string.Concat("'", prp.ardb_cd, "'"),
+                        string.Concat("'", prp.loan_id, "'"),
+                        prp.charge_id
+                        );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal int ApproveLoanChargesData(td_loan_charges prp)
+        {
+            int _ret = 0;
+
+            string _query = " UPDATE TD_LOAN_CHARGES  "
+                          + " SET APPROVAL_STATUS = 'A', APPROVED_BY = {0} AND APPROVED_DT = SYSDATE  "
+                          + " WHERE ARDB_CD = {1} AND LOAN_ID= {2} AND CHARGE_ID = {3}";
+
+           using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                        string.Concat("'", prp.approved_by, "'"),
+                        string.Concat("'", prp.ardb_cd, "'"),
+                        string.Concat("'", prp.loan_id, "'"),
+                        prp.charge_id
+                        );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal int DeleteLoanChargesData(td_loan_charges prp)
+        {
+            int _ret = 0;
+
+            string _query = " UPDATE TD_LOAN_CHARGES  "
+                          + " SET DEL_FLAG = 'Y', MODIFIED_BY = {0} AND MODIFIED_DT = SYSDATE  "
+                          + " WHERE ARDB_CD = {1} AND LOAN_ID= {2} AND CHARGE_ID = {3} AND APPROVAL_STATUS = 'U' ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                        string.Concat("'", prp.modified_by, "'"),
+                        string.Concat("'", prp.ardb_cd, "'"),
+                        string.Concat("'", prp.loan_id, "'"),
+                        prp.charge_id
+                        );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
     }
 }
+
+
 

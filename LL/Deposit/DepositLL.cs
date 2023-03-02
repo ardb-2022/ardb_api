@@ -61,6 +61,26 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDepositWithChild(dep);
         }
 
+        internal List<sb_intt_list> POPULATE_SB_INTT(p_gen_param dep)
+        {
+            return _dac.POPULATE_SB_INTT(dep);
+        }
+        
+        internal int POST_SB_INTT(p_gen_param dep)
+        {
+            return _dac.POST_SB_INTT(dep);
+        }
+        
+        internal List<tt_agent_comm> GetAgentCommission(p_gen_param dep)
+        {
+            return _dac.GetAgentCommission(dep);
+        }
+
+        internal int PostAgentCommission(p_gen_param dep)
+        {
+            return _dac.PostAgentCommission(dep);
+        }
+
         internal List<standing_instr> PopulateActiveSIList(p_report_param prp)
         {
             return _dac.PopulateActiveSIList(prp);

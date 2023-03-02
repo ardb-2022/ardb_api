@@ -515,22 +515,15 @@ namespace SBWSFinanceApi.DL
         internal List<td_def_trans_trf> GetDepTransTrfwithChild(td_def_trans_trf tdt)
         {
             List<td_def_trans_trf> tdtRets = new List<td_def_trans_trf>();
-            string _query = " SELECT a.brn_cd,a.trans_dt,a.trans_cd,a.acc_type_cd,a.ACC_NUM,b.acc_type_desc,c.ACC_NAME ,F.CUST_NAME,A.amount "
+            string _query = " SELECT a.brn_cd,a.trans_dt,a.trans_cd,a.acc_type_cd,a.ACC_NUM,b.acc_type_desc,c.ACC_NAME ,(SELECT D.CUST_NAME FROM MM_CUSTOMER D,TM_DEPOSIT E WHERE D.ARDB_CD = E.ARDB_CD AND D.CUST_CD=E.CUST_CD AND E.ACC_TYPE_CD = A.ACC_TYPE_CD AND E.ACC_NUM = A.ACC_NUM ) CUST_NAME,A.amount "
                           + " FROM TD_DEP_TRANS_TRF A, "
                           + " MM_ACC_TYPE B, "
-                          + " M_ACC_MASTER C, "
-                          + " (SELECT D.CUST_NAME,E.ACC_NUM,E.BRN_CD "
-                          + " FROM MM_CUSTOMER D, "
-                          + " TM_DEPOSIT E "
-                          + " WHERE D.ARDB_CD = E.ARDB_CD AND D.CUST_CD=E.CUST_CD "
-                          + " AND D.BRN_CD=E.BRN_CD ) F "
+                          + " M_ACC_MASTER C "
                           + " WHERE  (A.ARDB_CD = {0}) AND (A.BRN_CD = {1}) AND "
                           + " (A.TRANS_DT = to_date('{2}','dd-mm-yyyy' )) AND  "
                           + " (  A.TRANS_CD = {3} )   "
                           + " AND A.ACC_TYPE_CD=B.ACC_TYPE_CD (+) "
                           + " AND A.ACC_TYPE_CD=C.ACC_CD(+) "
-                          + " AND A.ACC_NUM=F.ACC_NUM (+) "
-                          + " AND A.BRN_CD=F.BRN_CD(+) "
                           + " AND A.ARDB_CD=C.ARDB_CD(+)  AND A.DEL_FLAG = 'N' ";
             using (var connection = OrclDbConnection.NewConnection)
             {

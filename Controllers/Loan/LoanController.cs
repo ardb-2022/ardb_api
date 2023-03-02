@@ -458,6 +458,49 @@ namespace SBWSFinanceApi.Controllers
             return _ll.LoanUpdatePassbookData(pgp);
         }
 
+        [Route("GetLoanCharges")]
+        [HttpPost]
+        public List<td_loan_charges> GetLoanCharges([FromBody]  p_report_param loan)
+        {
+
+            return _ll.GetLoanCharges(loan);
+        }
+
+        [Route("InsertLoanChargesData")]
+        [HttpPost]
+        public int InsertLoanChargesData([FromBody] td_loan_charges loan)
+        {
+
+            return _ll.InsertLoanChargesData(loan);
+        }
+        
+        [Route("UpdateLoanChargesData")]
+        [HttpPost]
+        public int UpdateLoanChargesData([FromBody] td_loan_charges loan)
+        {
+
+            return _ll.UpdateLoanChargesData(loan);
+        }
+
+        
+        [Route("ApproveLoanChargesData")]
+        [HttpPost]
+        public int ApproveLoanChargesData([FromBody] td_loan_charges loan)
+        {
+
+            return _ll.ApproveLoanChargesData(loan);
+        }
+
+        
+        [Route("DeleteLoanChargesData")]
+        [HttpPost]
+        public int DeleteLoanChargesData([FromBody] td_loan_charges loan)
+        {
+
+            return _ll.DeleteLoanChargesData(loan);
+        }
+
+
 
 
     }
