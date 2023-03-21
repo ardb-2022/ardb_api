@@ -363,7 +363,7 @@ namespace SBWSDepositApi.Deposit
                             + " and intr.acc_type_cd = act.acc_group_cd "
                             + " and intr.effective_dt <= {2} "
                             + " and intr.catg_cd      = {3} "
-                            + "and intr.no_of_days >= {4} + 1  ORDER BY intr.EFFECTIVE_DT DESC ,intr.NO_OF_DAYS)"
+                            + "and intr.no_of_days >= {4}   ORDER BY intr.EFFECTIVE_DT DESC ,intr.NO_OF_DAYS)"
                             + " Where rownum = 1 ";
 
             using (var connection = OrclDbConnection.NewConnection)
@@ -3363,12 +3363,11 @@ namespace SBWSDepositApi.Deposit
                             + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
                             + " BONUS_INTT_RT, TRANSFER_FLAG, TRANSFER_DT, AGENT_CD ,DEL_FLAG                                  "
                             + " FROM TM_DEPOSIT  T1                                                               "
-                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND DEL_FLAG = 'N'  "
-                            + " AND T1.RENEW_ID = ( SELECT MAX(RENEW_ID) FROM TM_DEPOSIT T2 WHERE  ARDB_CD = {4} AND  T1.BRN_CD = T2.BRN_CD AND T1.ACC_NUM = T2.ACC_NUM AND T1.ACC_TYPE_CD = T2.ACC_TYPE_CD )";
+                            + " WHERE ARDB_CD = {0} AND ACC_NUM={1} AND ACC_TYPE_CD={2} AND DEL_FLAG = 'N'  "
+                            + " AND T1.RENEW_ID = ( SELECT MAX(RENEW_ID) FROM TM_DEPOSIT T2 WHERE  ARDB_CD = {3} AND  T1.BRN_CD = T2.BRN_CD AND T1.ACC_NUM = T2.ACC_NUM AND T1.ACC_TYPE_CD = T2.ACC_TYPE_CD )";
 
             _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
-                                          !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
                                           dep.acc_type_cd != 0 ? Convert.ToString(dep.acc_type_cd) : "ACC_TYPE_CD",
                                           !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd"
@@ -3456,11 +3455,10 @@ namespace SBWSDepositApi.Deposit
              + " PERCENTAGE,  "
              + " RELATION,DEL_FLAG     "
              + " FROM TD_NOMINEE"
-             + " WHERE ARDB_CD = {0} AND BRN_CD = {1} AND ACC_TYPE_CD = {2} AND ACC_NUM = {3} AND DEL_FLAG = 'N' ";
+             + " WHERE ARDB_CD = {0} AND ACC_TYPE_CD = {1} AND ACC_NUM = {2} AND DEL_FLAG = 'N' ";
 
             _statement = string.Format(_query,
                                        !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
-                                       !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
                                        dep.acc_type_cd != 0 ? dep.acc_type_cd.ToString() : "ACC_TYPE_CD",
                                        !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num");
 
@@ -3508,11 +3506,10 @@ namespace SBWSDepositApi.Deposit
              + " ACC_NUM,"
              + " SIGNATORY_NAME,DEL_FLAG"
              + " FROM TD_SIGNATORY"
-             + " WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_NUM = {2} AND  ACC_TYPE_CD = {3} ";
+             + " WHERE ARDB_CD={0} AND ACC_NUM = {1} AND  ACC_TYPE_CD = {2} ";
 
             _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(sig.ardb_cd) ? string.Concat("'", sig.ardb_cd, "'") : "ardb_cd",
-                                          !string.IsNullOrWhiteSpace(sig.brn_cd) ? string.Concat("'", sig.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig.acc_num) ? string.Concat("'", sig.acc_num, "'") : "acc_num",
                                            sig.acc_type_cd != 0 ? Convert.ToString(sig.acc_type_cd) : "ACC_TYPE_CD"
                                            );
@@ -3556,12 +3553,11 @@ namespace SBWSDepositApi.Deposit
                  + " RELATION,      "
                  + " CUST_CD,DEL_FLAG        "
                  + " FROM TD_ACCHOLDER "
-                 + " WHERE ARDB_CD = {0} AND BRN_CD = {1} AND ACC_NUM = {2} AND  ACC_TYPE_CD = {3}  ";
+                 + " WHERE ARDB_CD = {0} AND ACC_NUM = {1} AND  ACC_TYPE_CD = {2}  ";
             var v1 = !string.IsNullOrWhiteSpace(acc.ardb_cd) ? string.Concat("'", acc.ardb_cd, "'") : "ardb_cd";
-            var v2 = !string.IsNullOrWhiteSpace(acc.brn_cd) ? string.Concat("'", acc.brn_cd, "'") : "brn_cd";
             var v3 = !string.IsNullOrWhiteSpace(acc.acc_num) ? string.Concat("'", acc.acc_num, "'") : "acc_num";
             dynamic v4 = (acc.acc_type_cd > 0) ? acc.acc_type_cd.ToString() : "ACC_TYPE_CD";
-            _statement = string.Format(_query, v1, v2, v3,v4);
+            _statement = string.Format(_query, v1,v3,v4);
 
 
             using (var command = OrclDbConnection.Command(connection, _statement))
@@ -3604,11 +3600,10 @@ namespace SBWSDepositApi.Deposit
                  + " INTRODUCER_ACC_TYPE,"
                  + " INTRODUCER_ACC_NUM,DEL_FLAG  "
                  + " FROM TD_INTRODUCER  "
-                 + " WHERE ARDB_CD={0} AND BRN_CD = {1} AND ACC_NUM = {2}  AND ACC_TYPE_CD = {3}";
+                 + " WHERE ARDB_CD={0} AND ACC_NUM = {1}  AND ACC_TYPE_CD = {2}";
 
             _statement = string.Format(_query,
             !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
-            !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
             !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
             (dep.acc_type_cd > 0 ? dep.acc_type_cd.ToString() : "ACC_TYPE_CD"));
 
@@ -3693,7 +3688,7 @@ namespace SBWSDepositApi.Deposit
                   + "user_acc_num       = NVL({5}, user_acc_num      ),"
                   + "modified_by          = NVL({6}, modified_by   ),"
                   + "modified_dt          = NVL({7}, modified_dt   )"
-                  + "WHERE ardb_cd={8} and brn_cd = NVL({9}, brn_cd) AND acc_num = NVL({10},  acc_num ) AND acc_type_cd=NVL({11},  acc_type_cd ) and renew_id={12} and del_flag='N' ";
+                  + "WHERE ardb_cd={8} AND acc_num = NVL({9},  acc_num ) AND acc_type_cd=NVL({10},  acc_type_cd ) and renew_id={11} and del_flag='N' ";
 
             _statement = string.Format(_query,
             string.Concat("'", dep.oprn_instr_cd, "'"),
@@ -3705,7 +3700,6 @@ namespace SBWSDepositApi.Deposit
             string.Concat("'", dep.modified_by, "'"),
             string.Concat("sysdate"),
             string.Concat("'", dep.ardb_cd, "'"),
-            string.Concat("'", dep.brn_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
             string.Concat("'", dep.acc_type_cd, "'"),
             string.Concat("'", dep.renew_id, "'")
@@ -3723,12 +3717,11 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateNominee(DbConnection connection, List<td_nominee> nom)
         {
             string _queryd = " DELETE FROM TD_NOMINEE "
-                         + " WHERE ardb_cd = {0} and brn_cd = {1} AND acc_num = {2} AND acc_type_cd = {3}";
+                         + " WHERE ardb_cd = {0} AND acc_num = {1} AND acc_type_cd = {2}";
 
 
             _statement = string.Format(_queryd,
                                  !string.IsNullOrWhiteSpace(nom[0].ardb_cd) ? string.Concat("'", nom[0].ardb_cd, "'") : "ardb_cd",
-                                 !string.IsNullOrWhiteSpace(nom[0].brn_cd) ? string.Concat("'", nom[0].brn_cd, "'") : "brn_cd",
                                  !string.IsNullOrWhiteSpace(nom[0].acc_num) ? string.Concat("'", nom[0].acc_num, "'") : "acc_num",
                                  !string.IsNullOrWhiteSpace(nom[0].acc_type_cd.ToString()) ? string.Concat("'", nom[0].acc_type_cd, "'") : "acc_type_cd"
                                   );
@@ -3768,11 +3761,10 @@ namespace SBWSDepositApi.Deposit
                 internal bool UpdateSignatory(DbConnection connection, List<td_signatory> sig)
         {
             string _queryd=" DELETE FROM TD_SIGNATORY  "
-             +" WHERE ardb_cd={0} AND brn_cd = {1} AND acc_num = {2} AND acc_type_cd={3}";
+             +" WHERE ardb_cd={0} AND acc_num = {1} AND acc_type_cd={2}";
 
                      _statement = string.Format(_queryd,
                                           !string.IsNullOrWhiteSpace(sig[0].ardb_cd) ? string.Concat("'", sig[0].ardb_cd, "'") : "ardb_cd",
-                                          !string.IsNullOrWhiteSpace(sig[0].brn_cd) ? string.Concat("'", sig[0].brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(sig[0].acc_num) ? string.Concat("'", sig[0].acc_num, "'") : "acc_num",
                                           !string.IsNullOrWhiteSpace(sig[0].acc_type_cd.ToString()) ? string.Concat("'", sig[0].acc_type_cd, "'") : "acc_type_cd"
                                            );
@@ -3811,11 +3803,10 @@ namespace SBWSDepositApi.Deposit
         internal bool UpdateAccholder(DbConnection connection, List<td_accholder> acc)
         {
              string _queryd=" DELETE FROM td_accholder "
-             +" WHERE ardb_cd={0} and brn_cd = {1} AND acc_num = {2} AND  ACC_TYPE_CD = {3}";
+             +" WHERE ardb_cd={0} AND acc_num = {1} AND  ACC_TYPE_CD = {2}";
 
                      _statement = string.Format(_queryd,
                                           !string.IsNullOrWhiteSpace(acc[0].ardb_cd) ? string.Concat("'", acc[0].ardb_cd, "'") : "ardb_cd",
-                                          !string.IsNullOrWhiteSpace(acc[0].brn_cd) ? string.Concat("'", acc[0].brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(acc[0].acc_num) ? string.Concat("'", acc[0].acc_num, "'") : "acc_num",
                                           (acc[0].acc_type_cd > 0) ? acc[0].acc_type_cd.ToString() : "ACC_TYPE_CD"
                                            );

@@ -218,6 +218,11 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateRecoveryRegisterFundwise(prp);
         }
 
+        internal List<blockwiserecovery_type> PopulateRecoveryRegisterFundwiseBlockwise(p_report_param prp)
+        {
+            return _dac.PopulateRecoveryRegisterFundwiseBlockwise(prp);
+        }
+
         internal List<gm_loan_trans> PopulateAdvRecovStmt(p_report_param prp)
         {
             return _dac.PopulateAdvRecovStmt(prp);

@@ -29,7 +29,8 @@ namespace SBWSFinanceApi.Models
         public int lines_printed { get; set; }
 
         public string cust_cd { get; set; }
-
+        public string print_status { get; set; }
+        public int renew_id { get; set; }
 
 
     }

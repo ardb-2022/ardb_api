@@ -263,6 +263,20 @@ namespace SBWSFinanceApi.Controllers
             return _ll2.UpdatePassbookline(pgp);
         }
 
+        [Route("GetCertificateStatus")]
+        [HttpPost]
+        public string GetCertificateStatus([FromBody] p_report_param pgp)
+        {
+            return _ll2.GetCertificateStatus(pgp);
+        }
+
+        [Route("UpdateCertificateStatus")]
+        [HttpPost]
+        public int UpdateCertificateStatus([FromBody] p_report_param pgp)
+        {
+            return _ll2.UpdateCertificateStatus(pgp);
+        }
+
         [Route("PopulateSlabwiseDeposit")]
         [HttpPost]
         public List<agentwiseDL> PopulateSlabwiseDeposit([FromBody] p_report_param pgp)

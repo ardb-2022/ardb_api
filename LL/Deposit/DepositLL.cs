@@ -222,6 +222,16 @@ namespace SBWSFinanceApi.LL
             return _dac.UpdatePassbookline(dep);
         }
 
+        internal string GetCertificateStatus(p_report_param dep)
+        {
+            return _dac.GetCertificateStatus(dep);
+        }
+
+        internal int UpdateCertificateStatus(p_report_param dep)
+        {
+            return _dac.UpdateCertificateStatus(dep);
+        }
+
         internal List<agentwiseDL> PopulateDLDds(p_report_param dep)
         {
             return _dac.PopulateDLDds(dep);

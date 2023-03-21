@@ -24,14 +24,16 @@ namespace SBWSFinanceApi.DL.INVESTMENT
                             + " CREATED_BY, CREATED_DT, MODIFIED_BY, MODIFIED_DT, APPROVAL_STATUS, APPROVED_BY,       "
                             + " APPROVED_DT, USER_ACC_NUM, LOCK_MODE, LOAN_ID, CERT_NO, BONUS_AMT, PENAL_INTT_RT,     "
                             + " BONUS_INTT_RT, BANK_CD, BRANCH_CD,DEL_FLAG                                   "
-                            + " FROM TM_DEPOSIT_INV                                                                  "
-                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND nvl(ACC_STATUS,'O') = 'O' AND DEL_FLAG = 'N' ";
+                            + " FROM TM_DEPOSIT_INV  T1                                                                "
+                            + " WHERE ARDB_CD = {0} AND BRN_CD={1} AND ACC_NUM={2} AND ACC_TYPE_CD={3} AND nvl(ACC_STATUS,'O') = 'O' AND DEL_FLAG = 'N' "
+                            + " AND T1.RENEW_ID = ( SELECT MAX(RENEW_ID) FROM TM_DEPOSIT_INV T2 WHERE  T2.ARDB_CD = {4} AND  T1.BRN_CD = T2.BRN_CD AND T1.ACC_NUM = T2.ACC_NUM AND T1.ACC_TYPE_CD = T2.ACC_TYPE_CD )";
 
             _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd",
                                           !string.IsNullOrWhiteSpace(dep.brn_cd) ? string.Concat("'", dep.brn_cd, "'") : "brn_cd",
                                           !string.IsNullOrWhiteSpace(dep.acc_num) ? string.Concat("'", dep.acc_num, "'") : "acc_num",
-                                          dep.acc_type_cd != 0 ? Convert.ToString(dep.acc_type_cd) : "ACC_TYPE_CD"
+                                          dep.acc_type_cd != 0 ? Convert.ToString(dep.acc_type_cd) : "ACC_TYPE_CD",
+                                          !string.IsNullOrWhiteSpace(dep.ardb_cd) ? string.Concat("'", dep.ardb_cd, "'") : "ardb_cd"
                                            );
             using (var command = OrclDbConnection.Command(connection, _statement))
             {

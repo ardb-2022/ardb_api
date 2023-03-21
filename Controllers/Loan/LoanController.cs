@@ -129,7 +129,13 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.PopulateRecoveryRegisterFundwise(prp);
         }
-
+        
+        [Route("PopulateRecoveryRegisterFundwiseBlockwise")]
+        [HttpPost]
+        public List<blockwiserecovery_type> PopulateRecoveryRegisterFundwiseBlockwise(p_report_param prp)
+        {
+            return _ll.PopulateRecoveryRegisterFundwiseBlockwise(prp);
+        }
 
         [Route("GetDemandNotice")]
         [HttpPost]

@@ -2319,7 +2319,7 @@ namespace SBWSDepositApi.Deposit
                             + " FROM TT_DEP_SUB_CASH_BOOK  "
                             + " WHERE TT_DEP_SUB_CASH_BOOK.ACC_TYPE_CD = {0} "
                             + " AND NVL(TT_DEP_SUB_CASH_BOOK.CATG_CD, '0') NOT IN ('1', '2') AND TT_DEP_SUB_CASH_BOOK.ACC_NUM <> '0000' "
-                            + " ORDER BY TT_DEP_SUB_CASH_BOOK.ACC_TYPE_CD ";
+                            + " ORDER BY TT_DEP_SUB_CASH_BOOK.ACC_TYPE_CD,TT_DEP_SUB_CASH_BOOK.ACC_NUM ";
 
             string _query2 = " SELECT DISTINCT a.ACC_TYPE_CD ACC_TYPE_CD, b.ACC_TYPE_DESC || ' - PRINCIPAL' ACC_TYPE_DESC "
                             + " FROM TT_DEP_SUB_CASH_BOOK a, MM_ACC_TYPE b "
@@ -2338,7 +2338,7 @@ namespace SBWSDepositApi.Deposit
                             + " FROM TT_DEP_SUB_CASH_BOOK "
                             + " WHERE TT_DEP_SUB_CASH_BOOK.ACC_TYPE_CD = {0} "
                             + " AND NVL(TT_DEP_SUB_CASH_BOOK.CATG_CD, '0') IN ('1', '2') AND TT_DEP_SUB_CASH_BOOK.ACC_NUM <> '0000' "
-                            + " ORDER BY TT_DEP_SUB_CASH_BOOK.ACC_TYPE_CD ";
+                            + " ORDER BY TT_DEP_SUB_CASH_BOOK.ACC_TYPE_CD,TT_DEP_SUB_CASH_BOOK.ACC_NUM ";
 
 
             string _query4  = " SELECT DISTINCT a.ACC_TYPE_CD ACC_TYPE_CD, b.ACC_TYPE_DESC || ' - INTEREST' ACC_TYPE_DESC "
@@ -2967,7 +2967,7 @@ namespace SBWSDepositApi.Deposit
             List<tt_sbca_dtl_list> tcaRet = new List<tt_sbca_dtl_list>();
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _query = "p_td_prov_intt_detail_list";
-            string _query1 = " SELECT DISTINCT  TT_TDPROV_INTT.ACC_TYPE_CD, "
+            string _query1 = " SELECT TT_TDPROV_INTT.ACC_TYPE_CD, "
                                 + " TT_TDPROV_INTT.ACC_NUM,       "
                                 + " TT_TDPROV_INTT.CUST_NAME,     "
                                 + " TT_TDPROV_INTT.OPENING_DT,    "
@@ -2975,13 +2975,9 @@ namespace SBWSDepositApi.Deposit
                                 + " TT_TDPROV_INTT.PRN_AMT,       "
                                 + " TT_TDPROV_INTT.INTT_RT,       "
                                 + " TT_TDPROV_INTT.PROV_INTT_AMT, "
-                                + " TT_TDPROV_INTT.CONSTITUTION_CD,"
-                                + " TM_DEPOSIT.CUST_CD   "
-                                + " FROM TT_TDPROV_INTT, "
-                                + " TM_DEPOSIT "
-                                + " WHERE ( TT_TDPROV_INTT.ARDB_CD = TM_DEPOSIT.ARDB_CD ) and ( TT_TDPROV_INTT.ACC_TYPE_CD = TM_DEPOSIT.ACC_TYPE_CD ) and "
-                                + " ( TT_TDPROV_INTT.ACC_NUM = TM_DEPOSIT.ACC_NUM ) and "
-                                + "  ( TT_TDPROV_INTT.ARDB_CD = {0} ) AND  "
+                                + " TT_TDPROV_INTT.CONSTITUTION_CD"
+                                + " FROM TT_TDPROV_INTT "
+                                + " WHERE ( TT_TDPROV_INTT.ARDB_CD = {0} ) AND  "
                                 + "  ( TT_TDPROV_INTT.BRN_CD = {1} ) AND  "
                                 + " ( TT_TDPROV_INTT.ACC_TYPE_CD = {2} ) AND   "
                                 + " ( trim(substr(TT_TDPROV_INTT.CONSTITUTION_CD,1,2)) = {3} )  ORDER BY TT_TDPROV_INTT.ACC_NUM ";
@@ -3036,7 +3032,7 @@ namespace SBWSDepositApi.Deposit
                                         tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
                                         tca.INTT_RT = Convert.ToDecimal(UtilityM.CheckNull<float>(reader["INTT_RT"]));
                                         tca.PROV_INTT_AMT = UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
-                                        tca.cust_cd = UtilityM.CheckNull<decimal>(reader["CUST_CD"]);
+                                       // tca.cust_cd = UtilityM.CheckNull<decimal>(reader["CUST_CD"]);
                                         tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MAT_DT"]);
                                         tcaRet.Add(tca);
                                     }
@@ -3060,7 +3056,7 @@ namespace SBWSDepositApi.Deposit
             List<conswise_sb_dl> tcaRet = new List<conswise_sb_dl>();
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _query = "p_td_prov_intt_detail_list";
-            string _query1 = " SELECT DISTINCT  TT_TDPROV_INTT.ACC_TYPE_CD, "
+            string _query1 = " SELECT TT_TDPROV_INTT.ACC_TYPE_CD, "
                                 + " TT_TDPROV_INTT.ACC_NUM,       "
                                 + " TT_TDPROV_INTT.CUST_NAME,     "
                                 + " TT_TDPROV_INTT.OPENING_DT,    "
@@ -3068,13 +3064,9 @@ namespace SBWSDepositApi.Deposit
                                 + " TT_TDPROV_INTT.PRN_AMT,       "
                                 + " TT_TDPROV_INTT.INTT_RT,       "
                                 + " TT_TDPROV_INTT.PROV_INTT_AMT, "
-                                + " TT_TDPROV_INTT.CONSTITUTION_CD,"
-                                + " TM_DEPOSIT.CUST_CD   "
-                                + " FROM TT_TDPROV_INTT, "
-                                + " TM_DEPOSIT "
-                                + " WHERE ( TT_TDPROV_INTT.ARDB_CD = TM_DEPOSIT.ARDB_CD ) and ( TT_TDPROV_INTT.ACC_TYPE_CD = TM_DEPOSIT.ACC_TYPE_CD ) and "
-                                + " ( TT_TDPROV_INTT.ACC_NUM = TM_DEPOSIT.ACC_NUM ) and "
-                                + "  ( TT_TDPROV_INTT.ARDB_CD = {0} ) AND  "
+                                + " TT_TDPROV_INTT.CONSTITUTION_CD"
+                                + " FROM TT_TDPROV_INTT "
+                               + " WHERE ( TT_TDPROV_INTT.ARDB_CD = {0} ) AND  "
                                 + "  ( TT_TDPROV_INTT.BRN_CD = {1} ) AND  "
                                 + " ( TT_TDPROV_INTT.ACC_TYPE_CD = {2} ) AND   "
                                 + " ( TT_TDPROV_INTT.CONSTITUTION_CD = {3} )  ORDER BY TT_TDPROV_INTT.ACC_NUM ";
@@ -3159,7 +3151,7 @@ namespace SBWSDepositApi.Deposit
                                                         tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
                                                         tca.INTT_RT = Convert.ToDecimal(UtilityM.CheckNull<float>(reader["INTT_RT"]));
                                                         tca.PROV_INTT_AMT = UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
-                                                        tca.cust_cd = UtilityM.CheckNull<decimal>(reader["CUST_CD"]);
+                                                        //tca.cust_cd = UtilityM.CheckNull<decimal>(reader["CUST_CD"]);
                                                         tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MAT_DT"]);
 
                                                         tca1.tot_cons_count = tca1.tot_cons_count + 1;
@@ -4040,7 +4032,7 @@ namespace SBWSDepositApi.Deposit
                   + " MD_PASSBOOK_PRINT_STATUS.TRANS_TYPE,                      "
                   + " MD_PASSBOOK_PRINT_STATUS.INSTRUMENT_NUM,                  "
                   + " MD_PASSBOOK_PRINT_STATUS.AMOUNT,                          "
-                  + " Lower(MD_PASSBOOK_PRINT_STATUS.PARTICULARS) PARTICULARS,  "
+                  + " UPPER(MD_PASSBOOK_PRINT_STATUS.PARTICULARS) PARTICULARS,  "
                   + " MD_PASSBOOK_PRINT_STATUS.PRINTED_FLAG,                    "
                   + " f_passbook_balance({0},{1}, {2}, to_date('{3}', 'dd-mm-yyyy hh24:mi:ss') ) BALANCE_AMT,            "
                   + " 0 RUNNING_BAL,                                                             "
@@ -4131,7 +4123,7 @@ namespace SBWSDepositApi.Deposit
                   + " MD_PASSBOOK_PRINT_STATUS.TRANS_TYPE,                      "
                   + " MD_PASSBOOK_PRINT_STATUS.INSTRUMENT_NUM,                  "
                   + " MD_PASSBOOK_PRINT_STATUS.AMOUNT,                          "
-                  + " Lower(MD_PASSBOOK_PRINT_STATUS.PARTICULARS) PARTICULARS,  "
+                  + " UPPER(MD_PASSBOOK_PRINT_STATUS.PARTICULARS) PARTICULARS,  "
                   + " MD_PASSBOOK_PRINT_STATUS.PRINTED_FLAG,                    "
                   + " f_passbook_balance({0},{1}, {2}, to_date('{3}', 'dd-mm-yyyy hh24:mi:ss') ) BALANCE_AMT,            "
                   + " 0 RUNNING_BAL,                                                             "
@@ -4746,8 +4738,8 @@ namespace SBWSDepositApi.Deposit
 
                             command.ExecuteNonQuery();
 
-                            transaction.Rollback();
-                            //transaction.Commit();
+                            //transaction.Rollback();
+                            transaction.Commit();
                             _ret = 0;
 
                         }
@@ -4761,6 +4753,115 @@ namespace SBWSDepositApi.Deposit
                 }
             }
             return _ret;
+        }
+
+
+
+        internal int UpdateCertificateStatus(p_report_param prp)
+        {
+            int _ret = 0;
+
+            string _query = "UPDATE TM_DEPOSIT  "
+                            + " SET TRANSFER_FLAG = {0} "
+                            + " WHERE ARDB_CD = {1} "
+                            + " AND ACC_TYPE_CD = {2} "
+                            + " AND ACC_NUM = {3} "
+                            + " AND  RENEW_ID = '{4}' "
+                            + " AND DEL_FLAG = 'N' ";
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+
+                        _statement = string.Format(_query,
+                                                string.Concat("'", prp.print_status, "'"),
+                                                string.Concat("'", prp.ardb_cd, "'"),
+                                                prp.acc_type_cd,
+                                                string.Concat("'", prp.acc_num, "'"),
+                                                prp.renew_id);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        transaction.Commit();
+                        _ret = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+
+        internal string GetCertificateStatus(p_report_param prp)
+        {
+
+            string lines_printed = null;
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+
+            // prp.from_dt = prp.from_dt.Date;
+            // prp.to_dt = prp.to_dt.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+            string _query = " SELECT NVL(TRANSFER_FLAG,'N')    TRANSFER_FLAG     "
+                  + " FROM TM_DEPOSIT                                              "
+                  + " WHERE (TM_DEPOSIT.ACC_TYPE_CD = {0} ) AND                   "
+                  + "       (TM_DEPOSIT.ACC_NUM = '{1}' )                         "
+                  + " AND   (TM_DEPOSIT.ARDB_CD = '{2}') AND  (TM_DEPOSIT.RENEW_ID = '{3}') AND  (TM_DEPOSIT.DEL_FLAG = 'N')  ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_query,
+                                                   prp.acc_type_cd,
+                                                   prp.acc_num,
+                                                   prp.ardb_cd,
+                                                   prp.renew_id);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        lines_printed = UtilityM.CheckNull<string>(reader["TRANSFER_FLAG"]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        lines_printed = "Error";
+                    }
+                }
+            }
+
+            return lines_printed;
         }
 
 

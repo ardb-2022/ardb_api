@@ -52,14 +52,13 @@ namespace SBWSDepositApi.Deposit
                         + "TD_OUTWARD_PAYMENT.DEL_FLAG "
                         + " FROM TD_OUTWARD_PAYMENT "
                         + " WHERE ( TD_OUTWARD_PAYMENT.ARDB_CD = {0} ) AND ( TD_OUTWARD_PAYMENT.BRN_CD = {1} ) AND "
-                        + " ( TD_OUTWARD_PAYMENT.TRANS_CD = {2} ) ";
+                        + " ( TD_OUTWARD_PAYMENT.APPROVAL_STATUS = 'U' AND TD_OUTWARD_PAYMENT.DEL_FLAG = 'N' ) ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                           !string.IsNullOrWhiteSpace(nom.ardb_cd) ? string.Concat("'", nom.ardb_cd, "'") : "ardb_cd",
-                                          !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'")   : "brn_cd",
-                                          nom.trans_cd>0 ? string.Concat("'", nom.trans_cd.ToString(), "'") : "trans_cd"
+                                          !string.IsNullOrWhiteSpace(nom.brn_cd) ? string.Concat("'", nom.brn_cd, "'")   : "brn_cd"
                                            );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
