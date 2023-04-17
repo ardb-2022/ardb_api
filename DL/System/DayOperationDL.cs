@@ -249,5 +249,52 @@ internal p_gen_param W_DAY_CLOSE(p_gen_param prp)
             return custRets;
         }
 
+
+        internal int YearOpen(p_gen_param prp)
+        {
+            int _ret = 0;
+
+            string _query = " UPDATE SM_PARAMETER SET PARAM_VALUE = {0} WHERE PARAM_CD = '207'  ";
+
+            string _query1 = " UPDATE SM_PARAMETER SET PARAM_VALUE =  to_char(to_date(substr({0},1,10),'dd/mm/yyyy'),'dd/mm/yyyy') WHERE PARAM_CD = '210'  ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                             string.Concat("'", prp.as_acc_num, "'")                                          
+                                              );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            //transaction.Commit();
+                            _ret = 0;
+                        }
+
+                        _statement = string.Format(_query1,
+                                             string.Concat("'", prp.adt_trans_dt, "'")
+                                              );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            _ret = 0;
+                        }
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
     }
 }

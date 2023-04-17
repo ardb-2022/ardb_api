@@ -127,8 +127,12 @@ namespace SBWSFinanceApi.LL
         {
              return _dac.PopulateLoanRepSch(prp);
         }
-
         
+        internal List<tt_int_subsidy> PopulateInterestSubsidy(p_report_param prp)
+        {
+            return _dac.PopulateInterestSubsidy(prp);
+        }
+
         internal List<tt_detailed_list_loan> PopulateLoanDetailedList(p_report_param prp)
         {
             return _dac.PopulateLoanDetailedList(prp);

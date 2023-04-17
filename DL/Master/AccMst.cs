@@ -599,7 +599,7 @@ internal List<mm_constitution> GetConstitution()
         internal int GetVillMaxId(mm_vill tvd)
         {
             int maxVillCd = 0;
-            string _query = "Select  nvl(max(to_number(vill_cd)) + 1, 1) max_vill_cd"
+            string _query = "Select  nvl(max(vill_cd) + 1, 1) max_vill_cd"
                             + " From   mm_vill "
                             + " Where  ardb_cd = {0} ";
             using (var connection = OrclDbConnection.NewConnection)
@@ -1673,6 +1673,132 @@ internal List<mm_constitution> GetConstitution()
                                            string.Concat("'", tvd.ardb_cd, "'"),
                                            string.Concat(tvd.branch_cd)
 
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+
+        internal List<mm_role_permission> GetRolePermission(p_gen_param mum)
+        {
+            List<mm_role_permission> mamRets = new List<mm_role_permission>();
+            string _query = " SELECT ARDB_CD,ROLE_CD, MODULE, SUB_MODULE, FIRST_SUB_MODULE_ITEM, SECOND_SUB_MODULE_ITEM, IDENTIFICATION, PERMISSION"
+                         + " FROM MM_ROLE_PERMISSION WHERE ARDB_CD = {0} AND ROLE_CD = {1}";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'"),
+                                            string.Concat(mum.role_cd));
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new mm_role_permission();
+                                mam.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                mam.role_cd = UtilityM.CheckNull<Int64>(reader["ROLE_CD"]);
+                                mam.module = UtilityM.CheckNull<string>(reader["MODULE"]);
+                                mam.sub_module = UtilityM.CheckNull<string>(reader["SUB_MODULE"]);
+                                mam.first_sub_module_item = UtilityM.CheckNull<string>(reader["FIRST_SUB_MODULE_ITEM"]);
+                                mam.second_sub_module_item = UtilityM.CheckNull<string>(reader["SECOND_SUB_MODULE_ITEM"]);
+                                mam.identification = UtilityM.CheckNull<string>(reader["IDENTIFICATION"]);
+                                mam.permission = UtilityM.CheckNull<string>(reader["PERMISSION"]);                                
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+        internal int InsertRolePermission(mm_role_permission tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_ROLE_PERMISSION VALUES ({0},{1},{2}, {3}, {4},{5},{6},{7},{8},SYSDATE,NULL,NULL,NULL)";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat(tvd.role_cd),
+                                  string.Concat("'", tvd.module, "'"),
+                                  string.Concat("'", tvd.sub_module, "'"),
+                                  string.Concat("'", tvd.first_sub_module_item, "'"),
+                                  string.Concat("'", tvd.second_sub_module_item, "'"),
+                                  string.Concat("'", tvd.identification, "'"),
+                                  string.Concat("'", tvd.permission, "'"),
+                                  string.Concat("'", tvd.created_by, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret =0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+        internal int UpdateRolePermission(mm_role_permission tvd)
+        {
+            int _ret = 0;
+            string _query = "Update MM_ROLE_PERMISSION"
+                            + " Set PERMISSION = {0}, MODIFIED_BY = {1}, MODIFIED_DT = SYSDATE "
+                            + " Where  ardb_cd = {2} AND role_cd = {3} AND MODULE = {4} AND SUB_MODULE = {5} AND "
+                            + " FIRST_SUB_MODULE_ITEM = {6} AND SECOND_SUB_MODULE_ITEM = {7} AND IDENTIFICATION = {8}";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                             string.Concat("'", tvd.permission, "'"),
+                                             string.Concat("'", tvd.modified_by, "'"),
+                                             string.Concat("'", tvd.ardb_cd, "'"),
+                                            string.Concat(tvd.role_cd),
+                                            string.Concat("'", tvd.module, "'"),
+                                            string.Concat("'", tvd.sub_module, "'"),
+                                            string.Concat("'", tvd.first_sub_module_item, "'"),
+                                            string.Concat("'", tvd.second_sub_module_item, "'"),
+                                            string.Concat("'", tvd.identification, "'")                                          
                                          );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))

@@ -20,6 +20,12 @@ namespace SBWSFinanceApi.LL
         {
             return _dacCashCumTrialDL.PopulateCashCumTrialConso(prp);
         }
+        
+
+        internal List<tt_cash_cum_trial> PopulateCashCumTrialConsoNew(p_report_param prp)
+        {
+            return _dacCashCumTrialDL.PopulateCashCumTrialConsoNew(prp);
+        }
 
         Weekly_ReturnDL _dacWeeklyReturnDL = new Weekly_ReturnDL();
         internal List<weekly_return> PopulateWeeklyReturn(p_report_param prp)
@@ -82,6 +88,11 @@ namespace SBWSFinanceApi.LL
             return _dacProfitandLossDL.PopulateProfitandLoss(prp);
         }
 
+        internal List<tt_pl_book> PopulateProfitandLossConso(p_report_param prp)
+        {
+            return _dacProfitandLossDL.PopulateProfitandLossConso(prp);
+        }
+
         internal List<accwisegl> GetGeneralLedger(p_report_param prm)
         {
             var _dac = new RptGeneralLedgerTransactionDtlsDL();
@@ -93,6 +104,11 @@ namespace SBWSFinanceApi.LL
             var _dac = new RptGeneralLedgerTransactionDtlsDL();
             return _dac.GetGLTransDtls(prm);
         }
-
+        
+        internal List<tt_gl_trans> GetGLTransDtlsConso(p_report_param prm)
+        {
+            var _dac = new RptGeneralLedgerTransactionDtlsDL();
+            return _dac.GetGLTransDtlsConso(prm);
+        }
     }
 }

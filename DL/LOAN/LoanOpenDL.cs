@@ -2197,6 +2197,100 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
         }
 
 
+        internal List<tt_int_subsidy> PopulateInterestSubsidy(p_report_param prp)
+        {
+            List<tt_int_subsidy> loanDtlList = new List<tt_int_subsidy>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _procedure = "p_interest_subsidy";
+            string _query = "   SELECT TT_INT_SUBSIDY.LOAN_ID,           "
+                             + "   TT_INT_SUBSIDY.PARTY_NAME,           "
+                             + "   TT_INT_SUBSIDY.DISB_AMT,       "
+                             + "   TT_INT_SUBSIDY.LOAN_BALANCE,        "
+                             + "   TT_INT_SUBSIDY.CURR_INTT_RATE,             "
+                             + "   TT_INT_SUBSIDY.LOAN_RECOV,              "
+                             + "   TT_INT_SUBSIDY.CURR_INTT_RECOV,            "
+                             + "   TT_INT_SUBSIDY.SUBSIDY_AMT             "
+                             + "   FROM  TT_INT_SUBSIDY                 " ;
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_procedure);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_frdt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("adt_todt", OracleDbType.Date, ParameterDirection.Input);
+                            parm4.Value = prp.to_dt;
+                            command.Parameters.Add(parm4);
+
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        _statement = string.Format(_query);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var loanDtl = new tt_int_subsidy();
+
+                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                        loanDtl.party_name = UtilityM.CheckNull<string>(reader["PARTY_NAME"]);
+                                        loanDtl.curr_intt_rate = UtilityM.CheckNull<float>(reader["CURR_INTT_RATE"]);
+                                        loanDtl.disb_amt = UtilityM.CheckNull<decimal>(reader["DISB_AMT"]);
+                                        loanDtl.loan_balance = UtilityM.CheckNull<decimal>(reader["LOAN_BALANCE"]);
+                                        loanDtl.prn_recov = UtilityM.CheckNull<decimal>(reader["LOAN_RECOV"]);
+                                        loanDtl.intt_recov = UtilityM.CheckNull<decimal>(reader["CURR_INTT_RECOV"]);
+                                        loanDtl.subsidy_amt = UtilityM.CheckNull<decimal>(reader["SUBSIDY_AMT"]);
+                                        
+                                        loanDtlList.Add(loanDtl);
+                                    }
+                                    transaction.Commit();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDtlList = null;
+                    }
+                }
+            }
+            return loanDtlList;
+        }
+
+
         internal List<tt_detailed_list_loan> PopulateLoanDetailedListAll(p_report_param prp)
         {
             List<tt_detailed_list_loan> loanDtlList = new List<tt_detailed_list_loan>();
@@ -4806,8 +4900,8 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                                         loanDtl.penal_intt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
                                         loanDtl.disb_dt = UtilityM.CheckNull<DateTime>(reader["DISB_DT"]);
                                         loanDtl.outstanding_prn = UtilityM.CheckNull<decimal>(reader["OUTSTANDING_PRN"]);
-                                        loanDtl.curr_prn_recov = UtilityM.CheckNull<decimal>(reader["UPTO_1"]);
-                                        loanDtl.above_1 = UtilityM.CheckNull<decimal>(reader["ABOVE_1"]);
+                                        loanDtl.curr_prn_recov = UtilityM.CheckNull<decimal>(reader["ABOVE_1"]);
+                                        loanDtl.above_1 = UtilityM.CheckNull<decimal>(reader["UPTO_1"]);
                                         loanDtl.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["ABOVE_2"]);
                                         loanDtl.curr_intt_recov = UtilityM.CheckNull<decimal>(reader["ABOVE_3"]);
                                         loanDtl.ovd_intt_recov = UtilityM.CheckNull<decimal>(reader["ABOVE_4"]);

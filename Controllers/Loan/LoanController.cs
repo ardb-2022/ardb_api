@@ -40,6 +40,13 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.PopulateLoanDetailedList(prp);
         }
+        
+        [Route("PopulateInterestSubsidy")]
+        [HttpPost]
+        public List<tt_int_subsidy> PopulateInterestSubsidy(p_report_param prp)
+        {
+            return _ll.PopulateInterestSubsidy(prp);
+        }
 
         [Route("PopulateLoanDetailedListAll")]
         [HttpPost]

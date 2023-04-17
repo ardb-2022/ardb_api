@@ -541,7 +541,21 @@ namespace SBWSFinanceApi.Controllers
         {
             return __ll.POST_SB_INTT(prm);
         }
-        
+
+        [Route("POPULATE_SMS_CHARGE")]
+        [HttpPost]
+        public List<sb_intt_list> POPULATE_SMS_CHARGE([FromBody] p_gen_param prm)
+        {
+            return __ll.POPULATE_SMS_CHARGE(prm);
+        }
+
+        [Route("POST_SMS_CHARGE")]
+        [HttpPost]
+        public int POST_SMS_CHARGE([FromBody] p_gen_param prm)
+        {
+            return __ll.POST_SMS_CHARGE(prm);
+        }
+
         [Route("GetAgentCommission")]
         [HttpPost]
         public List<tt_agent_comm> GetAgentCommission([FromBody] p_gen_param prm)

@@ -65,6 +65,13 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateCashCumTrialConso(prp);
         }
 
+        [Route("PopulateCashCumTrialConsoNew")]
+        [HttpPost]
+        public List<tt_cash_cum_trial> PopulateCashCumTrialConsoNew([FromBody] p_report_param prp)
+        {
+            return _ll.PopulateCashCumTrialConsoNew(prp);
+        }
+
         [Route("PopulateDayScrollBook")]
         [HttpPost]
         public List<tt_day_scroll> PopulateDayScrollBook([FromBody] p_report_param prp)
@@ -86,7 +93,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateProfitandLoss(prp);
         }
 
-        [Route("GetGeneralLedger")]
+        [Route("PopulateProfitandLossConso")]
+        [HttpPost]
+        public List<tt_pl_book> PopulateProfitandLossConso([FromBody] p_report_param prp)
+        {
+            return _ll.PopulateProfitandLossConso(prp);
+        }
+
+      [Route("GetGeneralLedger")]
       [HttpPost]
       public List<accwisegl> GetGeneralLedger([FromBody] p_report_param prm)
       {
@@ -101,8 +115,16 @@ namespace SBWSFinanceApi.Controllers
             return _ll.GetGLTransDtls(prm);
         }
 
+        
+      [Route("GetGLTransDtlsConso")]
+      [HttpPost]
+      public List<tt_gl_trans> GetGLTransDtlsConso([FromBody] p_report_param prm)
+        {
+            return _ll.GetGLTransDtlsConso(prm);
+        }
 
-      [Route("PopulateTrialBalance")]
+
+        [Route("PopulateTrialBalance")]
       [HttpPost]
       public List<tt_trial_balance> PopulateTrialBalance([FromBody] p_report_param prm)
       {

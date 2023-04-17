@@ -15,6 +15,21 @@ namespace SBWSFinanceApi.LL
         {
            return _dac.GetAccountMaster(mum);
         }
+
+        public List<mm_role_permission> GetRolePermission(p_gen_param mum)
+        {
+            return _dac.GetRolePermission(mum);
+        }
+
+        public int InsertRolePermission(mm_role_permission mum)
+        {
+            return _dac.InsertRolePermission(mum);
+        }
+
+        public int UpdateRolePermission(mm_role_permission mum)
+        {
+            return _dac.UpdateRolePermission(mum);
+        }
         public List<mm_acc_type> GetAccountTypeMaster()
         {
            return _dac.GetAccountTypeMaster();

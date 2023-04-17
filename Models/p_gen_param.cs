@@ -39,5 +39,7 @@ namespace SBWSFinanceApi.Models
         public int catg_cd { get; set; }
 
         public int no_of_days { get; set; }
+
+        public int role_cd { get; set; }
     }
 }

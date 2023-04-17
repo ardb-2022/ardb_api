@@ -4604,6 +4604,126 @@ namespace SBWSDepositApi.Deposit
 
 
 
+        internal List<sb_intt_list> POPULATE_SMS_CHARGE(p_gen_param prm)
+        {
+            List<sb_intt_list> tcaRet = new List<sb_intt_list>();
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query1 = " SELECT  TT_SMS_CHARGE.ACC_NUM, "
+                            + " TT_SMS_CHARGE.CONSTITUTION_CD,           "
+                            + " TT_SMS_CHARGE.AMOUNT,           "
+                            + " MM_CUSTOMER.CUST_NAME,           "
+                            + " TM_DEPOSIT.CLR_BAL        "
+                            + " FROM TT_SMS_CHARGE,TM_DEPOSIT,MM_CUSTOMER "
+                            + " WHERE TT_SMS_CHARGE.ACC_NUM = TM_DEPOSIT.ACC_NUM "
+                            + " AND TT_SMS_CHARGE.CONSTITUTION_CD = TM_DEPOSIT.CONSTITUTION_CD "
+                            + " AND TM_DEPOSIT.CUST_CD = MM_CUSTOMER.CUST_CD "
+                            + " AND TM_DEPOSIT.ACC_TYPE_CD IN (1,8) ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+
+                    using (var command = OrclDbConnection.Command(connection, _alter))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+
+                    // transaction.Commit();
+                    using (var command2 = OrclDbConnection.Command(connection, "P_DEDUCT_SMS"))
+                    {
+                        command2.CommandType = System.Data.CommandType.StoredProcedure;
+                        var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                        parm.Value = prm.ardb_cd;
+                        command2.Parameters.Add(parm);
+
+                        using (var reader2 = command2.ExecuteReader())
+                        {
+                            _statement = string.Format(_query1);
+
+                            try
+                            {
+                                using (var command1 = OrclDbConnection.Command(connection, _statement))
+                                {
+                                    using (var reader1 = command1.ExecuteReader())
+                                    {
+                                        if (reader1.HasRows)
+                                        {
+                                            while (reader1.Read())
+                                            {
+                                                var tca = new sb_intt_list();
+                                                tca.acc_num = UtilityM.CheckNull<string>(reader1["ACC_NUM"]);
+                                                tca.name = UtilityM.CheckNull<string>(reader1["CUST_NAME"]);
+                                                tca.constitution_cd = UtilityM.CheckNull<string>(reader1["CONSTITUTION_CD"]);
+                                                tca.interest = UtilityM.CheckNull<decimal>(reader1["AMOUNT"]);
+                                                tca.balance = UtilityM.CheckNull<decimal>(reader1["CLR_BAL"]);
+                                                tcaRet.Add(tca);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                transaction.Rollback();
+                                tcaRet = null;
+                            }
+                        }
+                    }
+                }                
+            }
+            return tcaRet;
+        }
+
+
+        internal int POST_SMS_CHARGE(p_gen_param prm)
+        {
+            int _ret = 0;
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        using (var command = OrclDbConnection.Command(connection, "P_POP_SMS_INTT"))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm.Value = prm.ardb_cd;
+                            command.Parameters.Add(parm);
+                            parm = new OracleParameter("adt_effect_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm.Value = prm.adt_trans_dt;
+                            command.Parameters.Add(parm);
+                            
+                            command.ExecuteNonQuery();
+
+                            transaction.Commit();
+                            //transaction.Rollback();
+
+                            _ret = 0;
+
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
+
         internal List<tt_agent_comm> GetAgentCommission(p_gen_param prp)
         {
             List<tt_agent_comm> tcaRet = new List<tt_agent_comm>();

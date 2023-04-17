@@ -22,6 +22,29 @@ namespace SBWSFinanceApi.Controllers
         {
            return _ll.GetAccountMaster(mum);
         }
+
+       
+        [Route("GetRolePermission")]
+        [HttpPost]
+        public List<mm_role_permission> GetRolePermission(p_gen_param mum)
+        {
+            return _ll.GetRolePermission(mum);
+        }
+
+        [Route("InsertRolePermission")]
+        [HttpPost]
+        public int InsertRolePermission(mm_role_permission mum)
+        {
+            return _ll.InsertRolePermission(mum);
+        }
+
+        [Route("UpdateRolePermission")]
+        [HttpPost]
+        public int UpdateRolePermission(mm_role_permission mum)
+        {
+            return _ll.UpdateRolePermission(mum);
+        }
+
         [Route("GetAccountTypeMaster")]
         [HttpPost]
         public List<mm_acc_type> GetAccountTypeMaster()

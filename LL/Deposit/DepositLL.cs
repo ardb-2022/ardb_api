@@ -65,12 +65,22 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.POPULATE_SB_INTT(dep);
         }
-        
+
+        internal List<sb_intt_list> POPULATE_SMS_CHARGE(p_gen_param dep)
+        {
+            return _dac.POPULATE_SMS_CHARGE(dep);
+        }
+
         internal int POST_SB_INTT(p_gen_param dep)
         {
             return _dac.POST_SB_INTT(dep);
         }
-        
+
+        internal int POST_SMS_CHARGE(p_gen_param dep)
+        {
+            return _dac.POST_SMS_CHARGE(dep);
+        }
+
         internal List<tt_agent_comm> GetAgentCommission(p_gen_param dep)
         {
             return _dac.GetAgentCommission(dep);

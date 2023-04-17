@@ -23,6 +23,13 @@ namespace SBWSFinanceApi.Controllers
            return _ll.GetDayOperation(tvd);
         }
 
+        [Route("YearOpen")]
+        [HttpPost]
+        public int YearOpen([FromBody] p_gen_param prp)
+        {
+            return _ll.YearOpen(prp);
+        }
+
         [Route("W_DAY_CLOSE")]
         [HttpPost]
         public p_gen_param W_DAY_CLOSE([FromBody] p_gen_param pgp)

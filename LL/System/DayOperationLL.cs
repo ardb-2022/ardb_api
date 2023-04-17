@@ -15,7 +15,13 @@ namespace SBWSFinanceApi.LL
         {         
            
             return _dac.GetDayOperation(pmc);
-        }  
+        }
+
+        internal int YearOpen(p_gen_param prp)
+        {
+
+            return _dac.YearOpen(prp);
+        }
         internal p_gen_param W_DAY_CLOSE(p_gen_param pgp)
         {         
            

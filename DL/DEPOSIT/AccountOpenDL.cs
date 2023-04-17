@@ -3687,8 +3687,9 @@ namespace SBWSDepositApi.Deposit
                   + "cert_no       = NVL({4}, cert_no      ),"
                   + "user_acc_num       = NVL({5}, user_acc_num      ),"
                   + "modified_by          = NVL({6}, modified_by   ),"
-                  + "modified_dt          = NVL({7}, modified_dt   )"
-                  + "WHERE ardb_cd={8} AND acc_num = NVL({9},  acc_num ) AND acc_type_cd=NVL({10},  acc_type_cd ) and renew_id={11} and del_flag='N' ";
+                  + "modified_dt          = NVL({7}, modified_dt   ),"
+                  + "constitution_cd          = NVL({8}, constitution_cd   ),ext_instl_tot={9}"
+                  + "WHERE ardb_cd={10} AND acc_num = NVL({11},  acc_num ) AND acc_type_cd=NVL({12},  acc_type_cd ) and renew_id={13} and del_flag='N' ";
 
             _statement = string.Format(_query,
             string.Concat("'", dep.oprn_instr_cd, "'"),
@@ -3699,6 +3700,8 @@ namespace SBWSDepositApi.Deposit
              string.Concat("'", dep.user_acc_num, "'"),
             string.Concat("'", dep.modified_by, "'"),
             string.Concat("sysdate"),
+            string.Concat("'", dep.constitution_cd, "'"),
+            string.Concat("'", dep.ext_instl_tot, "'"),
             string.Concat("'", dep.ardb_cd, "'"),
             string.Concat("'", dep.acc_num, "'"),
             string.Concat("'", dep.acc_type_cd, "'"),
