@@ -86,6 +86,13 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateBalanceSheet(prp);
         }
 
+        [Route("PopulateBalanceSheetConso")]
+        [HttpPost]
+        public List<tt_balance_sheet> PopulateBalanceSheetConso([FromBody] p_report_param prp)
+        {
+            return _ll.PopulateBalanceSheetConso(prp);
+        }
+
         [Route("PopulateProfitandLoss")]
         [HttpPost]
         public List<tt_pl_book> PopulateProfitandLoss([FromBody] p_report_param prp)

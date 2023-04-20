@@ -82,6 +82,11 @@ namespace SBWSFinanceApi.LL
             return _dacBalanceSheetDL.PopulateBalanceSheet(prp);
         }
 
+        internal List<tt_balance_sheet> PopulateBalanceSheetConso(p_report_param prp)
+        {
+            return _dacBalanceSheetDL.PopulateBalanceSheetConso(prp);
+        }
+
         ProfitandLoss _dacProfitandLossDL = new ProfitandLoss();
         internal List<tt_pl_book> PopulateProfitandLoss(p_report_param prp)
         {
