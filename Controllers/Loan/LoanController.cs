@@ -64,6 +64,14 @@ namespace SBWSFinanceApi.Controllers
         }
 
         
+        [Route("PopulateDcStatement")]
+        [HttpPost]
+        public List<dcstatement> PopulateDcStatement(p_report_param prp)
+        {
+            return _ll.PopulateDcStatement(prp);
+        }
+
+
         [Route("PopulateLoanDisburseReg")]
         [HttpPost]
         public List<blockwisedisb_type> PopulateLoanDisburseReg(p_report_param prp)

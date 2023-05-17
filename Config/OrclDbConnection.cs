@@ -35,6 +35,9 @@ namespace SBWSFinanceApi.Config
                 //sb.UserID = "bmardbcfs";
                 //sb.Password = "bmardbcfs21101";
 
+                //sb.UserID = "cfstest1";
+                //sb.Password = "signature";
+
                 // Use below 3 for PRD deploymen/t
                 //sb.DataSource = bc.db_server_ip;
                 //sb.UserID = bc.user1;
@@ -53,6 +56,11 @@ namespace SBWSFinanceApi.Config
                 {
                     sb.UserID = "cfstest1";
                     sb.Password = "signature";
+                }
+                if (bc.bank_name == "GARDBUX")
+                {
+                    sb.UserID = "gardbcfs";
+                    sb.Password = "gardbcfs71101";
                 }
 
                 // Use below 3 for PRD deploymen/t

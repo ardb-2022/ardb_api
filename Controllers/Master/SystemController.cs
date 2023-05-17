@@ -59,6 +59,13 @@ namespace SBWSFinanceApi.Controllers
             return _ll1.GetUserIDStatus(mum);
         }
 
+        [Route("GetUserIDStatusAll")]
+        [HttpPost]
+        public List<m_user_master> GetUserIDStatusAll([FromBody] m_user_master mum)
+        {
+            return _ll1.GetUserIDStatusAll(mum);
+        }
+
         [Route("DeleteUserMaster")]
         [HttpPost]
         public int DeleteUserMaster([FromBody] m_user_master mum)
@@ -86,6 +93,21 @@ namespace SBWSFinanceApi.Controllers
         public int InsertUserMaster([FromBody] m_user_master mum)
         {
            return _ll1.InsertUserMaster(mum);
+        }
+
+        [Route("InsertUserTransfer")]
+        [HttpPost]
+        public int InsertUserTransfer([FromBody] td_user_transfer mum)
+        {
+            return _ll1.InsertUserTransfer(mum);
+        }
+
+
+        [Route("ApproveUserTransfer")]
+        [HttpPost]
+        public int ApproveUserTransfer([FromBody] td_user_transfer mum)
+        {
+            return _ll1.ApproveUserTransfer(mum);
         }
     }
 }

@@ -86,7 +86,37 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
         }
 
 
+        internal List<m_user_master> GetUserIDStatusAll(m_user_master mum)
+        {
+            List<m_user_master> mumRets = new List<m_user_master>();
+            string _query = " SELECT USER_ID, LOGIN_STATUS , USER_TYPE "
+                        + " FROM M_USER_MASTER WHERE  ARDB_CD={0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                             string.Concat("'", mum.ardb_cd, "'")
+                                             );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mumt = new m_user_master();
+                                mumt.user_id = UtilityM.CheckNull<string>(reader["USER_ID"]);
+                                mumt.login_status = UtilityM.CheckNull<string>(reader["LOGIN_STATUS"]);
+                                mumt.user_type = UtilityM.CheckNull<string>(reader["USER_TYPE"]);
+                                mumRets.Add(mumt);
 
+                            }
+                        }
+                    }
+                }
+            }
+            return mumRets;
+        }
 
 
         internal int UpdateUserIdStatus(List<m_user_master> tvd)
@@ -318,7 +348,111 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
             return passout;
         }
 
-    
+
+        internal int InsertUserTransfer(td_user_transfer mum)
+        {
+            string _query = "INSERT INTO TD_USER_TRANSFER (ARDB_CD,USER_ID,BRN_CD,NEW_BRN_CD,TRANSFER_DT,USER_TYPE,APPROVAL_STATUS,CREATED_BY,CREATED_DT,MODIFIED_BY,MODIFIED_DT)"
+                          + " VALUES( {0},{1},{2},{3},to_date(substr({4},1,10),'dd/mm/yyyy'),{5},'U',{6},SYSDATE,{7},SYSDATE) ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                                   string.Concat("'", mum.ardb_cd, "'"),
+                                                   string.Concat("'", mum.user_id, "'"),
+                                                   string.Concat("'", mum.brn_cd, "'"),
+                                                   string.Concat("'", mum.new_brn_cd, "'"),
+                                                   string.Concat("'", mum.transfer_dt, "'"),
+                                                   string.Concat("'", mum.user_type, "'"),
+                                                   string.Concat("'", mum.created_by, "'"),
+                                                   string.Concat("'", mum.modified_by, "'")
+                                                    );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return -1;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+
+        internal int ApproveUserTransfer(td_user_transfer mum)
+        {
+            int _ret = 0;
+            
+
+         string _query = " UPDATE TD_USER_TRANSFER "
+         + " SET APPROVAL_STATUS = 'A' , "
+         + " APPROVED_BY     = {0} , "
+         + " APPROVED_DT      = to_date(substr({1},1,10),'dd/mm/yyyy')  "
+         + "  WHERE ARDB_CD = {2} and  USER_ID={3} AND BRN_CD = {4} AND  NEW_BRN_CD = {5} AND TRANSFER_DT = to_date(substr({6},1,10),'dd/mm/yyyy') ";
+
+        string _query1 = " UPDATE M_USER_MASTER "
+        + " SET BRN_CD = {0}  "
+        + "  WHERE ARDB_CD = {1} and  USER_ID={2} AND BRN_CD = {3} ";
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                                      string.Concat("'", mum.approved_by, "'"),
+                                                      string.Concat("'", mum.approved_dt, "'"),
+                                                      string.Concat("'", mum.ardb_cd, "'"),
+                                                      string.Concat("'", mum.user_id, "'"),
+                                                      string.Concat("'", mum.brn_cd, "'"),
+                                                      string.Concat("'", mum.new_brn_cd, "'"),
+                                                      string.Concat("'", mum.transfer_dt, "'")
+                                                       );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();                            
+                            _ret = 0;
+                        }
+
+                        _statement = string.Format(_query1,
+                                                     string.Concat("'", mum.new_brn_cd, "'"),
+                                                     string.Concat("'", mum.ardb_cd, "'"),
+                                                     string.Concat("'", mum.user_id, "'"),
+                                                     string.Concat("'", mum.brn_cd, "'")
+                                                      );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command1.ExecuteNonQuery();
+                            _ret = 0;
+                        }
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+
     }
 }
     

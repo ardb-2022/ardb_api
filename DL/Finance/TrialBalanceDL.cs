@@ -123,7 +123,7 @@ namespace SBWSFinanceApi.DL
                                 + " AND TM_ACC_BALANCE.BALANCE_AMT < 0"
                                 + " AND TM_ACC_BALANCE.ACC_CD <>{3}"
                                 + " AND M_ACC_MASTER.ACC_TYPE = {4} "
-                                + " ORDER BY 6";
+                                + " ORDER BY 6,2";
 
             string _query1 = " Select DISTINCT acc_type, decode( a.ACC_TYPE,1,'Liabiliy',2,'Asset',3,'Revenue',4,'Expanse') acctype "
                             + " FROM M_ACC_MASTER a "
@@ -223,7 +223,7 @@ namespace SBWSFinanceApi.DL
                              + " AND v_acc_balance_all.acc_cd <> {2} "
                              + " AND m_acc_master.acc_type = {3} "
                              + " GROUP BY  v_acc_balance_all.balance_dt, v_acc_balance_all.acc_cd, m_acc_master.acc_name, m_acc_master.acc_type "
-                             + " ORDER BY 6 ";
+                             + " ORDER BY 6,2 ";
 
             string _query1 = " Select DISTINCT acc_type, decode( a.ACC_TYPE,1,'Liabiliy',2,'Asset',3,'Revenue',4,'Expanse') acctype "
                             + " FROM M_ACC_MASTER a "

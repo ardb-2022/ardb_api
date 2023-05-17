@@ -7,10 +7,11 @@ using SBWSFinanceApi.Models;
 using SBWSFinanceApi.Utility;
 
 namespace SBWSFinanceApi.LL
-{
+{   
     public class AccMstLL
     {
-       AccMstDL _dac = new AccMstDL(); 
+       AccMstDL _dac = new AccMstDL();
+        
         public List<m_acc_master> GetAccountMaster(m_acc_master mum)
         {
            return _dac.GetAccountMaster(mum);

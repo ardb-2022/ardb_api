@@ -36,10 +36,26 @@ namespace SBWSFinanceApi.LL
             return _dac.GetUserIDStatus(mum);
         }
 
+        internal List<m_user_master> GetUserIDStatusAll(m_user_master mum)
+        {
+
+            return _dac.GetUserIDStatusAll(mum);
+        }
+
         internal int InsertUserMaster(m_user_master mum)
        {
             return _dac.InsertUserMaster(mum);
-       }  
-                  
+       }
+
+        internal int InsertUserTransfer(td_user_transfer mum)
+        {
+            return _dac.InsertUserTransfer(mum);
+        }
+
+        internal int ApproveUserTransfer(td_user_transfer mum)
+        {
+            return _dac.ApproveUserTransfer(mum);
+        }
+
     }
 }

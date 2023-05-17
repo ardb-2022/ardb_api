@@ -1820,7 +1820,6 @@ internal List<mm_constitution> GetConstitution()
 
             return _ret;
         }
-
-
+    
     }
 }

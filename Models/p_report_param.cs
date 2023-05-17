@@ -31,6 +31,7 @@ namespace SBWSFinanceApi.Models
         public string cust_cd { get; set; }
         public string print_status { get; set; }
         public int renew_id { get; set; }
+        public int ad_cash_acc_cd { get; set; }
 
 
     }

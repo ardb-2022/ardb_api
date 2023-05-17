@@ -9,6 +9,7 @@ namespace SBWSFinanceApi.Models
     {
         public string loan_id { get; set; }
         public string party_name { get; set; }
+        public string block_name { get; set; }
         public decimal disb_amt { get; set; }
         public decimal loan_balance { get; set; }
         public float curr_intt_rate { get; set; }

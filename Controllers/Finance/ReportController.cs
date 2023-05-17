@@ -51,6 +51,13 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateDailyCashAccountConso(prp);
         }
 
+        [Route("PopulateDailyCashAccountConsoNew")]
+        [HttpPost]
+        public List<cashaccountDM> PopulateDailyCashAccountConsoNew([FromBody] p_report_param prp)
+        {
+            return _ll.PopulateDailyCashAccountConsoNew(prp);
+        }
+
         [Route("PopulateCashCumTrial")]
         [HttpPost]
         public List<tt_cash_cum_trial> PopulateCashCumTrial([FromBody] p_report_param prp)

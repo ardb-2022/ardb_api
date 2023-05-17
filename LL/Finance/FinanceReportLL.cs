@@ -70,6 +70,11 @@ namespace SBWSFinanceApi.LL
             return _dacDailyCashBookDL.PopulateDailyCashAccountConso(prp);
         }
 
+        internal List<cashaccountDM> PopulateDailyCashAccountConsoNew(p_report_param prp)
+        {
+            return _dacDailyCashBookDL.PopulateDailyCashAccountConsoNew(prp);
+        }
+
         DayScrollBookDL _dacDayScrollBookDL = new DayScrollBookDL(); 
         internal List<tt_day_scroll> PopulateDayScrollBook(p_report_param prp)
         {     
