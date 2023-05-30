@@ -2613,7 +2613,7 @@ namespace SBWSDepositApi.Deposit
                             + " TT_SBCA_DTL_LIST1.INTT_PROV_AMT, "
                             + " TT_SBCA_DTL_LIST1.CONSTITUTION_CD"
                             + " FROM TT_SBCA_DTL_LIST1  "
-                            + " WHERE TT_SBCA_DTL_LIST1.CONSTITUTION_CD = {0} ORDER BY TO_NUMBER(TT_SBCA_DTL_LIST1.ACC_NUM)  ";
+                            + " WHERE TT_SBCA_DTL_LIST1.CONSTITUTION_CD = {0} ORDER BY TT_SBCA_DTL_LIST1.ACC_NUM  ";
 
             string _query2 = " SELECT DISTINCT TT_SBCA_DTL_LIST1.CONSTITUTION_CD,TT_SBCA_DTL_LIST1.CONSTITUTION_DESC "
                             + " FROM TT_SBCA_DTL_LIST1  ";
