@@ -160,6 +160,13 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll2.GetInttRate(tvd);
         }
+        
+        [Route("GetInttRatePremature")]
+        [HttpPost]
+        public decimal GetInttRatePremature([FromBody] p_gen_param tvd)
+        {
+            return _ll2.GetInttRatePremature(tvd);
+        }
 
         [Route("isDormantAccount")]
         [HttpPost]

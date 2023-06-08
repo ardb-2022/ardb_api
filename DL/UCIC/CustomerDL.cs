@@ -184,7 +184,7 @@ namespace SBWSFinanceApi.DL
          + " MM_CUSTOMER.STATE,"
          + " MM_CUSTOMER.DIST,"
          + " MM_CUSTOMER.PIN,"
-         + " MM_CUSTOMER.VILL_CD,"
+         + " (SELECT min(VILL_NAME) FROM MM_VILL WHERE VILL_CD = MM_CUSTOMER.VILL_CD) VILL_CD,"
          + " MM_CUSTOMER.BLOCK_CD,"
          + " MM_CUSTOMER.SERVICE_AREA_CD,"
          + " MM_CUSTOMER.OCCUPATION,"

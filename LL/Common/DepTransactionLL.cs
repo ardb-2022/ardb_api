@@ -31,8 +31,14 @@ namespace SBWSFinanceApi.LL
         internal List<td_def_trans_trf> GetUnapprovedDepTrans(td_def_trans_trf tdt)
         {
             return _dac.GetUnapprovedDepTrans(tdt);
-        }  
-         internal int UpdateTransactionDetails(LoanOpenDM acc)
+        }
+
+        
+        internal List<td_def_trans_trf> GetapprovedDepTrans(td_def_trans_trf tdt)
+        {
+            return _dac.GetapprovedDepTrans(tdt);
+        }
+        internal int UpdateTransactionDetails(LoanOpenDM acc)
         {
             return _dac.UpdateTransactionDetails(acc);
         }

@@ -34,6 +34,13 @@ namespace SBWSFinanceApi.LL
             return _dac.GetInttRate(pmc);
         }
 
+        
+
+        internal decimal GetInttRatePremature(p_gen_param pmc)
+        {
+            return _dac.GetInttRatePremature(pmc);
+        }
+
         internal int UpdateDeposit(tm_deposit pmc)
         {
             if (pmc.temp_flag == 1)

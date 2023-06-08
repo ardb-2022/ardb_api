@@ -134,7 +134,7 @@ namespace SBWSFinanceApi.LL
         }
 
         
-        internal List<dcstatement> PopulateDcStatement(p_report_param prp)
+        internal List<activitywisedc_type> PopulateDcStatement(p_report_param prp)
         {
             return _dac.PopulateDcStatement(prp);
         }
@@ -142,6 +142,11 @@ namespace SBWSFinanceApi.LL
         internal List<tt_detailed_list_loan> PopulateLoanDetailedList(p_report_param prp)
         {
             return _dac.PopulateLoanDetailedList(prp);
+        }        
+
+        internal List<UserwisetransDM> GetUserwiseTransDtls(p_report_param prp)
+        {
+            return _dac.GetUserwiseTransDtls(prp);
         }
 
         internal List<tt_detailed_list_loan> PopulateLoanDetailedListAll(p_report_param prp)
@@ -223,6 +228,11 @@ namespace SBWSFinanceApi.LL
             return _dac.PopulateRecoveryRegister(prp);
         }
         
+        internal List<accwiserecovery_type> PopulateRecoveryRegisterVillWise(p_report_param prp)
+        {
+            return _dac.PopulateRecoveryRegisterVillWise(prp);
+        }
+
         internal List<accwiserecovery_type> PopulateRecoveryRegisterFundwise(p_report_param prp)
         {
             return _dac.PopulateRecoveryRegisterFundwise(prp);

@@ -49,5 +49,15 @@ namespace SBWSFinanceApi.Models
 
         public string sex { get; set; }
 
+        public string culti_area { get; set; }
+
+        public decimal culti_val { get; set; }
+
+        public decimal pronote_amt { get; set; }
+
+        public string machine { get; set; }
+
+
+
     }
 }

@@ -108,6 +108,14 @@ namespace SBWSFinanceApi.Controllers
         {
            return _ll2.GetUnapprovedDepTrans(tdt);
         }
+        
+
+        [Route("GetapprovedDepTrans")]
+        [HttpPost]
+        public List<td_def_trans_trf> GetapprovedDepTrans([FromBody] td_def_trans_trf tdt)
+        {
+            return _ll2.GetapprovedDepTrans(tdt);
+        }
 
         [Route("UpdateTransactionDetails")]
         [HttpPost]

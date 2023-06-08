@@ -64,9 +64,17 @@ namespace SBWSFinanceApi.Controllers
         }
 
         
+        [Route("GetUserwiseTransDtls")]
+        [HttpPost]
+        public List<UserwisetransDM> GetUserwiseTransDtls(p_report_param prp)
+        {
+            return _ll.GetUserwiseTransDtls(prp);
+        }
+
+
         [Route("PopulateDcStatement")]
         [HttpPost]
-        public List<dcstatement> PopulateDcStatement(p_report_param prp)
+        public List<activitywisedc_type> PopulateDcStatement(p_report_param prp)
         {
             return _ll.PopulateDcStatement(prp);
         }
@@ -138,6 +146,14 @@ namespace SBWSFinanceApi.Controllers
         }
 
         
+        [Route("PopulateRecoveryRegisterVillWise")]
+        [HttpPost]
+        public List<accwiserecovery_type> PopulateRecoveryRegisterVillWise(p_report_param prp)
+        {
+            return _ll.PopulateRecoveryRegisterVillWise(prp);
+        }
+
+
         [Route("PopulateRecoveryRegisterFundwise")]
         [HttpPost]
         public List<accwiserecovery_type> PopulateRecoveryRegisterFundwise(p_report_param prp)

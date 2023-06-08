@@ -1601,12 +1601,50 @@ namespace SBWSDepositApi.Deposit
 
             return inttrate;
 
-        }          
+        }
+
+
+        internal decimal GetInttRatePremature(p_gen_param pmc)
+        {
+            decimal inttrate = 0;
+
+            string _query = "Select f_get_intt_rate_premature({0},{1},{2},{3},{4}) INTT_RATE "
+                            + " From   Dual ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                _statement = string.Format(_query,
+                                            pmc.ardb_cd,
+                                            pmc.acc_type_cd,
+                                            pmc.ad_intt_rt,
+                                            pmc.catg_cd,
+                                            pmc.no_of_days
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                inttrate = UtilityM.CheckNull<decimal>(reader["INTT_RATE"]);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            return inttrate;
+
+        }
 
 
 
 
-            internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
+
+        internal List<tm_deposit> GetDepositDtls(mm_customer pmc)
         {
             List<tm_deposit> depo = new List<tm_deposit>();
             string _query =  " SELECT TM_DEPOSIT.ACC_TYPE_CD, TM_DEPOSIT.ACC_NUM, "

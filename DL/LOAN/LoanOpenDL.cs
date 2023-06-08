@@ -2726,6 +2726,201 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
 
 
+        internal List<accwiserecovery_type> PopulateRecoveryRegisterVillWise(p_report_param prp)
+        {
+            List<accwiserecovery_type> loanRecoList = new List<accwiserecovery_type>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _query = " SELECT A.BRN_CD,                       "
+               + " A.LOAN_ID,                                        "
+               + " (SELECT ACC_NAME FROM M_ACC_MASTER WHERE ACC_CD =A.ACC_CD) ACC_NAME,                                         "
+               + " A.PARTY_CD,                                       "
+               + " C.CUST_NAME,                                      "
+               + " A.LAST_INTT_CALC_DT,                              "
+               + " B.TRANS_DT,                                       "
+               + "(SELECT BLOCK_NAME FROM MM_BLOCK WHERE BLOCK_CD = C.BLOCK_CD) BLOCK_NAME, "
+               + " SUM(B.RECOV_AMT) RECOV_AMT,                       "
+               + " SUM(B.CURR_PRN_RECOV) CURR_PRN_RECOV,             "
+               + " SUM(B.ADV_PRN_RECOV) ADV_PRN_RECOV,             "
+               + " SUM(B.OVD_PRN_RECOV) OVD_PRN_RECOV,               "
+               + " SUM(B.CURR_INTT_RECOV) CURR_INTT_RECOV,           "
+               + " SUM(B.OVD_INTT_RECOV) OVD_INTT_RECOV,              "
+               + " SUM(B.PENAL_INTT_RECOV) PENAL_INTT_RECOV          "
+               + " FROM TM_LOAN_ALL A, GM_LOAN_TRANS B, MM_CUSTOMER C "
+               + " WHERE A.ARDB_CD = B.ARDB_CD AND A.ARDB_CD = C.ARDB_CD AND A.LOAN_ID = B.LOAN_ID                       "
+               + " AND A.PARTY_CD  = C.CUST_CD                        "
+               + " AND B.TRANS_DT BETWEEN to_date('{0}', 'dd-mm-yyyy') AND to_date('{1}', 'dd-mm-yyyy')"
+               + " AND B.TRANS_TYPE = 'R'                            "
+               + " AND A.BRN_CD = {2}                                "
+               + " AND A.ARDB_CD = {3}                                "
+               + " AND A.ACC_CD = {4}                                "
+               + " AND C.VILL_CD = {5}                                "
+               + " GROUP BY A.BRN_CD, A.LOAN_ID, A.ACC_CD, C.CUST_NAME,"
+               + " A.PARTY_CD, A.LAST_INTT_CALC_DT, B.TRANS_DT,C.BLOCK_CD     ORDER BY  B.TRANS_DT  ";
+
+
+            string _query1 = " SELECT DISTINCT A.ACC_CD,(SELECT ACC_NAME FROM M_ACC_MASTER WHERE ACC_CD =A.ACC_CD AND ARDB_CD = A.ARDB_CD) ACC_NAME "
+                             + " FROM TM_LOAN_ALL A, GM_LOAN_TRANS B, MM_CUSTOMER C "
+                             + " WHERE A.ARDB_CD = B.ARDB_CD AND A.ARDB_CD = C.ARDB_CD AND A.LOAN_ID = B.LOAN_ID "
+                             + "  AND A.PARTY_CD = C.CUST_CD "
+                             + "  AND B.TRANS_DT BETWEEN to_date({0}, 'dd-mm-yyyy') AND to_date({1}, 'dd-mm-yyyy') "
+                             + "  AND B.TRANS_TYPE = 'R' "
+                             + "  AND A.BRN_CD = {2} "
+                             + "  AND A.ARDB_CD = {3} ";
+
+
+            string _query2 = " SELECT DISTINCT C.VILL_CD,(SELECT min(VILL_NAME) FROM MM_VILL WHERE VILL_CD = C.VILL_CD AND ARDB_CD = A.ARDB_CD) VILL_NAME "
+                             + " FROM TM_LOAN_ALL A, GM_LOAN_TRANS B, MM_CUSTOMER C "
+                             + " WHERE A.ARDB_CD = B.ARDB_CD AND A.ARDB_CD = C.ARDB_CD AND A.LOAN_ID = B.LOAN_ID "
+                             + "  AND A.PARTY_CD = C.CUST_CD "
+                             + "  AND B.TRANS_DT BETWEEN to_date({0}, 'dd-mm-yyyy') AND to_date({1}, 'dd-mm-yyyy') "
+                             + "  AND B.TRANS_TYPE = 'R' "
+                             + "  AND A.BRN_CD = {2} "
+                             + "  AND A.ARDB_CD = {3} "
+                             + "  AND A.ACC_CD = {4} ";
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        string _statement1 = string.Format(_query1,
+                                         prp.from_dt != null ? string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'") : "TRANS_DT",
+                                      prp.to_dt != null ? string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'") : "TRANS_DT",
+                                      string.IsNullOrWhiteSpace(prp.brn_cd) ? "BRN_CD" : string.Concat("'", prp.brn_cd, "'"),
+                                      string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ARDB_CD" : string.Concat("'", prp.ardb_cd, "'"));
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        accwiserecovery_type tcaRet1 = new accwiserecovery_type();
+
+                                        var tca = new acc_type();
+                                        tca.acc_cd = UtilityM.CheckNull<Int32>(reader1["ACC_CD"]);
+                                        tca.acc_name = UtilityM.CheckNull<string>(reader1["ACC_NAME"]);
+
+                                        tcaRet1.acctype = tca;
+
+                                        string _statement2 = string.Format(_query2,
+                                         prp.from_dt != null ? string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'") : "TRANS_DT",
+                                         prp.to_dt != null ? string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'") : "TRANS_DT",
+                                        string.IsNullOrWhiteSpace(prp.brn_cd) ? "BRN_CD" : string.Concat("'", prp.brn_cd, "'"),
+                                        string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ARDB_CD" : string.Concat("'", prp.ardb_cd, "'"),
+                                        UtilityM.CheckNull<Int32>(reader1["ACC_CD"]));
+
+                                        using (var command2 = OrclDbConnection.Command(connection, _statement2))
+                                        {
+                                            using (var reader2 = command2.ExecuteReader())
+                                            {
+                                                if (reader2.HasRows)
+                                                {
+                                                    while (reader2.Read())
+                                                    {
+
+                                                        blockwiserecovery_type tcaRet2 = new blockwiserecovery_type();
+
+                                                        var tca1 = new block_type();
+                                                        tca1.block_cd = UtilityM.CheckNull<string>(reader2["VILL_CD"]);
+                                                        tca1.block_name = UtilityM.CheckNull<string>(reader2["VILL_NAME"]);
+
+
+
+                                                        _statement = string.Format(_query,
+                                                                     prp.from_dt != null ? prp.from_dt.ToString("dd/MM/yyyy") : "TRANS_DT",
+                                                                     prp.to_dt != null ? prp.to_dt.ToString("dd/MM/yyyy") : "TRANS_DT",
+                                                                     string.IsNullOrWhiteSpace(prp.brn_cd) ? "BRN_CD" : string.Concat("'", prp.brn_cd, "'"),
+                                                                     string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ARDB_CD" : string.Concat("'", prp.ardb_cd, "'"),
+                                                                     UtilityM.CheckNull<Int32>(reader1["ACC_CD"]),
+                                                                     UtilityM.CheckNull<String>(reader2["VILL_CD"])
+                                                                  );
+
+                                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                                        {
+                                                            using (var reader = command.ExecuteReader())
+                                                            {
+                                                                if (reader.HasRows)
+                                                                {
+                                                                    while (reader.Read())
+                                                                    {
+                                                                        var loanReco = new gm_loan_trans();
+
+
+                                                                        loanReco.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                                                        loanReco.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                                                        loanReco.acc_name = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
+                                                                        loanReco.party_cd = UtilityM.CheckNull<decimal>(reader["PARTY_CD"]);
+                                                                        loanReco.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                                                        loanReco.last_intt_calc_dt = UtilityM.CheckNull<DateTime>(reader["LAST_INTT_CALC_DT"]);
+                                                                        loanReco.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                                                        loanReco.recov_amt = UtilityM.CheckNull<decimal>(reader["RECOV_AMT"]);
+                                                                        loanReco.curr_prn_recov = UtilityM.CheckNull<decimal>(reader["CURR_PRN_RECOV"]);
+                                                                        loanReco.adv_prn_recov = UtilityM.CheckNull<decimal>(reader["ADV_PRN_RECOV"]);
+                                                                        loanReco.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["OVD_PRN_RECOV"]);
+                                                                        loanReco.curr_intt_recov = UtilityM.CheckNull<decimal>(reader["CURR_INTT_RECOV"]);
+                                                                        loanReco.ovd_intt_recov = UtilityM.CheckNull<decimal>(reader["OVD_INTT_RECOV"]);
+                                                                        loanReco.penal_intt_recov = UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RECOV"]);
+
+                                                                        tca1.tot_block_curr_prn_recov = tca1.tot_block_curr_prn_recov + UtilityM.CheckNull<decimal>(reader["CURR_PRN_RECOV"]);
+                                                                        tca1.tot__block_ovd_prn_recov = tca1.tot__block_ovd_prn_recov + UtilityM.CheckNull<decimal>(reader["OVD_PRN_RECOV"]);
+                                                                        tca1.tot__block_adv_prn_recov = tca1.tot__block_adv_prn_recov + UtilityM.CheckNull<decimal>(reader["ADV_PRN_RECOV"]);
+                                                                        tca1.tot_block_curr_intt_recov = tca1.tot_block_curr_intt_recov + UtilityM.CheckNull<decimal>(reader["CURR_INTT_RECOV"]);
+                                                                        tca1.tot_block_ovd_intt_recov = tca1.tot_block_ovd_intt_recov + UtilityM.CheckNull<decimal>(reader["OVD_INTT_RECOV"]);
+                                                                        tca1.tot_block_penal_intt_recov = tca1.tot_block_penal_intt_recov + UtilityM.CheckNull<decimal>(reader["PENAL_INTT_RECOV"]);
+                                                                        tca1.tot_block_recov = tca1.tot_block_recov + UtilityM.CheckNull<decimal>(reader["RECOV_AMT"]);
+                                                                        tca1.tot_count_block = tca1.tot_count_block + 1;
+                                                                        tcaRet2.gmloantrans.Add(loanReco);
+                                                                        //loanRecoList.Add(loanReco);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        tcaRet2.blocktype = tca1;
+                                                        tcaRet1.blockwiserecovery.Add(tcaRet2);//loanRecoList.Add(tcaRet1);
+                                                        tca.tot_acc_curr_prn_recov = tca.tot_acc_curr_prn_recov + tca1.tot_block_curr_prn_recov;
+                                                        tca.tot_acc_ovd_prn_recov = tca.tot_acc_ovd_prn_recov + tca1.tot__block_ovd_prn_recov;
+                                                        tca.tot_acc_adv_prn_recov = tca.tot_acc_adv_prn_recov + tca1.tot__block_adv_prn_recov;
+                                                        tca.tot_acc_curr_intt_recov = tca.tot_acc_curr_intt_recov + tca1.tot_block_curr_intt_recov;
+                                                        tca.tot_acc_ovd_intt_recov = tca.tot_acc_ovd_intt_recov + tca1.tot_block_ovd_intt_recov;
+                                                        tca.tot_acc_penal_intt_recov = tca.tot_acc_penal_intt_recov + tca1.tot_block_penal_intt_recov;
+                                                        tca.tot_acc_recov = tca.tot_acc_recov + tca1.tot_block_recov;
+                                                        tca.tot_count_acc = tca.tot_count_acc + 1;
+                                                    }
+
+
+                                                }
+                                            }
+                                        }
+                                        loanRecoList.Add(tcaRet1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanRecoList = null;
+                    }
+                }
+            }
+            return loanRecoList;
+        }
+
+
+
         internal List<accwiserecovery_type> PopulateRecoveryRegisterFundwise(p_report_param prp)
         {
             List<accwiserecovery_type> loanRecoList = new List<accwiserecovery_type>();
@@ -4937,6 +5132,135 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
         }
 
 
+        internal List<UserwisetransDM> GetUserwiseTransDtls(p_report_param prp)
+        {
+            List<UserwisetransDM> loanDfltList = new List<UserwisetransDM>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            
+            string _query = " SELECT V_TRANS_DTLS.TRANS_DT,             "
+                           + " (SELECT ACC_TYPE_DESC FROM MM_ACC_TYPE WHERE ACC_TYPE_CD = V_TRANS_DTLS.ACC_TYPE_CD) ACC_DESC,           "
+                           + "  V_TRANS_DTLS.ACC_NUM LOAN_ID,              "
+                           + " V_TRANS_DTLS.TRANS_CD,                "
+                           + " Decode(V_TRANS_DTLS.TRANS_TYPE,'B','Disbursment','Recovery') TRANS_TYPE,                  "
+                           + " V_TRANS_DTLS.TRANS_MODE,                 "
+                           + " V_TRANS_DTLS.AMOUNT,                     "
+                           + "  Decode(V_TRANS_DTLS.TRF_TYPE,'C','Cash','Transfer') TRF_TYPE,                "
+                           + " (V_TRANS_DTLS.CURR_PRN_RECOV + V_TRANS_DTLS.ADV_PRN_RECOV + V_TRANS_DTLS.OVD_PRN_RECOV) PRN_RECOV,                 "
+                           + " (V_TRANS_DTLS.CURR_INTT_RECOV+V_TRANS_DTLS.OVD_INTT_RECOV+ V_TRANS_DTLS.PENAL_INTT_RECOV) INTT_RECOV,               "
+                           + " V_TRANS_DTLS.CURR_INTT_RATE,             "
+                           + " V_TRANS_DTLS.OVD_INTT_RATE,          "
+                           + " (SELECT USER_FIRST_NAME || ' ' || nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME          "
+                           + "  FROM V_TRANS_DTLS       "
+                           + " WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and  "
+                           + " (V_TRANS_DTLS.TRANS_TYPE IN ('R','B')) and  "
+                           + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and  "
+                           + " (V_TRANS_DTLS.BRN_CD  = {2})  AND "
+                           + " (SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) ) ={3} "
+                           + " ORDER BY TRANS_TYPE,TRANS_CD ";
+
+
+            string _query1 = " SELECT  DISTINCT SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) USER_ID, "
+                             + " (SELECT USER_FIRST_NAME || ' '|| nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME  FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME"
+                             + "  FROM V_TRANS_DTLS "
+                             + "  WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and "
+                             + " (V_TRANS_DTLS.TRANS_TYPE IN ('R','B')) and "
+                             + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and"
+                             + " (V_TRANS_DTLS.BRN_CD  = {2})";
+
+            
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        string _statement1 = string.Format(_query1,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.to_dt , "'"),
+                                         string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'")
+                                         );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        UserwisetransDM tcaRet1 = new UserwisetransDM();
+
+                                        var tca = new UserType();
+                                        tca.user_id = UtilityM.CheckNull<string>(reader1["USER_ID"]);
+                                        tca.user_name = UtilityM.CheckNull<string>(reader1["USER_NAME"]);
+                                        
+                                        tcaRet1.utype = tca;
+
+                                        _statement = string.Format(_query,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.to_dt, "'"),
+                                         string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'"),
+                                          string.Concat("'", UtilityM.CheckNull<string>(reader1["USER_ID"]), "'")
+                                         );
+
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var loanDtl = new UserTransDtls();
+
+                                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                                        loanDtl.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                                        loanDtl.acc_desc = UtilityM.CheckNull<string>(reader["ACC_DESC"]);
+                                                        loanDtl.trans_cd = UtilityM.CheckNull<Int64>(reader["TRANS_CD"]);
+                                                        loanDtl.trans_type = UtilityM.CheckNull<string>(reader["TRANS_TYPE"]);
+                                                        loanDtl.trans_mode = UtilityM.CheckNull<string>(reader["TRANS_MODE"]);
+                                                        loanDtl.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]);
+                                                        loanDtl.trf_type = UtilityM.CheckNull<string>(reader["TRF_TYPE"]);
+                                                        loanDtl.prn_recov = UtilityM.CheckNull<decimal>(reader["PRN_RECOV"]);
+                                                        loanDtl.intt_recov = UtilityM.CheckNull<decimal>(reader["INTT_RECOV"]);
+                                                        loanDtl.curr_intt_rt = UtilityM.CheckNull<double>(reader["CURR_INTT_RATE"]);
+                                                        loanDtl.ovd_intt_rt = UtilityM.CheckNull<double>(reader["OVD_INTT_RATE"]);
+                                                        loanDtl.user_name = UtilityM.CheckNull<string>(reader["USER_NAME"]);
+
+                                                        //loanDfltList.Add(loanDtl);
+                                                        tcaRet1.utransdtls.Add(loanDtl);
+                                                    }                                                    
+                                                }
+                                            }
+                                        }
+                                                    
+                                        loanDfltList.Add(tcaRet1);
+                                    }
+                                    transaction.Commit();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
+        }
+
+
 
         internal List<recoveryDM> GetRecoveryListGroupwise(p_report_param prp)
         {
@@ -6336,9 +6660,11 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
         }
 
 
-        internal List<dcstatement> PopulateDcStatement(p_report_param prp)
+
+    
+        internal List<activitywisedc_type> PopulateDcStatement(p_report_param prp)
         {
-            List<dcstatement> loanDfltList = new List<dcstatement>();
+            List<activitywisedc_type> loanDfltList = new List<activitywisedc_type>();
 
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
             string _statement;
@@ -6364,8 +6690,19 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                             + "TT_DC_FARM.DEP_AMT, "
                             + "TT_DC_FARM.LSO_NO, "
                             + "TT_DC_FARM.LSO_DATE, "
-                            + "TT_DC_FARM.SEX "
-                            + " FROM TT_DC_FARM ORDER BY TT_DC_FARM.DISB_DT";
+                            + "TT_DC_FARM.SEX, "
+                            + "TT_DC_FARM.CULTI_VALUE, "
+                            + "TT_DC_FARM.CULTI_AREA, "
+                            + "TT_DC_FARM.PRONOTE_AMT, "
+                            + "TT_DC_FARM.MACHINE "
+                            + " FROM TT_DC_FARM  WHERE ACTIVITY_CD = {0} AND LOAN_ID = {1} ORDER BY TT_DC_FARM.DISB_DT";
+
+            string _query1 = " SELECT DISTINCT TT_DC_FARM.ACTIVITY_CD  "
+                            + " FROM TT_DC_FARM ";
+
+            string _query2 = " SELECT DISTINCT TT_DC_FARM.LOAN_ID  "
+                           + " FROM TT_DC_FARM WHERE ACTIVITY_CD = {0}  ";
+
 
 
             using (var connection = OrclDbConnection.NewConnection)
@@ -6405,46 +6742,111 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
                         }
 
-                        _statement = string.Format(_query);
+                        transaction.Commit();
 
-                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        string _statement1 = string.Format(_query1);
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
                         {
-                            using (var reader = command.ExecuteReader())
+                            using (var reader1 = command1.ExecuteReader())
                             {
-                                if (reader.HasRows)
+                                if (reader1.HasRows)
                                 {
-                                    while (reader.Read())
+                                    while (reader1.Read())
                                     {
-                                        var loanDtl = new dcstatement();
-
-                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
-                                        loanDtl.party_name = UtilityM.CheckNull<string>(reader["PARTY_NAME"]);
-                                        loanDtl.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
-                                        loanDtl.application_dt = UtilityM.CheckNull<DateTime>(reader["APP_RECEPT_DT"]);
-                                        loanDtl.loan_case_no = UtilityM.CheckNull<string>(reader["LOAN_CASE_NO"]);
-                                        loanDtl.sanction_dt = UtilityM.CheckNull<DateTime>(reader["SANC_DT"]);
-                                        loanDtl.sanction_amt = UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
-                                        loanDtl.disb_amt = UtilityM.CheckNull<decimal>(reader["DISB_AMT"]);
-                                        loanDtl.disb_dt = UtilityM.CheckNull<DateTime>(reader["DISB_DT"]);
-                                        loanDtl.activity = UtilityM.CheckNull<string>(reader["ACTIVITY_CD"]);
-                                        loanDtl.land_value = UtilityM.CheckNull<decimal>(reader["LAND_VALUE"]);
-                                        loanDtl.land_area = UtilityM.CheckNull<string>(reader["LAND_AREA"]);
-                                        loanDtl.addl_land_area = UtilityM.CheckNull<string>(reader["ADDI_LAND_AMT"]);
-                                        loanDtl.project_cost = UtilityM.CheckNull<decimal>(reader["PROJECT_COST"]);
-                                        loanDtl.net_income_gen = UtilityM.CheckNull<decimal>(reader["NET_INCOME_GEN"]);
-                                        loanDtl.bond_no = UtilityM.CheckNull<string>(reader["BOND_NO"]);
-                                        loanDtl.bond_dt = UtilityM.CheckNull<DateTime>(reader["BOND_DT"]);
-                                        loanDtl.operator_name = UtilityM.CheckNull<string>(reader["OPERATOR_NAME"]);
-                                        loanDtl.deposit_amt = UtilityM.CheckNull<decimal>(reader["DEP_AMT"]);
-                                        loanDtl.own_contribution = UtilityM.CheckNull<decimal>(reader["PROJECT_COST"]) - UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
-                                        loanDtl.lso_no = UtilityM.CheckNull<string>(reader["LSO_NO"]);
-                                        loanDtl.lso_dt = UtilityM.CheckNull<DateTime>(reader["LSO_DATE"]);
-                                        loanDtl.sex = UtilityM.CheckNull<string>(reader["SEX"]);
+                                        activitywisedc_type tcaRet1 = new activitywisedc_type();
 
 
-                                        loanDfltList.Add(loanDtl);
+                                        tcaRet1.activity_cd = UtilityM.CheckNull<string>(reader1["ACTIVITY_CD"]);
+
+                                        string _statement2 = string.Format(_query2,
+                                            string.Concat("'",UtilityM.CheckNull<string>(reader1["ACTIVITY_CD"]), "'"));
+
+                                        using (var command2 = OrclDbConnection.Command(connection, _statement2))
+                                        {
+                                            using (var reader2 = command2.ExecuteReader())
+                                            {
+                                                if (reader2.HasRows)
+                                                {
+                                                    while (reader2.Read())
+                                                    {
+
+                                                        activitywiseloan tcaRet2 = new activitywiseloan();
+
+
+                                                        tcaRet2.loan_id = UtilityM.CheckNull<string>(reader2["LOAN_ID"]);
+
+
+
+                                                        _statement = string.Format(_query,
+                                                                     string.Concat("'", UtilityM.CheckNull<string>(reader1["ACTIVITY_CD"]), "'"),
+                                                                     string.Concat("'", UtilityM.CheckNull<string>(reader2["LOAN_ID"]), "'")
+                                                                  );
+
+                                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                                        {
+                                                            using (var reader = command.ExecuteReader())
+                                                            {
+                                                                if (reader.HasRows)
+                                                                {
+                                                                    while (reader.Read())
+                                                                    {
+                                                                        var loanDtl = new dcstatement();
+
+                                                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                                                        loanDtl.party_name = UtilityM.CheckNull<string>(reader["PARTY_NAME"]);
+                                                                        loanDtl.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
+                                                                        loanDtl.application_dt = UtilityM.CheckNull<DateTime>(reader["APP_RECEPT_DT"]);
+                                                                        loanDtl.loan_case_no = UtilityM.CheckNull<string>(reader["LOAN_CASE_NO"]);
+                                                                        loanDtl.sanction_dt = UtilityM.CheckNull<DateTime>(reader["SANC_DT"]);
+                                                                        loanDtl.sanction_amt = UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
+                                                                        loanDtl.disb_amt = UtilityM.CheckNull<decimal>(reader["DISB_AMT"]);
+                                                                        loanDtl.disb_dt = UtilityM.CheckNull<DateTime>(reader["DISB_DT"]);
+                                                                        loanDtl.activity = UtilityM.CheckNull<string>(reader["ACTIVITY_CD"]);
+                                                                        loanDtl.land_value = UtilityM.CheckNull<decimal>(reader["LAND_VALUE"]);
+                                                                        loanDtl.land_area = UtilityM.CheckNull<string>(reader["LAND_AREA"]);
+                                                                        loanDtl.addl_land_area = UtilityM.CheckNull<string>(reader["ADDI_LAND_AMT"]);
+                                                                        loanDtl.project_cost = UtilityM.CheckNull<decimal>(reader["PROJECT_COST"]);
+                                                                        loanDtl.net_income_gen = UtilityM.CheckNull<decimal>(reader["NET_INCOME_GEN"]);
+                                                                        loanDtl.bond_no = UtilityM.CheckNull<string>(reader["BOND_NO"]);
+                                                                        loanDtl.bond_dt = UtilityM.CheckNull<DateTime>(reader["BOND_DT"]);
+                                                                        loanDtl.operator_name = UtilityM.CheckNull<string>(reader["OPERATOR_NAME"]);
+                                                                        loanDtl.deposit_amt = UtilityM.CheckNull<decimal>(reader["DEP_AMT"]);
+                                                                        loanDtl.own_contribution = UtilityM.CheckNull<decimal>(reader["PROJECT_COST"]) - UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
+                                                                        loanDtl.lso_no = UtilityM.CheckNull<string>(reader["LSO_NO"]);
+                                                                        loanDtl.lso_dt = UtilityM.CheckNull<DateTime>(reader["LSO_DATE"]);
+                                                                        loanDtl.sex = UtilityM.CheckNull<string>(reader["SEX"]);
+                                                                        loanDtl.culti_area = UtilityM.CheckNull<string>(reader["CULTI_AREA"]);
+                                                                        loanDtl.culti_val = UtilityM.CheckNull<decimal>(reader["CULTI_VALUE"]);
+                                                                        loanDtl.pronote_amt = UtilityM.CheckNull<decimal>(reader["PRONOTE_AMT"]);
+                                                                        loanDtl.machine = UtilityM.CheckNull<string>(reader["MACHINE"]);
+
+
+                                                                        tcaRet2.dc_statement.Add(loanDtl);
+
+                                                                        tcaRet1.tot_disb = tcaRet1.tot_disb + UtilityM.CheckNull<decimal>(reader["DISB_AMT"]);
+                                                                        tcaRet1.tot_project = tcaRet1.tot_project + UtilityM.CheckNull<decimal>(reader["PROJECT_COST"]);
+                                                                        tcaRet1.tot_pronote = tcaRet1.tot_pronote + UtilityM.CheckNull<decimal>(reader["PRONOTE_AMT"]);
+                                                                        tcaRet1.tot_sanc = tcaRet1.tot_sanc + UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
+                                                                        tcaRet1.tot_own_contribution = tcaRet1.tot_own_contribution + UtilityM.CheckNull<decimal>(reader["PROJECT_COST"]) - UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
+
+
+                                                                    }
+
+                                                                   // transaction.Commit();
+                                                                }
+                                                            }
+                                                        }
+
+                                                        tcaRet1.dclist.Add(tcaRet2);
+                                                        
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        loanDfltList.Add(tcaRet1);
+                                        
                                     }
-                                    transaction.Commit();
                                 }
                             }
                         }

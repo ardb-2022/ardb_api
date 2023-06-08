@@ -622,7 +622,65 @@ namespace SBWSFinanceApi.DL
         }
 
 
-             
+        internal List<td_def_trans_trf> GetapprovedDepTrans(td_def_trans_trf tdt)
+        {
+            List<td_def_trans_trf> tdtRets = new List<td_def_trans_trf>();
+            string _query = "SELECT  TRANS_DT,"
+         + " TRANS_CD,"
+         + " ACC_TYPE_CD,"
+         + " ACC_NUM,"
+         + " TRANS_TYPE,"
+         + " TRANS_MODE,"
+         + " AMOUNT,"
+         + " TRF_TYPE,"
+         + " REMARKS,"
+         + " OVD_PRN_RECOV,"
+         + " BRN_CD,ARDB_CD,DEL_FLAG"
+    + " FROM TD_DEP_TRANS"
+    + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
+    + " NVL(APPROVAL_STATUS, 'U') = 'A' AND "
+    + " ACC_TYPE_CD IN (SELECT acc_type_cd FROM   mm_acc_type WHERE  dep_loan_flag = {2})   AND"
+    + " TRANS_TYPE <> 'T' AND DEL_FLAG='N' ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tdt.ardb_cd) ? "ardb_cd" : string.Concat("'", tdt.ardb_cd, "'"),
+                                            string.IsNullOrWhiteSpace(tdt.brn_cd) ? "brn_cd" : string.Concat("'", tdt.brn_cd, "'"),
+                                            string.IsNullOrWhiteSpace(tdt.trans_type) ? string.Concat("'", "D", "'") : string.Concat("'", tdt.trans_type, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var tdtr = new td_def_trans_trf();
+                                tdtr.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                tdtr.trans_cd = UtilityM.CheckNull<Int64>(reader["TRANS_CD"]);
+                                tdtr.acc_type_cd = UtilityM.CheckNull<Int32>(reader["ACC_TYPE_CD"]);
+                                tdtr.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                tdtr.trans_type = UtilityM.CheckNull<string>(reader["TRANS_TYPE"]);
+                                tdtr.trans_mode = UtilityM.CheckNull<string>(reader["TRANS_MODE"]);
+                                tdtr.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]);
+                                tdtr.trf_type = UtilityM.CheckNull<string>(reader["TRF_TYPE"]);
+                                tdtr.remarks = UtilityM.CheckNull<string>(reader["REMARKS"]);
+                                tdtr.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["OVD_PRN_RECOV"]);
+                                tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                tdtr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                tdtr.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
+                                tdtRets.Add(tdtr);
+                            }
+                        }
+                    }
+                }
+            }
+            return tdtRets;
+        }
+
+
+
         internal string P_UPDATE_TD_DEP_TRANS(DbConnection connection, p_gen_param prp)
         {
             string _alter="ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
