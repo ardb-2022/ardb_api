@@ -8,6 +8,7 @@ namespace SBWSFinanceApi.Models
     public class activitywisedc_type
     {
         public string activity_cd { get; set; }
+        public  string sex { get; set; }
         public decimal tot_pronote { get; set; }
         public decimal tot_disb { get; set; }
 

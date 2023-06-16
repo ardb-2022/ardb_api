@@ -9,6 +9,7 @@ namespace SBWSFinanceApi.Models
     {
         public string ardb_cd { get; set; }
         public Int64 role_cd { get; set; }
+        public string role_type { get; set; }
         public string module { get; set; }
         public string sub_module { get; set; }
         public string first_sub_module_item { get; set; }

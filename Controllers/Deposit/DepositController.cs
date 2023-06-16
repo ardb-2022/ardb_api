@@ -42,7 +42,7 @@ namespace SBWSFinanceApi.Controllers
         }
 
 
-
+        
         [Route("PopulateAccountNumber")]
         [HttpPost]
         public string PopulateAccountNumber([FromBody] p_gen_param tvd)
@@ -152,6 +152,13 @@ namespace SBWSFinanceApi.Controllers
         public string ApproveAccountTranaction([FromBody] p_gen_param tvd)
         {
             return _ll2.ApproveAccountTranaction(tvd);
+        }
+
+        [Route("GetUserwiseTransDepositDtls")]
+        [HttpPost]
+        public List<UserwisetransDM> GetUserwiseTransDepositDtls(p_report_param prp)
+        {
+            return _ll2.GetUserwiseTransDepositDtls(prp);
         }
 
         [Route("GetInttRate")]

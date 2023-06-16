@@ -151,8 +151,8 @@ namespace SBWSFinanceApi.DL
     {
             int _ret=0;
             List<t_voucher_dtls> tvdRets=new List<t_voucher_dtls>();
-            string _query="INSERT INTO T_VOUCHER_DTLS (ARDB_CD,BRN_CD, VOUCHER_DT, VOUCHER_ID, ACC_CD, AMOUNT, DEBIT_CREDIT_FLAG, TRANSACTION_TYPE, NARRATION, APPROVAL_STATUS,CREATED_BY,CREATED_DT,DEL_FLAG)"
-                            +" VALUES ({0},{1},to_date('{2}','dd-mm-yyyy' ), {3}, {4}, {5}, {6}, {7},  {8}, {9},{10},SYSDATE,'N')";
+            string _query="INSERT INTO T_VOUCHER_DTLS (ARDB_CD,BRN_CD, VOUCHER_DT, VOUCHER_ID, ACC_CD, AMOUNT, DEBIT_CREDIT_FLAG, TRANSACTION_TYPE, NARRATION, APPROVAL_STATUS,CREATED_BY,CREATED_DT,DEL_FLAG,BANK_NAME,BRANCH_NAME)"
+                            +" VALUES ({0},{1},to_date('{2}','dd-mm-yyyy' ), {3}, {4}, {5}, {6}, {7},  {8}, {9},{10},SYSDATE,'N',{11},{12})";
             string _query1="INSERT INTO T_VOUCHER_NARRATION (ARDB_CD,BRN_CD, VOUCHER_DT, VOUCHER_ID, NARRATION, VOUCHER_TYPE, APPROVAL_STATUS,DEL_FLAG)"
                             +"VALUES ({0},{1},  to_date('{2}','dd-mm-yyyy' ), {3}, {4}, {5}, {6},'N')";
             int VoucherIdMax=GetTVoucherDtlsMaxId(tvd[0]);
@@ -176,7 +176,9 @@ namespace SBWSFinanceApi.DL
                                           string.Concat("'", tvd[i].transaction_type, "'"),
                                           string.Concat("'", tvd[i].narration, "'"),
                                           string.Concat("'", tvd[i].approval_status, "'"),
-                                          string.Concat("'", tvd[i].created_by, "'")
+                                          string.Concat("'", tvd[i].created_by, "'"),
+                                          string.Concat("'", tvd[i].bank_name, "'"),
+                                          string.Concat("'", tvd[i].branch_name, "'")
                                           );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -250,7 +252,7 @@ namespace SBWSFinanceApi.DL
             string _query="Update t_voucher_dtls"
                             +" Set approved_by = {0} , approval_status ={1}, approved_dt= SYSDATE "
                             +" Where  ardb_cd = {2} AND brn_cd = {3}  AND voucher_dt = to_date('{4}','dd-mm-yyyy' ) AND "
-                            +" voucher_id = {5} AND acc_cd= {6}";
+                            +" voucher_id = {5} AND acc_cd= {6} ";
             string _query1="Update t_voucher_narration"
                             +" Set narration = {0} , approval_status ={1}"
                             +" Where  ardb_cd = {2} AND brn_cd = {3}  AND voucher_dt = to_date('{4}','dd-mm-yyyy' ) AND "
@@ -315,8 +317,8 @@ namespace SBWSFinanceApi.DL
                             +" Set narration = {0} "
                             +" Where ardb_cd ={1} AND brn_cd = {2}  AND voucher_dt = to_date('{3}','dd-mm-yyyy' ) AND "
                             +" voucher_id = {4} ";
-            string _queryIns= "INSERT INTO T_VOUCHER_DTLS (ARDB_CD,BRN_CD, VOUCHER_DT, VOUCHER_ID, ACC_CD, AMOUNT, DEBIT_CREDIT_FLAG, TRANSACTION_TYPE, NARRATION, APPROVAL_STATUS,CREATED_BY,CREATED_DT,DEL_FLAG)"
-                            + " VALUES ({0},{1}, to_date('{2}','dd-mm-yyyy' ), {3}, {4}, {5}, {6}, {7},  {8}, {9},{10},SYSDATE,'N')";
+            string _queryIns= "INSERT INTO T_VOUCHER_DTLS (ARDB_CD,BRN_CD, VOUCHER_DT, VOUCHER_ID, ACC_CD, AMOUNT, DEBIT_CREDIT_FLAG, TRANSACTION_TYPE, NARRATION, APPROVAL_STATUS,CREATED_BY,CREATED_DT,DEL_FLAG,BANK_NAME,BRANCH_NAME)"
+                            + " VALUES ({0},{1}, to_date('{2}','dd-mm-yyyy' ), {3}, {4}, {5}, {6}, {7},  {8}, {9},{10},SYSDATE,'N',{11},{12})";
             
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -351,7 +353,9 @@ namespace SBWSFinanceApi.DL
                                           string.Concat("'", tvd[i].transaction_type, "'"),
                                           string.Concat("'", tvd[i].narration, "'"),
                                           string.Concat("'", tvd[i].approval_status, "'"),
-                                          string.Concat("'", tvd[i].created_by, "'")
+                                          string.Concat("'", tvd[i].created_by, "'"),
+                                          string.Concat("'", tvd[i].bank_name, "'"),
+                                          string.Concat("'", tvd[i].branch_name, "'")
                                           );                           
 
 

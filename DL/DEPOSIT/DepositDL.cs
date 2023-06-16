@@ -5024,5 +5024,139 @@ namespace SBWSDepositApi.Deposit
 
 
 
+        internal List<UserwisetransDM> GetUserwiseTransDepositDtls(p_report_param prp)
+        {
+            List<UserwisetransDM> loanDfltList = new List<UserwisetransDM>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+
+            string _query = " SELECT V_TRANS_DTLS.TRANS_DT,             "
+                           + " (SELECT ACC_TYPE_DESC FROM MM_ACC_TYPE WHERE ACC_TYPE_CD = V_TRANS_DTLS.ACC_TYPE_CD) ACC_DESC,           "
+                           + "  V_TRANS_DTLS.ACC_NUM LOAN_ID,              "
+                           + " V_TRANS_DTLS.TRANS_CD,                "
+                           + " Decode(V_TRANS_DTLS.TRANS_TYPE,'D','Deposit','Withdrawal') TRANS_TYPE,                  "
+                           + " V_TRANS_DTLS.TRANS_MODE,                 "
+                           + " V_TRANS_DTLS.AMOUNT,                     "
+                           + "  Decode(V_TRANS_DTLS.TRF_TYPE,'C','Cash','Transfer') TRF_TYPE,                "
+                           + " (V_TRANS_DTLS.CURR_PRN_RECOV) PRN_RECOV,                 "
+                           + " (V_TRANS_DTLS.CURR_INTT_RECOV) INTT_RECOV,               "
+                           + " V_TRANS_DTLS.CURR_INTT_RATE,             "
+                           + " V_TRANS_DTLS.OVD_INTT_RATE," 
+                           + " V_TRANS_DTLS.PARTICULARS,          "
+                           + " (SELECT USER_FIRST_NAME || ' ' || nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME          "
+                           + "  FROM V_TRANS_DTLS       "
+                           + " WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and  "
+                           + " (V_TRANS_DTLS.TRANS_TYPE IN ('D','W')) and  "
+                           + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and  "
+                           + " (V_TRANS_DTLS.BRN_CD  = {2})  AND "
+                           + " (SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) ) ={3} "
+                           + " ORDER BY TRANS_TYPE,TRANS_CD ";
+
+
+            string _query1 = " SELECT  DISTINCT SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) USER_ID, "
+                             + " (SELECT USER_FIRST_NAME || ' '|| nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME  FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME"
+                             + "  FROM V_TRANS_DTLS "
+                             + "  WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and "
+                             + " (V_TRANS_DTLS.TRANS_TYPE IN ('D','W')) and "
+                             + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and"
+                             + " (V_TRANS_DTLS.BRN_CD  = {2})";
+
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        string _statement1 = string.Format(_query1,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.to_dt, "'"),
+                                         string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'")
+                                         );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        UserwisetransDM tcaRet1 = new UserwisetransDM();
+
+                                        var tca = new UserType();
+                                        tca.user_id = UtilityM.CheckNull<string>(reader1["USER_ID"]);
+                                        tca.user_name = UtilityM.CheckNull<string>(reader1["USER_NAME"]);
+
+                                        tcaRet1.utype = tca;
+
+                                        _statement = string.Format(_query,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.to_dt, "'"),
+                                         string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'"),
+                                          string.Concat("'", UtilityM.CheckNull<string>(reader1["USER_ID"]), "'")
+                                         );
+
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var loanDtl = new UserTransDtls();
+
+                                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                                        loanDtl.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                                        loanDtl.acc_desc = UtilityM.CheckNull<string>(reader["ACC_DESC"]);
+                                                        loanDtl.trans_cd = UtilityM.CheckNull<Int64>(reader["TRANS_CD"]);
+                                                        loanDtl.trans_type = UtilityM.CheckNull<string>(reader["TRANS_TYPE"]);
+                                                        loanDtl.trans_mode = UtilityM.CheckNull<string>(reader["TRANS_MODE"]);
+                                                        loanDtl.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]);
+                                                        loanDtl.particulars = UtilityM.CheckNull<string>(reader["PARTICULARS"]);
+                                                        loanDtl.trf_type = UtilityM.CheckNull<string>(reader["TRF_TYPE"]);
+                                                        loanDtl.prn_recov = UtilityM.CheckNull<decimal>(reader["PRN_RECOV"]);
+                                                        loanDtl.intt_recov = UtilityM.CheckNull<decimal>(reader["INTT_RECOV"]);
+                                                        loanDtl.curr_intt_rt = UtilityM.CheckNull<double>(reader["CURR_INTT_RATE"]);
+                                                        loanDtl.ovd_intt_rt = UtilityM.CheckNull<double>(reader["OVD_INTT_RATE"]);
+                                                        loanDtl.user_name = UtilityM.CheckNull<string>(reader["USER_NAME"]);
+
+                                                        //loanDfltList.Add(loanDtl);
+                                                        tcaRet1.utransdtls.Add(loanDtl);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        loanDfltList.Add(tcaRet1);
+                                    }
+                                    transaction.Commit();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
+        }
+
+
+
+
+
     }
 }

@@ -20,6 +20,11 @@ namespace SBWSFinanceApi.LL
         public List<mm_role_permission> GetRolePermission(p_gen_param mum)
         {
             return _dac.GetRolePermission(mum);
+        }      
+
+        public List<mm_role_permission> GetRoleMaster(p_gen_param mum)
+        {
+            return _dac.GetRoleMaster(mum);
         }
 
         public int InsertRolePermission(mm_role_permission mum)

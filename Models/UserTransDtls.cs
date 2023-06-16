@@ -24,6 +24,8 @@ namespace SBWSFinanceApi.Models
 
         public string user_name { get; set; }
 
+        public string particulars { get; set; }
+
 
     }
 }

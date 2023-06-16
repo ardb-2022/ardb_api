@@ -1694,6 +1694,37 @@ internal List<mm_constitution> GetConstitution()
         }
 
 
+        internal List<mm_role_permission> GetRoleMaster(p_gen_param mum)
+        {
+            List<mm_role_permission> mamRets = new List<mm_role_permission>();
+            string _query = " SELECT ROLE_CD, ROLE_TYPE"
+                         + " FROM MM_ROLE ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query);
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new mm_role_permission();
+                               
+                                mam.role_cd = UtilityM.CheckNull<Int64>(reader["ROLE_CD"]);
+                                mam.role_type = UtilityM.CheckNull<string>(reader["ROLE_TYPE"]);
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
         internal List<mm_role_permission> GetRolePermission(p_gen_param mum)
         {
             List<mm_role_permission> mamRets = new List<mm_role_permission>();

@@ -5260,6 +5260,148 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
             return loanDfltList;
         }
 
+/*        SELECT V_USER_TRANS.BRN_CD,
+         V_USER_TRANS.TRANS_DT,
+         V_USER_TRANS.VTYPE,
+         V_USER_TRANS.TRANS_CD,
+         V_USER_TRANS.ACC_TYPE_CD,
+         V_USER_TRANS.ACC_NAME,
+         V_USER_TRANS.ACC_NUM,
+         V_USER_TRANS.TRANS_TYPE,
+         DECODE(V_USER_TRANS.TRANS_TYPE,'D', V_USER_TRANS.AMOUNT,'R', V_USER_TRANS.AMOUNT,0),   
+         DECODE(V_USER_TRANS.TRANS_TYPE,'W', V_USER_TRANS.AMOUNT,'B', V_USER_TRANS.AMOUNT,0),   
+         V_USER_TRANS.CREATED_BY,   
+         V_USER_TRANS.CUST_NAME,   
+         V_USER_TRANS.APPROVED_BY,   
+         V_USER_TRANS.TRF_TYPE
+    FROM V_USER_TRANS
+   WHERE V_USER_TRANS.TRANS_DT = '16/05/2023' 
+
+
+
+        internal List<UserwisetransDM> GetUserwiseTransDtlsAll(p_report_param prp)
+        {
+            List<UserwisetransDM> loanDfltList = new List<UserwisetransDM>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+
+            string _query = " SELECT V_USER_TRANS.ARDB_CD,             "
+                           + " V_USER_TRANS.TRANS_DT,           "
+                           + " V_TRANS_DTLS.TRANS_CD,                "
+                           + " V_USER_TRANS.ACC_TYPE_CD,                  "
+                           + "  V_USER_TRANS.ACC_NAME,                 "
+                           + "  V_USER_TRANS.ACC_NUM,                     "
+                           + "   V_USER_TRANS.TRANS_TYPE,                "
+                           + " DECODE(V_USER_TRANS.TRANS_TYPE,'D', V_USER_TRANS.AMOUNT,'R', V_USER_TRANS.AMOUNT,0) RECEIPT,                    "
+                           + " DECODE(V_USER_TRANS.TRANS_TYPE,'W', V_USER_TRANS.AMOUNT,'B', V_USER_TRANS.AMOUNT,0) PAYMENT,               "
+                           + "  V_USER_TRANS.CREATED_BY,            "
+                           + "  V_USER_TRANS.APPROVED_BY,           "
+                           + "  V_USER_TRANS.TRF_TYPE          "
+                           + "  FROM V_USER_TRANS       "
+                           + " WHERE(V_USER_TRANS.ARDB_CD = {0}) and  "
+                           + " (V_TRANS_DTLS.TRANS_TYPE IN ('R','B')) and  "
+                           + " (V_USER_TRANS.TRANS_DT  = substr({1},1,10)) and  "
+                           + " (V_USER_TRANS.BRN_CD  = {2})  AND "
+                           + " (SUBSTR(V_USER_TRANS.CREATED_BY,1, instr(V_USER_TRANS.CREATED_BY,'/',1)-1) ) ={3} "
+                           + " ORDER BY TRANS_TYPE,TRANS_CD ";
+
+
+            string _query1 = " SELECT  DISTINCT SUBSTR(V_USER_TRANS.CREATED_BY,1,instr(V_USER_TRANS.CREATED_BY,'/',1)-1) USER_ID, "
+                             + " (SELECT USER_FIRST_NAME || ' '|| nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME  FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_USER_TRANS.CREATED_BY,1,instr(V_USER_TRANS.CREATED_BY,'/',1)-1)) USER_NAME"
+                             + "  FROM V_USER_TRANS "
+                             + "  WHERE(V_USER_TRANS.ARDB_CD = {0}) and "
+                             + " (V_USER_TRANS.TRANS_DT  = substr({1},1,10)) and"
+                             + " (V_USER_TRANS.BRN_CD  = {2})";
+
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        string _statement1 = string.Format(_query1,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.to_dt, "'"),
+                                         string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'")
+                                         );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        UserwisetransDM tcaRet1 = new UserwisetransDM();
+
+                                        var tca = new UserType();
+                                        tca.user_id = UtilityM.CheckNull<string>(reader1["USER_ID"]);
+                                        tca.user_name = UtilityM.CheckNull<string>(reader1["USER_NAME"]);
+
+                                        tcaRet1.utype = tca;
+
+                                        _statement = string.Format(_query,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                         string.Concat("'", prp.to_dt, "'"),
+                                         string.IsNullOrWhiteSpace(prp.brn_cd) ? "brn_cd" : string.Concat("'", prp.brn_cd, "'"),
+                                          string.Concat("'", UtilityM.CheckNull<string>(reader1["USER_ID"]), "'")
+                                         );
+
+                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                        {
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.HasRows)
+                                                {
+                                                    while (reader.Read())
+                                                    {
+                                                        var loanDtl = new UserTransDtls();
+
+                                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                                        loanDtl.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
+                                                        loanDtl.acc_desc = UtilityM.CheckNull<string>(reader["ACC_NAME"]);
+                                                        loanDtl.trans_cd = UtilityM.CheckNull<Int64>(reader["TRANS_CD"]);
+                                                        loanDtl.trans_type = UtilityM.CheckNull<string>(reader["TRANS_TYPE"]);
+                                                        loanDtl.amount = UtilityM.CheckNull<double>(reader["AMOUNT"]);
+                                                        loanDtl.trf_type = UtilityM.CheckNull<string>(reader["TRF_TYPE"]);
+                                                        loanDtl.prn_recov = UtilityM.CheckNull<decimal>(reader["RECEIPT"]);
+                                                        loanDtl.intt_recov = UtilityM.CheckNull<decimal>(reader["PAYMENT"]);                                                        
+                                                        loanDtl.user_name = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
+
+                                                        //loanDfltList.Add(loanDtl);
+                                                        tcaRet1.utransdtls.Add(loanDtl);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        loanDfltList.Add(tcaRet1);
+                                    }
+                                    transaction.Commit();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
+        }*/
+
 
 
         internal List<recoveryDM> GetRecoveryListGroupwise(p_report_param prp)
@@ -6695,13 +6837,13 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                             + "TT_DC_FARM.CULTI_AREA, "
                             + "TT_DC_FARM.PRONOTE_AMT, "
                             + "TT_DC_FARM.MACHINE "
-                            + " FROM TT_DC_FARM  WHERE ACTIVITY_CD = {0} AND LOAN_ID = {1} ORDER BY TT_DC_FARM.DISB_DT";
+                            + " FROM TT_DC_FARM  WHERE LOAN_ID = {0} ORDER BY TT_DC_FARM.DISB_DT";
 
-            string _query1 = " SELECT DISTINCT TT_DC_FARM.ACTIVITY_CD  "
-                            + " FROM TT_DC_FARM ";
+            string _query1 = " SELECT DISTINCT TT_DC_FARM.ACTIVITY_CD,SEX  "
+                            + " FROM TT_DC_FARM  WHERE TT_DC_FARM.ACTIVITY_CD = {0} AND TT_DC_FARM.SEX = {1}";
 
             string _query2 = " SELECT DISTINCT TT_DC_FARM.LOAN_ID  "
-                           + " FROM TT_DC_FARM WHERE ACTIVITY_CD = {0}  ";
+                           + " FROM TT_DC_FARM WHERE ACTIVITY_CD = {0}  AND  TT_DC_FARM.SEX = {1} ";
 
 
 
@@ -6744,7 +6886,9 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
                         transaction.Commit();
 
-                        string _statement1 = string.Format(_query1);
+                        string _statement1 = string.Format(_query1,
+                                            string.Concat("'", prp.activity_cd, "'"),
+                                            string.Concat("'", prp.sex, "'"));
 
                         using (var command1 = OrclDbConnection.Command(connection, _statement1))
                         {
@@ -6758,9 +6902,11 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
 
                                         tcaRet1.activity_cd = UtilityM.CheckNull<string>(reader1["ACTIVITY_CD"]);
+                                        tcaRet1.sex = UtilityM.CheckNull<string>(reader1["SEX"]);
 
                                         string _statement2 = string.Format(_query2,
-                                            string.Concat("'",UtilityM.CheckNull<string>(reader1["ACTIVITY_CD"]), "'"));
+                                            string.Concat("'", prp.activity_cd, "'"),
+                                            string.Concat("'", prp.sex, "'"));
 
                                         using (var command2 = OrclDbConnection.Command(connection, _statement2))
                                         {
@@ -6779,7 +6925,6 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
 
                                                         _statement = string.Format(_query,
-                                                                     string.Concat("'", UtilityM.CheckNull<string>(reader1["ACTIVITY_CD"]), "'"),
                                                                      string.Concat("'", UtilityM.CheckNull<string>(reader2["LOAN_ID"]), "'")
                                                                   );
 

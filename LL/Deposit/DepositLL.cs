@@ -21,6 +21,11 @@ namespace SBWSFinanceApi.LL
                 return _dac.GetDeposit(pmc);
         }
 
+        internal List<UserwisetransDM> GetUserwiseTransDepositDtls(p_report_param prp)
+        {
+            return _dac.GetUserwiseTransDepositDtls(prp);
+        }
+
         internal decimal InsertDeposit(tm_deposit pmc)
         {
             if (pmc.temp_flag == 1)
@@ -67,6 +72,8 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.GetDepositWithChild(dep);
         }
+
+        
 
         internal List<sb_intt_list> POPULATE_SB_INTT(p_gen_param dep)
         {
