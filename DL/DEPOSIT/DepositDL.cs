@@ -2760,8 +2760,10 @@ namespace SBWSDepositApi.Deposit
             
             string _query1 = "SELECT(SELECT ACC_TYPE_DESC FROM MM_ACC_TYPE WHERE ACC_TYPE_CD = a.acc_type_from) acc_type_from,"
                             + " a.acc_num_from acc_num_from,"
+                            + " (SELECT CUST_NAME FROM MM_CUSTOMER WHERE CUST_CD=(SELECT CUST_CD FROM TM_DEPOSIT WHERE nvl(ACC_STATUS,'O')='O' AND ACC_CLOSE_DT IS NULL AND ACC_TYPE_CD= a.ACC_TYPE_FROM AND ACC_NUM=a.ACC_NUM_FROM)) from_name,"
                             + " (SELECT ACC_TYPE_DESC FROM MM_ACC_TYPE WHERE ACC_TYPE_CD = b.acc_type_to) acc_type_to, "
                             + " b.acc_num_to acc_num_to,"
+                            + " (SELECT CUST_NAME FROM MM_CUSTOMER WHERE CUST_CD=(SELECT CUST_CD FROM TM_DEPOSIT WHERE nvl(ACC_STATUS,'O')='O' AND ACC_CLOSE_DT IS NULL AND ACC_TYPE_CD= b.ACC_TYPE_TO AND ACC_NUM=b.ACC_NUM_TO)) to_name,"
                             + " a.instr_status instr_status,"
                             + " a.first_trf_dt first_trf_dt,"
                             + " a.periodicity periodicity,"
@@ -2801,8 +2803,10 @@ namespace SBWSDepositApi.Deposit
                                         var tca = new standing_instr();
                                         tca.acc_type_from = UtilityM.CheckNull<string>(reader["ACC_TYPE_FROM"]);
                                         tca.acc_num_from = UtilityM.CheckNull<string>(reader["ACC_NUM_FROM"]);
+                                        tca.from_name = UtilityM.CheckNull<string>(reader["FROM_NAME"]);
                                         tca.acc_type_to = UtilityM.CheckNull<string>(reader["ACC_TYPE_TO"]);
                                         tca.acc_num_to = UtilityM.CheckNull<string>(reader["ACC_NUM_TO"]);
+                                        tca.to_name = UtilityM.CheckNull<string>(reader["TO_NAME"]);
                                         tca.instr_status = UtilityM.CheckNull<string>(reader["INSTR_STATUS"]);
                                         tca.first_trf_dt = UtilityM.CheckNull<DateTime>(reader["FIRST_TRF_DT"]);
                                         tca.periodicity = UtilityM.CheckNull<string>(reader["PERIODICITY"]);
@@ -4096,7 +4100,7 @@ namespace SBWSDepositApi.Deposit
                         _statement = string.Format(_query,
                                                    prp.ardb_cd, 
                                                    prp.acc_type_cd.ToString(),
-                                                   prp.acc_num,
+                                                   string.Concat("'", prp.acc_num, "'"),
                                                    prp.to_dt.ToString("dd/MM/yyyy HH:mm:ss"),
                                                    prp.acc_type_cd.ToString(),
                                                    prp.acc_num,
@@ -5050,17 +5054,19 @@ namespace SBWSDepositApi.Deposit
                            + " (V_TRANS_DTLS.TRANS_TYPE IN ('D','W')) and  "
                            + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and  "
                            + " (V_TRANS_DTLS.BRN_CD  = {2})  AND "
-                           + " (SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) ) ={3} "
-                           + " ORDER BY TRANS_TYPE,TRANS_CD ";
+                           + " (V_TRANS_DTLS.CREATED_BY  = {3} ) AND "
+                           + " (V_TRANS_DTLS.APPROVAL_STATUS = 'A' ) "
+                           + " ORDER BY TRANS_TYPE,TRANS_CD " ;
 
 
-            string _query1 = " SELECT  DISTINCT SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) USER_ID, "
+            string _query1 = " SELECT  DISTINCT V_TRANS_DTLS.CREATED_BY USER_ID, "
                              + " (SELECT USER_FIRST_NAME || ' '|| nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME  FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME"
                              + "  FROM V_TRANS_DTLS "
                              + "  WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and "
                              + " (V_TRANS_DTLS.TRANS_TYPE IN ('D','W')) and "
                              + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and"
-                             + " (V_TRANS_DTLS.BRN_CD  = {2})";
+                             + " (V_TRANS_DTLS.BRN_CD  = {2}) and"
+                             + " (V_TRANS_DTLS.APPROVAL_STATUS = 'A') ";
 
 
 

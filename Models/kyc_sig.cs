@@ -4,7 +4,7 @@ namespace SBWSFinanceApi.Models
 {
     public class kyc_sig
     {
-        public int? cust_cd { get; set; }
+        public Int64 cust_cd { get; set; }
         public string created_by { get; set; }
         public DateTime? created_dt { get; set; }
         public string img_typ { get; set; }

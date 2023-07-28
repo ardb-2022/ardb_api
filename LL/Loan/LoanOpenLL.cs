@@ -86,7 +86,12 @@ namespace SBWSFinanceApi.LL
             return _dac.CalculateLoanInterest(prp);
         }
 
-         internal List<p_loan_param> CalculateLoanAccWiseInterest(List<p_loan_param> prp)
+        internal p_loan_param CalculateLoanInterestYearend(p_loan_param prp)
+        {
+            return _dac.CalculateLoanInterestYearend(prp);
+        }
+
+        internal List<p_loan_param> CalculateLoanAccWiseInterest(List<p_loan_param> prp)
         {
             return _dac.CalculateLoanAccWiseInterest(prp);
         }
@@ -159,6 +164,10 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDemandList(prp);
         }
 
+        internal List<demand_list> GetDemandListSingle(p_report_param prp)
+        {
+            return _dac.GetDemandListSingle(prp);
+        }
         internal List<demandDM> GetDemandListMemberwise(p_report_param prp)
         {
             return _dac.GetDemandListMemberwise(prp);
@@ -211,6 +220,11 @@ namespace SBWSFinanceApi.LL
         internal List<blockwisedisb_type> PopulateLoanDisburseReg(p_report_param prp)
         {
             return _dac.PopulateLoanDisburseReg(prp);
+        }
+        
+        internal List<tm_loan_all> PopulateLoanDisburseRegAll(p_report_param prp)
+        {
+            return _dac.PopulateLoanDisburseRegAll(prp);
         }
 
         internal List<demand_notice> GetDemandNotice(p_report_param prp)

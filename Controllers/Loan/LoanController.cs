@@ -87,6 +87,15 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateLoanDisburseReg(prp);
         }
 
+        [Route("PopulateLoanDisburseRegAll")]
+        [HttpPost]
+        public List<tm_loan_all> PopulateLoanDisburseRegAll(p_report_param prp)
+        {
+            return _ll.PopulateLoanDisburseRegAll(prp);
+        }
+
+        
+
         [Route("PopulateLoanDisburseRegAccwise")]
         [HttpPost]
         public List<tm_loan_all> PopulateLoanDisburseRegAccwise(p_report_param prp)
@@ -210,6 +219,14 @@ namespace SBWSFinanceApi.Controllers
         public List<demand_list> GetDemandList(p_report_param prp)
         {
             return _ll.GetDemandList(prp);
+        }
+
+        
+        [Route("GetDemandListSingle")]
+        [HttpPost]
+        public List<demand_list> GetDemandListSingle(p_report_param prp)
+        {
+            return _ll.GetDemandListSingle(prp);
         }
 
         [Route("GetDemandListMemberwise")]
@@ -367,7 +384,15 @@ namespace SBWSFinanceApi.Controllers
             return _ll.CalculateLoanInterest(loan);
         }
 
-         [Route("CalculateLoanAccWiseInterest")]
+        [Route("CalculateLoanInterestYearend")]
+        [HttpPost]
+        public p_loan_param CalculateLoanInterestYearend(p_loan_param loan)
+        {
+
+            return _ll.CalculateLoanInterestYearend(loan);
+        }
+
+        [Route("CalculateLoanAccWiseInterest")]
         [HttpPost]
          public List<p_loan_param> CalculateLoanAccWiseInterest(List<p_loan_param> loan)
         {         

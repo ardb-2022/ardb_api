@@ -6,9 +6,11 @@ namespace SBWSFinanceApi.Models
     {         
        public string    acc_type_from {get; set;}
        public string acc_num_from {get; set;}
-       public string    acc_type_to {get; set;}
+        public string from_name { get; set; }
+        public string    acc_type_to {get; set;}
        public string acc_num_to {get; set;}
-       public string instr_status {get; set;}
+        public string to_name { get; set; }
+        public string instr_status {get; set;}
        public DateTime first_trf_dt {get; set;}
        public string periodicity {get; set;}
        public string prn_intt_flag {get; set;}

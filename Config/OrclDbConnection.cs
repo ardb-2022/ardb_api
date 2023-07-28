@@ -32,8 +32,8 @@ namespace SBWSFinanceApi.Config
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
                 sb.DataSource = "202.65.156.246:1521/orcl";// "10.65.65.246:1521/orcl";   //local
-                //sb.UserID = "gardbcfs";
-                //sb.Password = "gardbcfs71101";
+                //sb.UserID = "cfstest";
+                //sb.Password = "signature";
 
                 //sb.UserID = "cfstest1";
                 //sb.Password = "signature";
@@ -61,6 +61,16 @@ namespace SBWSFinanceApi.Config
                 {
                     sb.UserID = "gardbcfs";
                     sb.Password = "gardbcfs71101";
+                }
+                if (bc.bank_name == "GARDBUXBR")
+                {
+                    sb.UserID = "cfstest";
+                    sb.Password = "signature";
+                }
+                if (bc.bank_name == "CTARDBUX")
+                {
+                    sb.UserID = "ctardbcfs";
+                    sb.Password = "ctardbcfs31101";
                 }
 
                 // Use below 3 for PRD deploymen/t
