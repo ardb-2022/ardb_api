@@ -196,7 +196,7 @@ namespace SBWSFinanceApi.DL
                              parm2.Value = prp.loan_id;
                              command.Parameters.Add(parm2);
                              var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
-                             parm3.Value = prp.intt_dt;
+                             parm3.Value = prp.due_dt;
                              command.Parameters.Add(parm3);
                              command.ExecuteNonQuery();
                          }*/
@@ -3880,7 +3880,8 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                 + " GM_LOAN_TRANS.CURR_INTT,            "
                 + " GM_LOAN_TRANS.OVD_INTT ,            "
                 + " GM_LOAN_TRANS.PENAL_INTT ,            "
-                + " C.CUST_NAME                         "
+                + " C.CUST_NAME,                         "
+                + "(SELECT BLOCK_NAME FROM MM_BLOCK WHERE BLOCK_CD = C.BLOCK_CD) BLOCK_NAME "
                 + " FROM GM_LOAN_TRANS , TM_LOAN_ALL A ,  MM_CUSTOMER C "
                 + " WHERE GM_LOAN_TRANS.ARDB_CD = {0}   "
                 + " AND GM_LOAN_TRANS.BRN_CD = {1}     "
@@ -3921,6 +3922,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
                                         loanStmt.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
                                         loanStmt.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                        loanStmt.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]); 
                                         loanStmt.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
                                         loanStmt.prn_trf = UtilityM.CheckNull<decimal>(reader["PRN_TRF"]);
                                         loanStmt.intt_trf = UtilityM.CheckNull<decimal>(reader["INTT_TRF"]);
@@ -4121,7 +4123,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                             parm3.Value = prp.to_dt;
                             command.Parameters.Add(parm3);
 
-                            var parm4 = new OracleParameter("adt_dt", OracleDbType.Varchar2, ParameterDirection.Input);
+                            var parm4 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
                             parm4.Value = prp.loan_id;
                             command.Parameters.Add(parm4);
 
@@ -4173,6 +4175,121 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
             }
             return loanDtlList;
         }
+
+
+
+        internal List<demand_notice> GetDemandNoticeBlockwise(p_report_param prp)
+        {
+            List<demand_notice> loanDtlList = new List<demand_notice>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _procedure = "P_DUE_NOTICE_BLOCKWISE";
+            string _query = " SELECT TT_NOTIS2.LOAN_ID,           "
+                             + "   TT_NOTIS2.CUST_NAME,           "
+                             + "   TT_NOTIS2.CUST_ADDRESS,           "
+                             + "   TT_NOTIS2.BLOCK_NAME,           "
+                             + "   TT_NOTIS2.MEMBER_ID,           "
+                             + "   TT_NOTIS2.ACTIVITY_NAME,           "
+                             + "   TT_NOTIS2.CURR_INTT_RATE,       "
+                             + "   TT_NOTIS2.OVD_INTT_RATE,        "
+                             + "   TT_NOTIS2.DUE_PRN,             "
+                             + "   TT_NOTIS2.CURR_PRN,             "
+                             + "   TT_NOTIS2.OVD_PRN,              "
+                             + "   TT_NOTIS2.CURR_INTT,            "
+                             + "   TT_NOTIS2.OVD_INTT,             "
+                             + "   TT_NOTIS2.PENAL_INTT,           "
+                             + "   TT_NOTIS2.LEDGER_NO,             "
+                             + "   TT_NOTIS2.SANC_AMT             "
+                           + " FROM TT_NOTIS2                      ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_procedure);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("adt_from_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm2.Value = prp.from_dt;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.to_dt;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("ad_acc_cd", OracleDbType.Int32, ParameterDirection.Input);
+                            parm4.Value = prp.acc_cd;
+                            command.Parameters.Add(parm4);
+
+                            var parm5 = new OracleParameter("as_vill_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm5.Value = prp.vill_cd;
+                            command.Parameters.Add(parm5);
+
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_query);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var loanDtl = new demand_notice();
+
+                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                        loanDtl.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                        loanDtl.brn_cd = UtilityM.CheckNull<string>(reader["MEMBER_ID"]);
+                                        loanDtl.cust_address = UtilityM.CheckNull<string>(reader["CUST_ADDRESS"]);
+                                        loanDtl.curr_intt_rate = UtilityM.CheckNull<double>(reader["CURR_INTT_RATE"]);
+                                        loanDtl.ovd_intt_rate = UtilityM.CheckNull<double>(reader["OVD_INTT_RATE"]);
+                                        loanDtl.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
+                                        loanDtl.activity_name = UtilityM.CheckNull<string>(reader["ACTIVITY_NAME"]);
+                                        loanDtl.due_prn = UtilityM.CheckNull<decimal>(reader["DUE_PRN"]);
+                                        loanDtl.curr_prn = UtilityM.CheckNull<decimal>(reader["CURR_PRN"]);
+                                        loanDtl.ovd_prn = UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
+                                        loanDtl.curr_intt = UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
+                                        loanDtl.ovd_intt = UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                        loanDtl.penal_intt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
+                                        loanDtl.loan_case_no = UtilityM.CheckNull<string>(reader["LEDGER_NO"]);
+                                        loanDtl.disb_amt = UtilityM.CheckNull<decimal>(reader["SANC_AMT"]);
+
+                                        loanDtlList.Add(loanDtl);
+                                    }
+                                }
+
+                                transaction.Commit();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDtlList = null;
+                    }
+                }
+            }
+            return loanDtlList;
+        }
+
+
 
 
         internal List<tt_detailed_list_loan> GetDefaultList(p_report_param prp)

@@ -37,5 +37,7 @@ namespace SBWSFinanceApi.Models
         public decimal penal_intt { get; set; }
         public decimal recov_amt { get; set; }
         public string acc_name { get; set; }
+
+        public string block_name { get; set; }
     }
 }

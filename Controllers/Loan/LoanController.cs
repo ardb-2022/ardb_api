@@ -183,6 +183,13 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.GetDemandNotice(prp);
         }
+        
+        [Route("GetDemandNoticeBlockwise")]
+        [HttpPost]
+        public List<demand_notice> GetDemandNoticeBlockwise(p_report_param prp)
+        {
+            return _ll.GetDemandNoticeBlockwise(prp);
+        }
 
         [Route("PopulateRecoveryRegisterAccwise")]
         [HttpPost]

@@ -231,6 +231,11 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.GetDemandNotice(prp);
         }
+        
+        internal List<demand_notice> GetDemandNoticeBlockwise(p_report_param prp)
+        {
+            return _dac.GetDemandNoticeBlockwise(prp);
+        }
 
         internal List<tm_loan_all> PopulateLoanDisburseRegAccwise(p_report_param prp)
         {
