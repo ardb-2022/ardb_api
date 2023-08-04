@@ -124,6 +124,20 @@ namespace SBWSFinanceApi.Controllers
            return _ll.GetVillageMaster(mum);
         }
 
+        [Route("GetPsMaster")]
+        [HttpPost]
+        public List<mm_ps> GetPsMaster(mm_ps mum)
+        {
+            return _ll.GetPsMaster(mum);
+        }
+
+        [Route("GetPoMaster")]
+        [HttpPost]
+        public List<mm_po> GetPoMaster(mm_po mum)
+        {
+            return _ll.GetPoMaster(mum);
+        }
+
         [Route("GetBankInvMaster")]
         [HttpPost]
         public List<mm_bank_inv> GetBankInvMaster(mm_bank_inv mum)
@@ -189,6 +203,20 @@ namespace SBWSFinanceApi.Controllers
             return _ll.InsertVillageMaster(mum);
         }
 
+        [Route("InsertPoMaster")]
+        [HttpPost]
+        public int InsertPoMaster(mm_po mum)
+        {
+            return _ll.InsertPoMaster(mum);
+        }
+
+        [Route("InsertPsMaster")]
+        [HttpPost]
+        public int InsertPsMaster(mm_ps mum)
+        {
+            return _ll.InsertPsMaster(mum);
+        }
+
         [Route("InsertBankInvMaster")]
         [HttpPost]
         public int InsertBankInvMaster(mm_bank_inv mum)
@@ -231,6 +259,20 @@ namespace SBWSFinanceApi.Controllers
         public int UpdateVillage(mm_vill mum)
         {
             return _ll.UpdateVillage(mum);
+        }
+
+        [Route("UpdatePo")]
+        [HttpPost]
+        public int UpdatePo(mm_po mum)
+        {
+            return _ll.UpdatePo(mum);
+        }
+
+        [Route("UpdatePs")]
+        [HttpPost]
+        public int UpdatePs(mm_ps mum)
+        {
+            return _ll.UpdatePs(mum);
         }
 
 

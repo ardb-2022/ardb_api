@@ -30,8 +30,10 @@ public string state {get; set;}
 public string dist {get; set;}   
 public int pin {get; set;}   
 public string vill_cd {get; set;}   
-public string block_cd {get; set;}   
-public string service_area_cd {get; set;}   
+public string block_cd {get; set;}
+        public int ps { get; set; }
+        public int po { get; set; }
+        public string service_area_cd {get; set;}   
 public string occupation {get; set;}   
 public string phone {get; set;}   
 public string present_address {get; set;}  
@@ -47,8 +49,10 @@ public string nom_relation {get; set;}
 public string kyc_photo_type {get; set;}   
 public string kyc_photo_no {get; set;}   
 public string kyc_address_type {get; set;}   
-public string kyc_address_no {get; set;}   
-public string org_status {get; set;}   
+public string kyc_address_no {get; set;}
+        public string kyc_other_type { get; set; }
+        public string kyc_other_no { get; set; }
+        public string org_status {get; set;}   
 public decimal org_reg_no {get; set;}   
 public string created_by {get; set;}   
 public DateTime? created_dt {get; set;}   
@@ -56,5 +60,11 @@ public string modified_by {get; set;}
 public DateTime? modified_dt {get; set;}
 public string lbr_status {get; set;}  
 public string is_weaker {get; set;}
-public string del_flag {get; set;}     }
+        public string sb_folio_no { get; set; }
+        public string td_folio_no { get; set; }
+        public string fd_folio_no { get; set; }
+        public string rd_folio_no { get; set; }
+        public string mis_folio_no { get; set; }
+
+        public string del_flag {get; set;}     }
 }

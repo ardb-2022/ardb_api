@@ -27,13 +27,13 @@ namespace SBWSFinanceApi.Config
             get
             {
                 //BankConfigMst BC = new BankConfigMstLL().ReadAllConfiguration();
-                BankConfig bc = getBankConfigFromDB();
+                //BankConfig bc = getBankConfigFromDB();
 
                 OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder();
                 // Use below 3 for DEV
                 sb.DataSource = "202.65.156.246:1521/orcl";// "10.65.65.246:1521/orcl";   //local
-                //sb.UserID = "gardbcfs";
-                //sb.Password = "gardbcfs71101";
+                sb.UserID = "ctardbcfs";
+                sb.Password = "ctardbcfs31101";
 
                 //sb.UserID = "cfstest1";
                 //sb.Password = "signature";
@@ -43,25 +43,12 @@ namespace SBWSFinanceApi.Config
                 //sb.UserID = bc.user1;
                 //sb.Password = bc.pass1;
 
-                string bankName = System.IO.Directory.GetCurrentDirectory();
-                if (bc.bank_name == "BMARDBUX"){
-                    sb.UserID = "bmardbcfs";
-                    sb.Password = "bmardbcfs21101";
-                }
-                if (bc.bank_name == "ARDBUX"){
-                    sb.UserID = "cfs2022";
-                    sb.Password = "signature";
-                }
-                if (bc.bank_name == "ARDBTESTUX")
+              /*  string bankName = System.IO.Directory.GetCurrentDirectory();
+                if (bc.bank_name == "CTARDBUX")
                 {
-                    sb.UserID = "cfstest1";
-                    sb.Password = "signature";
-                }
-                if (bc.bank_name == "GARDBUX")
-                {
-                    sb.UserID = "gardbcfs";
-                    sb.Password = "gardbcfs71101";
-                }
+                    sb.UserID = "ctardbcfs";
+                    sb.Password = "ctardbcfs31101";
+                }*/
 
                 // Use below 3 for PRD deploymen/t
                 //sb.DataSource = BC.connstring.Server;

@@ -34,6 +34,8 @@ namespace SBWSFinanceApi.Models
         public string output { get; set; }
         public string as_cust_name { get; set; }
 
+        public string as_locker_id { get; set; }
+
         public int acc_type_cd { get; set; }
 
         public int catg_cd { get; set; }

@@ -1387,6 +1387,8 @@ namespace SBWSDepositApi.Deposit
                                         mc.pin = UtilityM.CheckNull<int>(reader["PIN"]);
                                         mc.vill_cd = UtilityM.CheckNull<string>(reader["VILL_CD"]);
                                         mc.block_cd = UtilityM.CheckNull<string>(reader["BLOCK_CD"]);
+                                        mc.ps = UtilityM.CheckNull<int>(reader["PS"]);
+                                        mc.po = UtilityM.CheckNull<int>(reader["PO"]);
                                         mc.service_area_cd = UtilityM.CheckNull<string>(reader["SERVICE_AREA_CD"]);
                                         mc.occupation = UtilityM.CheckNull<string>(reader["OCCUPATION"]);
                                         mc.phone = UtilityM.CheckNull<string>(reader["PHONE"]);
@@ -1404,6 +1406,8 @@ namespace SBWSDepositApi.Deposit
                                         mc.kyc_photo_no = UtilityM.CheckNull<string>(reader["KYC_PHOTO_NO"]);
                                         mc.kyc_address_type = UtilityM.CheckNull<string>(reader["KYC_ADDRESS_TYPE"]);
                                         mc.kyc_address_no = UtilityM.CheckNull<string>(reader["KYC_ADDRESS_NO"]);
+                                        mc.kyc_other_type = UtilityM.CheckNull<string>(reader["KYC_OTHER_TYPE"]);
+                                        mc.kyc_other_no = UtilityM.CheckNull<string>(reader["KYC_OTHER_NO"]);
                                         mc.org_status = UtilityM.CheckNull<string>(reader["ORG_STATUS"]);
                                         mc.org_reg_no = UtilityM.CheckNull<decimal>(reader["ORG_REG_NO"]);
                                         mc.created_by = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
@@ -1412,6 +1416,11 @@ namespace SBWSDepositApi.Deposit
                                         mc.modified_dt = UtilityM.CheckNull<DateTime>(reader["MODIFIED_DT"]);
                                         mc.lbr_status = UtilityM.CheckNull<string>(reader["LBR_STATUS"]);
                                         mc.is_weaker = UtilityM.CheckNull<string>(reader["IS_WEAKER"]);
+                                        mc.sb_folio_no = UtilityM.CheckNull<string>(reader["SB_FOLIO_NO"]);
+                                        mc.td_folio_no = UtilityM.CheckNull<string>(reader["TD_FOLIO_NO"]);
+                                        mc.fd_folio_no = UtilityM.CheckNull<string>(reader["FD_FOLIO_NO"]);
+                                        mc.rd_folio_no = UtilityM.CheckNull<string>(reader["RD_FOLIO_NO"]);
+                                        mc.mis_folio_no = UtilityM.CheckNull<string>(reader["MIS_FOLIO_NO"]);
                                         mc.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
                                         customers.Add(mc);
@@ -4096,7 +4105,7 @@ namespace SBWSDepositApi.Deposit
                         _statement = string.Format(_query,
                                                    prp.ardb_cd, 
                                                    prp.acc_type_cd.ToString(),
-                                                   prp.acc_num,
+                                                   string.Concat("'", prp.acc_num, "'"),
                                                    prp.to_dt.ToString("dd/MM/yyyy HH:mm:ss"),
                                                    prp.acc_type_cd.ToString(),
                                                    prp.acc_num,
@@ -5050,17 +5059,19 @@ namespace SBWSDepositApi.Deposit
                            + " (V_TRANS_DTLS.TRANS_TYPE IN ('D','W')) and  "
                            + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and  "
                            + " (V_TRANS_DTLS.BRN_CD  = {2})  AND "
-                           + " (SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) ) ={3} "
-                           + " ORDER BY TRANS_TYPE,TRANS_CD ";
+                           + " (V_TRANS_DTLS.CREATED_BY  = {3} ) AND "
+                           + " (V_TRANS_DTLS.APPROVAL_STATUS = 'A' ) "
+                           + " ORDER BY TRANS_TYPE,TRANS_CD " ;
 
 
-            string _query1 = " SELECT  DISTINCT SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) USER_ID, "
+            string _query1 = " SELECT  DISTINCT V_TRANS_DTLS.CREATED_BY USER_ID, "
                              + " (SELECT USER_FIRST_NAME || ' '|| nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME  FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME"
                              + "  FROM V_TRANS_DTLS "
                              + "  WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and "
                              + " (V_TRANS_DTLS.TRANS_TYPE IN ('D','W')) and "
                              + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and"
-                             + " (V_TRANS_DTLS.BRN_CD  = {2})";
+                             + " (V_TRANS_DTLS.BRN_CD  = {2}) and"
+                             + " (V_TRANS_DTLS.APPROVAL_STATUS = 'A') ";
 
 
 

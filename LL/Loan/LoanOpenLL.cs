@@ -12,7 +12,20 @@ namespace SBWSFinanceApi.LL
 {
     public class LoanOpenLL
     {
-       LoanOpenDL _dac = new LoanOpenDL(); 
+       LoanOpenDL _dac = new LoanOpenDL();
+
+        internal tm_gold_master GetGoldMaster(tm_gold_master pm)
+        {
+
+            return _dac.GetGoldMaster(pm);
+        }
+
+        internal List<tm_gold_master_dtls> GetGoldMasterDtls(tm_gold_master_dtls pm)
+        {
+
+            return _dac.GetGoldMasterDtls(pm);
+        }
+
         internal LoanOpenDM GetLoanData(tm_loan_all loan)
         {         
            
@@ -33,7 +46,15 @@ namespace SBWSFinanceApi.LL
         {         
            
             return _dac.InsertLoanAccountOpeningData(loan);
-        } 
+        }
+
+        internal String InsertLoanValuationData(LoanValuationDM loan)
+        {
+
+            return _dac.InsertLoanValuationData(loan);
+        }
+
+        
            internal String InsertLoanTransactionData(LoanOpenDM loan)
         {         
            
@@ -50,6 +71,13 @@ namespace SBWSFinanceApi.LL
            return _dac.UpdateLoanAccountOpeningData(loan);
         
         }
+        
+        internal int UpdateLoanValuationData(LoanValuationDM loan)
+        {
+            return _dac.UpdateLoanValuationData(loan);
+
+        }
+
 
         internal int InsertSubsidyData(tm_subsidy loan)
         {
@@ -86,7 +114,12 @@ namespace SBWSFinanceApi.LL
             return _dac.CalculateLoanInterest(prp);
         }
 
-         internal List<p_loan_param> CalculateLoanAccWiseInterest(List<p_loan_param> prp)
+        internal p_loan_param CalculateLoanInterestYearend(p_loan_param prp)
+        {
+            return _dac.CalculateLoanInterestYearend(prp);
+        }
+
+        internal List<p_loan_param> CalculateLoanAccWiseInterest(List<p_loan_param> prp)
         {
             return _dac.CalculateLoanAccWiseInterest(prp);
         }
@@ -159,6 +192,10 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDemandList(prp);
         }
 
+        internal List<demand_list> GetDemandListSingle(p_report_param prp)
+        {
+            return _dac.GetDemandListSingle(prp);
+        }
         internal List<demandDM> GetDemandListMemberwise(p_report_param prp)
         {
             return _dac.GetDemandListMemberwise(prp);

@@ -91,6 +91,16 @@ namespace SBWSFinanceApi.LL
            return _dac.GetVillageMaster(mum);
         }
 
+        public List<mm_po> GetPoMaster(mm_po mum)
+        {
+            return _dac.GetPoMaster(mum);
+        }
+
+        public List<mm_ps> GetPsMaster(mm_ps mum)
+        {
+            return _dac.GetPsMaster(mum);
+        }
+
         public List<mm_bank_inv> GetBankInvMaster(mm_bank_inv mum)
         {
             return _dac.GetBankInvMaster(mum);
@@ -123,7 +133,17 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.InsertVillageMaster(mum);
         }
-        
+
+        public int InsertPoMaster(mm_po mum)
+        {
+            return _dac.InsertPoMaster(mum);
+        }
+
+        public int InsertPsMaster(mm_ps mum)
+        {
+            return _dac.InsertPsMaster(mum);
+        }
+
         public int InsertBankInvMaster(mm_bank_inv mum)
         {
             return _dac.InsertBankInvMaster(mum);
@@ -166,6 +186,17 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.UpdateVillage(mum);
         }
+
+        public int UpdatePo(mm_po mum)
+        {
+            return _dac.UpdatePo(mum);
+        }
+
+        public int UpdatePs(mm_ps mum)
+        {
+            return _dac.UpdatePs(mum);
+        }
+
         public List<mm_kyc> GetKycMaster()
         {
            return _dac.GetKycMaster();

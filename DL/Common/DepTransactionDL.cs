@@ -317,6 +317,7 @@ namespace SBWSFinanceApi.DL
             }
             return tdtRets;
         }
+
         internal int InsertDepTrans(List<td_def_trans_trf> tdt)
         {
             int _ret = 0;
@@ -774,6 +775,53 @@ namespace SBWSFinanceApi.DL
             }
 
         }
+
+
+        internal string P_LOCKER_UPDATE(DbConnection connection, p_gen_param prp)
+        {
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _query = "P_LOCKER_UPDATE";
+
+            try
+            {
+                using (var command = OrclDbConnection.Command(connection, _alter))
+                {
+                    command.ExecuteNonQuery();
+                }
+                _statement = string.Format(_query);
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm1.Value = prp.ardb_cd;
+                    command.Parameters.Add(parm1);
+                    var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm2.Value = prp.brn_cd;
+                    command.Parameters.Add(parm2);
+                    var parm3 = new OracleParameter("as_locker_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm3.Value = prp.as_locker_id;
+                    command.Parameters.Add(parm3);
+                    var parm4 = new OracleParameter("ad_trans_cd", OracleDbType.Int16, ParameterDirection.Input);
+                    parm4.Value = prp.ad_trans_cd;
+                    command.Parameters.Add(parm4);
+                    var parm5 = new OracleParameter("adt_trans_dt", OracleDbType.Date, ParameterDirection.Input);
+                    parm5.Value = prp.adt_trans_dt;
+                    command.Parameters.Add(parm5);
+                    var parm6 = new OracleParameter("as_user_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm6.Value = prp.gs_user_id;
+                    command.Parameters.Add(parm6);
+
+                    command.ExecuteNonQuery();
+                    return "0";
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message.ToString();
+            }
+
+        }
+
 
 
 

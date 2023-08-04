@@ -160,6 +160,151 @@ namespace SBWSFinanceApi.DL
             return tcaRet;
         }
 
+
+
+        internal p_loan_param CalculateLoanInterestYearend(p_loan_param prp)
+        {
+            p_loan_param tcaRet = new p_loan_param();
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            //string _query1 = "P_LOAN_DAY_PRODUCT";
+            string _query2 = "P_CAL_LOAN_INTT_YEAREND";
+            string _query3 = "p_recovery";
+            string _query4 = "Select Nvl(curr_prn, 0) curr_prn,"
+                            + " Nvl(ovd_prn, 0) ovd_prn,"
+                            + " Nvl(curr_intt, 0) curr_intt,"
+                            + " Nvl(ovd_intt, 0) ovd_intt,"
+                            + " Nvl(penal_intt, 0) penal_intt"
+                            + " From   tm_loan_all where ardb_cd = {0} and loan_id = {1} and del_flag= 'N' ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                       /* _statement = string.Format(_query1);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+                            var parm2 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.loan_id;
+                            command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.intt_dt;
+                            command.Parameters.Add(parm3);
+                            command.ExecuteNonQuery();
+                        }*/
+                        _statement = string.Format(_query2);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+                            var parm2 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.loan_id;
+                            command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.intt_dt;
+                            command.Parameters.Add(parm3);
+                            var parm4 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm4.Value = prp.brn_cd;
+                            command.Parameters.Add(parm4);
+                            var parm5 = new OracleParameter("as_user", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm5.Value = prp.gs_user_id;
+                            command.Parameters.Add(parm5);
+                            command.ExecuteNonQuery();
+
+                        }
+                        if (prp.commit_roll_flag == 2)
+                        {
+                            _statement = string.Format(_query3);
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                command.CommandType = System.Data.CommandType.StoredProcedure;
+                                var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                                parm1.Value = prp.ardb_cd;
+                                command.Parameters.Add(parm1);
+                                var parm2 = new OracleParameter("as_loan_id", OracleDbType.Varchar2, ParameterDirection.Input);
+                                parm2.Value = prp.loan_id;
+                                command.Parameters.Add(parm2);
+                                var parm3 = new OracleParameter("ad_recov_amt", OracleDbType.Decimal, ParameterDirection.Input);
+                                parm3.Value = prp.recov_amt;
+                                command.Parameters.Add(parm3);
+                                var parm4 = new OracleParameter("as_curr_intt_rate", OracleDbType.Decimal, ParameterDirection.Input);
+                                parm4.Value = prp.curr_intt_rate;
+                                command.Parameters.Add(parm4);
+                                var parm5 = new OracleParameter("ad_curr_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                                command.Parameters.Add(parm5);
+                                var parm6 = new OracleParameter("ad_ovd_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                                command.Parameters.Add(parm6);
+                                var parm7 = new OracleParameter("ad_curr_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                                command.Parameters.Add(parm7);
+                                var parm8 = new OracleParameter("ad_ovd_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                                command.Parameters.Add(parm8);
+                                var parm9 = new OracleParameter("ad_penal_intt_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                                command.Parameters.Add(parm9);
+                                var parm10 = new OracleParameter("ad_adv_prn_recov", OracleDbType.Decimal, ParameterDirection.Output);
+                                command.Parameters.Add(parm10);
+                                command.ExecuteNonQuery();
+                                tcaRet.curr_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm5.Value.ToString()));
+                                tcaRet.ovd_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm6.Value.ToString()));
+                                tcaRet.curr_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm7.Value.ToString()));
+                                tcaRet.ovd_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm8.Value.ToString()));
+                                tcaRet.penal_intt_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm9.Value.ToString()));
+                                tcaRet.adv_prn_recov = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm10.Value.ToString()));
+                            }
+                        }
+                        else
+                        {
+                            _statement = string.Format(_query4,
+                                                        string.Concat("'", prp.ardb_cd, "'"),
+                                                        string.Concat("'", prp.loan_id, "'"));
+                            using (var command = OrclDbConnection.Command(connection, _statement))
+                            {
+                                using (var reader = command.ExecuteReader())
+                                {
+                                    if (reader.HasRows)
+                                    {
+                                        while (reader.Read())
+                                        {
+                                            tcaRet.curr_prn_recov = UtilityM.CheckNull<decimal>(reader["curr_prn"]);
+                                            tcaRet.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["ovd_prn"]);
+                                            tcaRet.curr_intt_recov = UtilityM.CheckNull<decimal>(reader["curr_intt"]);
+                                            tcaRet.ovd_intt_recov = UtilityM.CheckNull<decimal>(reader["ovd_intt"]);
+                                            tcaRet.penal_intt_recov = UtilityM.CheckNull<decimal>(reader["penal_intt"]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (prp.commit_roll_flag == 1)
+                            transaction.Commit();
+                        else
+                            transaction.Rollback();
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        tcaRet = null;
+                    }
+                }
+            }
+            return tcaRet;
+        }
+
+
+
+
         internal List<p_loan_param> CalculateLoanAccWiseInterest(List<p_loan_param> prp)
         {
             List<p_loan_param> tcaRetList = new List<p_loan_param>();
@@ -4215,7 +4360,8 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                              + "  TT_NPA_LOANWISE_ALL.PRN_DUE,           "
                              + "  TT_NPA_LOANWISE_ALL.ACTIVITY,           "
                              + "  TT_NPA_DL_LIST.PROVISION,           "
-                             + "  TT_NPA_DL_LIST.RECOV_DT           "
+                             + "  TT_NPA_DL_LIST.RECOV_DT,           "
+                             + "  TT_NPA_LOANWISE_ALL.ACTIVITY           "
                               + " FROM TT_NPA_LOANWISE_ALL,TM_LOAN_ALL,TT_NPA_DL_LIST         "
                            + "  WHERE	TM_LOAN_ALL.LOAN_ID =  TT_NPA_LOANWISE_ALL.LOAN_ID        "
                            + "  AND     TM_LOAN_ALL.LOAN_ID = TT_NPA_DL_LIST.LOAN_ID "
@@ -4293,6 +4439,7 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                                         loanDtl.prn_due = UtilityM.CheckNull<decimal>(reader["PRN_DUE"]);
                                         loanDtl.provision = UtilityM.CheckNull<decimal>(reader["PROVISION"]);
                                         loanDtl.recov_dt = UtilityM.CheckNull<DateTime>(reader["RECOV_DT"]);
+                                        loanDtl.activity = UtilityM.CheckNull<string>(reader["ACTIVITY"]);
                                         loanDtlList.Add(loanDtl);
                                     }
                                 }
@@ -4309,6 +4456,141 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                 }
             }
             return loanDtlList;
+        }
+
+
+
+        internal List<demand_list> GetDemandListSingle(p_report_param prp)
+        {
+            List<demand_list> loanDfltList = new List<demand_list>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _procedure = "p_block_new_acti_demand_single";
+            string _query = " SELECT DISTINCT TT_BLOCK_ACTI_DEMAND.ARDB_CD,TT_BLOCK_ACTI_DEMAND.LOAN_ID,             "
+                           + " TT_BLOCK_ACTI_DEMAND.ACTIVITY_CD,           "
+                           + " TT_BLOCK_ACTI_DEMAND.CURR_PRN,            "
+                           + " TT_BLOCK_ACTI_DEMAND.OVD_PRN,                 "
+                           + " TT_BLOCK_ACTI_DEMAND.CURR_INTT,                  "
+                           + " TT_BLOCK_ACTI_DEMAND.OVD_INTT,                "
+                           + " TT_BLOCK_ACTI_DEMAND.PENAL_INTT,                 "
+                           + " TT_BLOCK_ACTI_DEMAND.DISB_DT,                 "
+                           + " TT_BLOCK_ACTI_DEMAND.OUTSTANDING_PRN,                  "
+                           + " TT_BLOCK_ACTI_DEMAND.UPTO_1,               "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_1,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_2,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_3,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_4,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_5,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_6,          "
+                           + " TT_BLOCK_ACTI_DEMAND.PARTY_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.BLOCK_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.SERVICE_AREA_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.VILL_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.MONTH,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ACC_CD,          "
+                            + " TT_BLOCK_ACTI_DEMAND.LOAN_ACC_NO,          "
+                             + " TT_BLOCK_ACTI_DEMAND.ACC_DESC          "
+                           + " FROM TT_BLOCK_ACTI_DEMAND               ";
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_procedure);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_form_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm4.Value = prp.to_dt;
+                            command.Parameters.Add(parm4);
+
+                            var parm5 = new OracleParameter("ac_fund_type", OracleDbType.Char, ParameterDirection.Input);
+                            parm5.Value = prp.fund_type;
+                            command.Parameters.Add(parm5);
+
+                            var parm6 = new OracleParameter("ls_loan_id", OracleDbType.Char, ParameterDirection.Input);
+                            parm6.Value = prp.loan_id;
+                            command.Parameters.Add(parm6);
+
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        _statement = string.Format(_query);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var loanDtl = new demand_list();
+
+                                        loanDtl.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                        loanDtl.activity_cd = UtilityM.CheckNull<string>(reader["ACTIVITY_CD"]);
+                                        loanDtl.curr_prn = UtilityM.CheckNull<decimal>(reader["CURR_PRN"]);
+                                        loanDtl.ovd_prn = UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
+                                        loanDtl.curr_intt = UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
+                                        loanDtl.ovd_intt = UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                        loanDtl.penal_intt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
+                                        loanDtl.disb_dt = UtilityM.CheckNull<DateTime>(reader["DISB_DT"]);
+                                        loanDtl.outstanding_prn = UtilityM.CheckNull<decimal>(reader["OUTSTANDING_PRN"]);
+                                        loanDtl.upto_1 = UtilityM.CheckNull<decimal>(reader["UPTO_1"]);
+                                        loanDtl.above_1 = UtilityM.CheckNull<decimal>(reader["ABOVE_1"]);
+                                        loanDtl.above_2 = UtilityM.CheckNull<decimal>(reader["ABOVE_2"]);
+                                        loanDtl.above_3 = UtilityM.CheckNull<decimal>(reader["ABOVE_3"]);
+                                        loanDtl.above_4 = UtilityM.CheckNull<decimal>(reader["ABOVE_4"]);
+                                        loanDtl.above_5 = UtilityM.CheckNull<decimal>(reader["ABOVE_5"]);
+                                        loanDtl.above_6 = UtilityM.CheckNull<decimal>(reader["ABOVE_6"]);
+                                        loanDtl.party_name = UtilityM.CheckNull<string>(reader["PARTY_NAME"]);
+                                        loanDtl.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
+                                        loanDtl.service_area_name = UtilityM.CheckNull<string>(reader["SERVICE_AREA_NAME"]);
+                                        loanDtl.vill_name = UtilityM.CheckNull<string>(reader["VILL_NAME"]);
+                                        loanDtl.month = UtilityM.CheckNull<Int64>(reader["MONTH"]);
+                                        loanDtl.acc_cd = Convert.ToInt64(UtilityM.CheckNull<Int64>(reader["ACC_CD"]));
+                                        loanDtl.loan_acc_no = UtilityM.CheckNull<string>(reader["LOAN_ACC_NO"]);
+                                        loanDtl.acc_name = UtilityM.CheckNull<string>(reader["ACC_DESC"]);
+
+                                        loanDfltList.Add(loanDtl);
+                                    }
+                                    transaction.Commit();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
         }
 
 
@@ -5157,19 +5439,21 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
                            + " (V_TRANS_DTLS.TRANS_TYPE IN ('R','B')) and  "
                            + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and  "
                            + " (V_TRANS_DTLS.BRN_CD  = {2})  AND "
-                           + " (SUBSTR(V_TRANS_DTLS.CREATED_BY,1, instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) ) ={3} "
+                           + " (V_TRANS_DTLS.CREATED_BY = {3}) AND "
+                           + " (V_TRANS_DTLS.APPROVAL_STATUS = 'A' ) "
                            + " ORDER BY TRANS_TYPE,TRANS_CD ";
 
 
-            string _query1 = " SELECT  DISTINCT SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1) USER_ID, "
+            string _query1 = " SELECT  DISTINCT V_TRANS_DTLS.CREATED_BY USER_ID, "
                              + " (SELECT USER_FIRST_NAME || ' '|| nvl(USER_MIDDLE_NAME,'') || ' ' || USER_LAST_NAME  FROM M_USER_MASTER WHERE USER_ID =SUBSTR(V_TRANS_DTLS.CREATED_BY,1,instr(V_TRANS_DTLS.CREATED_BY,'/',1)-1)) USER_NAME"
                              + "  FROM V_TRANS_DTLS "
                              + "  WHERE(V_TRANS_DTLS.ARDB_CD = {0}) and "
                              + " (V_TRANS_DTLS.TRANS_TYPE IN ('R','B')) and "
                              + " (V_TRANS_DTLS.TRANS_DT  = substr({1},1,10)) and"
-                             + " (V_TRANS_DTLS.BRN_CD  = {2})";
+                             + " (V_TRANS_DTLS.BRN_CD  = {2}) and "
+                             + " (V_TRANS_DTLS.APPROVAL_STATUS = 'A') ";
 
-            
+
 
 
             using (var connection = OrclDbConnection.NewConnection)
@@ -6803,7 +7087,349 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
 
 
-    
+       internal tm_gold_master GetGoldMaster(tm_gold_master pm)
+        {
+            tm_gold_master loanRet = new tm_gold_master();
+            string _query = " SELECT TM_GOLD_MASTER.ARDB_CD,TM_GOLD_MASTER.BRN_CD,TM_GOLD_MASTER.MEMBER_NO,TM_GOLD_MASTER.CUST_CD,TM_GOLD_MASTER.VALUATION_NO,TM_GOLD_MASTER.VALUE_DT, "
+                          + " TM_GOLD_MASTER.LOAN_ID,TM_GOLD_MASTER.LGE_PAGE,TM_GOLD_MASTER.DUE_DT,MM_CUSTOMER.CUST_NAME,MM_CUSTOMER.PRESENT_ADDRESS  "
+                          + " FROM TM_GOLD_MASTER,MM_CUSTOMER WHERE TM_GOLD_MASTER.CUST_CD =  MM_CUSTOMER.CUST_CD AND "
+                          + " TM_GOLD_MASTER.ARDB_CD = {0} AND TM_GOLD_MASTER.BRN_CD = {1} AND TM_GOLD_MASTER.VALUATION_NO = {2} ";
+
+            _statement = string.Format(_query,
+                                          string.Concat("'", pm.ardb_cd, "'"),
+                                          string.Concat("'", pm.brn_cd, "'"),
+                                          string.Concat("'", pm.valuation_no, "'")
+                                           );
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            {
+                                while (reader.Read())
+                                {
+                                    var d = new tm_gold_master();
+                                    d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                    d.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                    d.member_no = UtilityM.CheckNull<string>(reader["MEMBER_NO"]);
+                                    d.cust_cd = UtilityM.CheckNull<string>(reader["CUST_CD"]);
+                                    d.valuation_no = UtilityM.CheckNull<Int64>(reader["VALUATION_NO"]);
+                                    d.value_dt = UtilityM.CheckNull<DateTime>(reader["VALUE_DT"]);
+                                    d.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                    d.lge_page = UtilityM.CheckNull<string>(reader["LGE_PAGE"]);
+                                    d.due_dt = UtilityM.CheckNull<DateTime>(reader["DUE_DT"]);
+                                    d.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                    d.present_address = UtilityM.CheckNull<string>(reader["PRESENT_ADDRESS"]);
+                                    loanRet = d;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return loanRet;
+        }
+
+
+
+        internal List<tm_gold_master_dtls> GetGoldMasterDtls(tm_gold_master_dtls pm)
+        {
+            List<tm_gold_master_dtls> loanRet = new List<tm_gold_master_dtls>();
+            string _query = " SELECT TM_GOLD_MASTER_DTLS.ARDB_CD,TM_GOLD_MASTER_DTLS.BRN_CD,TM_GOLD_MASTER_DTLS.VALUATION_NO,TM_GOLD_MASTER_DTLS.SL_NO,TM_GOLD_MASTER_DTLS.DESC_VAL,TM_GOLD_MASTER_DTLS.DESC_NO,TM_GOLD_MASTER_DTLS.GROSS_WE, "
+                          + " TM_GOLD_MASTER_DTLS.ALLOY_STONE_WE,TM_GOLD_MASTER_DTLS.NET_WE,TM_GOLD_MASTER_DTLS.PURITY_WE,TM_GOLD_MASTER_DTLS.ACT_WE,TM_GOLD_MASTER_DTLS.ACT_RATE,TM_GOLD_MASTER_DTLS.NET_VALUE "
+                          + " FROM TM_GOLD_MASTER_DTLS WHERE TM_GOLD_MASTER_DTLS.ARDB_CD = {0} AND TM_GOLD_MASTER_DTLS.BRN_CD = {1} AND TM_GOLD_MASTER_DTLS.VALUATION_NO = {2} ";
+
+            _statement = string.Format(_query,
+                                           string.Concat("'", pm.ardb_cd, "'") ,
+                                           string.Concat("'", pm.brn_cd, "'"),
+                                          string.Concat("'", pm.valuation_no, "'")
+                                           );
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            {
+                                while (reader.Read())
+                                {
+                                    var d = new tm_gold_master_dtls();
+                                    d.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                    d.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                    d.valuation_no = UtilityM.CheckNull<Int64>(reader["VALUATION_NO"]);
+                                    d.sl_no = UtilityM.CheckNull<Int16>(reader["SL_NO"]);
+                                    d.desc_val = UtilityM.CheckNull<string>(reader["DESC_VAL"]);
+                                    d.desc_no = UtilityM.CheckNull<Int16>(reader["DESC_NO"]);
+                                    d.gross_we = UtilityM.CheckNull<decimal>(reader["GROSS_WE"]);
+                                    d.alloy_stone_we = UtilityM.CheckNull<decimal>(reader["ALLOY_STONE_WE"]);
+                                    d.net_we = UtilityM.CheckNull<decimal>(reader["NET_WE"]);
+                                    d.purity_we = UtilityM.CheckNull<decimal>(reader["PURITY_WE"]);
+                                    d.act_we = UtilityM.CheckNull<decimal>(reader["ACT_WE"]);
+                                    d.act_rate = UtilityM.CheckNull<decimal>(reader["ACT_RATE"]);
+                                    d.net_value = UtilityM.CheckNull<decimal>(reader["NET_VALUE"]);
+                                    loanRet.Add(d);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return loanRet;
+        }
+
+
+
+          internal string InsertLoanValuationData(LoanValuationDM acc)
+          {
+              string _section = null;
+                Int64 maxvaluationno;
+
+              using (var connection = OrclDbConnection.NewConnection)
+              {
+                  using (var transaction = connection.BeginTransaction())
+                  {
+                      try
+                      {
+                            _section = "InsertGoldMaster";
+                            maxvaluationno = InsertGoldMaster(connection, acc.tmgoldmaster);
+                            _section = "InsertGoldMasterDtls";
+                            InsertGoldMasterDtls(connection, acc.tmgoldmasterdtls);
+
+                            transaction.Commit();
+                            return maxvaluationno.ToString();
+
+                    }
+                      catch (Exception ex)
+                      {
+
+                          transaction.Rollback();
+                          return _section + " : " + ex.Message;
+                      }
+
+                  }
+              }
+          }
+
+
+        internal Int64 InsertGoldMaster(DbConnection connection, tm_gold_master dep)
+        {
+            string _query = " INSERT INTO TM_GOLD_MASTER(ARDB_CD,BRN_CD,MEMBER_NO,CUST_CD,VALUATION_NO,VALUE_DT,"
+                           + " LOAN_ID,LGE_PAGE,DUE_DT,CREATED_BY,CREATED_DT)  "
+                          + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},SYSDATE)";
+
+            Int64 maxvaluationno = PopulateValuationNumber(dep.ardb_cd,dep.brn_cd,dep.value_dt);
+
+            _statement = string.Format(_query,
+            string.Concat("'", dep.ardb_cd, "'"),
+            string.Concat("'", dep.brn_cd, "'"),
+            string.Concat("'", dep.member_no, "'"),
+            string.Concat("'", dep.cust_cd, "'"),
+            string.Concat("'", dep.valuation_no, "'"),
+            string.IsNullOrWhiteSpace(dep.value_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", dep.value_dt.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
+            string.Concat("'", dep.loan_id, "'"),
+            string.Concat("'", dep.lge_page, "'"),
+            string.IsNullOrWhiteSpace(dep.due_dt.ToString()) ? string.Concat("null") : string.Concat("to_date('", dep.due_dt.ToString("dd/MM/yyyy"), "','dd-mm-yyyy' )"),
+            string.Concat("'", dep.created_by, "'")
+                  );
+
+            using (var command = OrclDbConnection.Command(connection, _statement))
+            {
+                command.ExecuteNonQuery();
+            }
+            return maxvaluationno;
+        }
+
+
+        internal bool InsertGoldMasterDtls(DbConnection connection, List<tm_gold_master_dtls> dep)
+        {
+            string _query = " INSERT INTO TM_GOLD_MASTER_DTLS(ARDB_CD,BRN_CD,VALUATION_NO,SL_NO,DESC_VAL,DESC_NO,GROSS_WE,ALLOY_STONE_WE,"
+                           + " NET_WE,PURITY_WE,ACT_WE,ACT_RATE,NET_VALUE,CREATED_BY,CREATED_DT)  "
+                          + " VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},SYSDATE)";
+
+            for (int i = 0; i < dep.Count; i++)
+            {
+                 _statement = string.Format(_query,
+                 string.Concat("'", dep[i].ardb_cd, "'"),
+                 string.Concat("'", dep[i].brn_cd, "'"),
+                 string.Concat("'", dep[i].valuation_no, "'"),
+                 string.Concat("'", dep[i].sl_no, "'"),
+                 string.Concat("'", dep[i].desc_val, "'"),
+                 string.Concat("'", dep[i].desc_no, "'"),
+                 string.Concat("'", dep[i].gross_we, "'"),
+                 string.Concat("'", dep[i].alloy_stone_we, "'"),
+                 string.Concat("'", dep[i].net_we, "'"),
+                 string.Concat("'", dep[i].purity_we, "'"),
+                 string.Concat("'", dep[i].act_we, "'"),
+                 string.Concat("'", dep[i].act_rate, "'"),
+                 string.Concat("'", dep[i].net_value, "'"),
+                 string.Concat("'", dep[i].created_by, "'")
+                   );
+
+                    using (var command = OrclDbConnection.Command(connection, _statement))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+            }
+            return true;
+        }
+
+
+        internal Int64 PopulateValuationNumber(string ardb,string brn,DateTime valudt)
+        {
+             Int64 accNum  = 0;
+
+            string _query = "Select f_get_valuation_no({0},{1},{2}) VALUATION_NO"
+                           + " From  DUAL ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+
+                        _statement = string.Format(_query,
+                                        string.Concat("'", ardb, "'"),
+                                         string.Concat("'", brn, "'"),
+                                         string.Concat("'", valudt, "'")
+                                        );
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        accNum = UtilityM.CheckNull<Int64>(reader["VALUATION_NO"]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        accNum = 0;
+                    }
+                }
+            }
+            return accNum;
+        }
+
+
+        internal int UpdateLoanValuationData(LoanValuationDM acc)
+        {
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        UpdateGoldMaster(connection, acc.tmgoldmaster);
+                        if (acc.tmgoldmasterdtls.Count > 0)
+                          UpdateGoldMasterDtls(connection, acc.tmgoldmasterdtls);                        
+                        transaction.Commit();
+                        return 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return -1;
+                    }
+
+                }
+            }
+        }
+
+
+        internal bool UpdateGoldMaster(DbConnection connection, tm_gold_master dep)
+        {
+            string _query = " UPDATE  TM_GOLD_MASTER SET "
+                  + "member_no          = NVL({0},  member_no         ),"
+                  + "cust_cd            = NVL({1},  cust_cd           ),"
+                  + "value_dt           = NVL({2},  value_dt          ),"
+                  + "due_dt             = NVL({3},  due_dt            ), "
+                  + "modified_by        = NVL({4},  modified_by       ), "
+                  + "modified_dt        = sysdate                       "
+                  + "WHERE ardb_cd  ={5} and brn_cd = NVL({6}, brn_cd) AND valuation_no = NVL({7},  valuation_no ) ";
+
+            _statement = string.Format(_query,
+
+            string.Concat("'", dep.member_no, "'"),
+            string.Concat("'", dep.cust_cd, "'"),
+            string.Concat("'", dep.value_dt, "'"),
+            string.Concat("'", dep.due_dt, "'"),
+            string.Concat("'", dep.modified_by, "'"),
+            string.Concat("'", dep.ardb_cd, "'"),
+            string.Concat("'", dep.cust_cd, "'"),
+            string.Concat("'", dep.brn_cd, "'"),
+            string.Concat("'", dep.valuation_no, "'")
+            );
+
+            using (var command = OrclDbConnection.Command(connection, _statement))
+            {
+                command.ExecuteNonQuery();
+            }
+            return true;
+
+        }
+
+
+
+        internal bool UpdateGoldMasterDtls(DbConnection connection, List<tm_gold_master_dtls> dep)
+        {
+            string _query = " UPDATE  TM_GOLD_MASTER_DTLS SET "
+                  + " sl_no              = NVL({0},  sl_no  ),"
+                  + " desc_val           = NVL({1},  desc_val ),"
+                  + " desc_no            = NVL({2},  desc_no  ),"
+                  + " gross_we           = NVL({3},  gross_we ), "
+                  + " alloy_stone_we     = NVL({4},  alloy_stone_we), "
+                  + " net_we             = NVL({5},  net_we),  "
+                  + " purity_we          = NVL({6},  purity_we),  "
+                  + " act_we             = NVL({7},  act_we),  "
+                  + " act_rate           = NVL({8},  act_rate),  "
+                  + " net_value          = NVL({9},  net_value),  "
+                  + " modified_by        = NVL({10},  modified_by),  "
+                  + " modified_dt        = sysdate  "
+                  + " WHERE ardb_cd  ={11} and brn_cd = NVL({12}, brn_cd) AND valuation_no = NVL({13},  valuation_no ) ";
+            for (int i = 0; i < dep.Count; i++)
+            {
+
+                    _statement = string.Format(_query,
+
+                string.Concat("'", dep[i].sl_no, "'"),
+                string.Concat("'", dep[i].desc_val, "'"),
+                string.Concat("'", dep[i].desc_no, "'"),
+                string.Concat("'", dep[i].gross_we, "'"),
+                string.Concat("'", dep[i].alloy_stone_we, "'"),
+                string.Concat("'", dep[i].net_we, "'"),
+                string.Concat("'", dep[i].purity_we, "'"),
+                string.Concat("'", dep[i].act_we, "'"),
+                string.Concat("'", dep[i].act_rate, "'"),
+                 string.Concat("'", dep[i].net_value, "'"),
+                  string.Concat("'", dep[i].modified_by, "'"),
+                  string.Concat("'", dep[i].ardb_cd, "'"),
+                  string.Concat("'", dep[i].brn_cd, "'"),
+                  string.Concat("'", dep[i].valuation_no, "'")
+                );
+
+                    using (var command = OrclDbConnection.Command(connection, _statement))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+            }
+            return true;
+
+        }
+
+
+
         internal List<activitywisedc_type> PopulateDcStatement(p_report_param prp)
         {
             List<activitywisedc_type> loanDfltList = new List<activitywisedc_type>();

@@ -42,6 +42,8 @@ namespace SBWSFinanceApi.DL
          + " MM_CUSTOMER.VILL_CD,"
          + " MM_CUSTOMER.BLOCK_CD,"
          + " MM_CUSTOMER.SERVICE_AREA_CD,"
+         + " MM_CUSTOMER.PS,"
+         + " MM_CUSTOMER.PO,"
          + " MM_CUSTOMER.OCCUPATION,"
          + " MM_CUSTOMER.PHONE,"
          + " MM_CUSTOMER.PRESENT_ADDRESS,"
@@ -58,6 +60,8 @@ namespace SBWSFinanceApi.DL
          + " MM_CUSTOMER.KYC_PHOTO_NO,"
          + " MM_CUSTOMER.KYC_ADDRESS_TYPE,"
          + " MM_CUSTOMER.KYC_ADDRESS_NO,"
+         + " MM_CUSTOMER.KYC_OTHER_TYPE,"
+         + " MM_CUSTOMER.KYC_OTHER_NO,"
          + " MM_CUSTOMER.ORG_STATUS,"
          + " MM_CUSTOMER.ORG_REG_NO,"
          + " MM_CUSTOMER.CREATED_BY,"
@@ -66,6 +70,11 @@ namespace SBWSFinanceApi.DL
          + " MM_CUSTOMER.MODIFIED_DT,"
          + " MM_CUSTOMER.LBR_STATUS,"
          + " MM_CUSTOMER.IS_WEAKER,"
+         + " MM_CUSTOMER.SB_FOLIO_NO,"
+         + " MM_CUSTOMER.TD_FOLIO_NO,"
+         + " MM_CUSTOMER.FD_FOLIO_NO,"
+         + " MM_CUSTOMER.RD_FOLIO_NO,"
+         + " MM_CUSTOMER.MIS_FOLIO_NO,"
          + " MM_CUSTOMER.DEL_FLAG"
          + " FROM  MM_CUSTOMER"
          + " WHERE MM_CUSTOMER.ARDB_CD ={0} "
@@ -117,6 +126,8 @@ namespace SBWSFinanceApi.DL
                                 mc.vill_cd = UtilityM.CheckNull<string>(reader["VILL_CD"]);
                                 mc.block_cd = UtilityM.CheckNull<string>(reader["BLOCK_CD"]);
                                 mc.service_area_cd = UtilityM.CheckNull<string>(reader["SERVICE_AREA_CD"]);
+                                mc.ps = UtilityM.CheckNull<int>(reader["PS"]);
+                                mc.po = UtilityM.CheckNull<int>(reader["PO"]);
                                 mc.occupation = UtilityM.CheckNull<string>(reader["OCCUPATION"]);
                                 mc.phone = UtilityM.CheckNull<string>(reader["PHONE"]);
                                 mc.present_address = UtilityM.CheckNull<string>(reader["PRESENT_ADDRESS"]);
@@ -133,6 +144,8 @@ namespace SBWSFinanceApi.DL
                                 mc.kyc_photo_no = UtilityM.CheckNull<string>(reader["KYC_PHOTO_NO"]);
                                 mc.kyc_address_type = UtilityM.CheckNull<string>(reader["KYC_ADDRESS_TYPE"]);
                                 mc.kyc_address_no = UtilityM.CheckNull<string>(reader["KYC_ADDRESS_NO"]);
+                                mc.kyc_other_type = UtilityM.CheckNull<string>(reader["KYC_OTHER_TYPE"]);
+                                mc.kyc_other_no = UtilityM.CheckNull<string>(reader["KYC_OTHER_NO"]);
                                 mc.org_status = UtilityM.CheckNull<string>(reader["ORG_STATUS"]);
                                 mc.org_reg_no = UtilityM.CheckNull<decimal>(reader["ORG_REG_NO"]);
                                 mc.created_by = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
@@ -140,6 +153,11 @@ namespace SBWSFinanceApi.DL
                                 mc.modified_by = UtilityM.CheckNull<string>(reader["MODIFIED_BY"]);
                                 mc.modified_dt = UtilityM.CheckNull<DateTime>(reader["MODIFIED_DT"]);
                                 mc.lbr_status = UtilityM.CheckNull<string>(reader["LBR_STATUS"]);
+                                mc.sb_folio_no = UtilityM.CheckNull<string>(reader["SB_FOLIO_NO"]);
+                                mc.td_folio_no = UtilityM.CheckNull<string>(reader["TD_FOLIO_NO"]);
+                                mc.fd_folio_no = UtilityM.CheckNull<string>(reader["FD_FOLIO_NO"]);
+                                mc.rd_folio_no = UtilityM.CheckNull<string>(reader["RD_FOLIO_NO"]);
+                                mc.mis_folio_no = UtilityM.CheckNull<string>(reader["MIS_FOLIO_NO"]);
                                 mc.is_weaker = UtilityM.CheckNull<string>(reader["IS_WEAKER"]);
                                 mc.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
 
@@ -399,12 +417,12 @@ namespace SBWSFinanceApi.DL
                         + " OLD_CUST_CD, DT_OF_BIRTH,AGE, SEX,MARITAL_STATUS,CATG_CD,COMMUNITY,CASTE,PERMANENT_ADDRESS,WARD_NO,STATE,DIST,PIN,VILL_CD,"
                         + " BLOCK_CD,SERVICE_AREA_CD,OCCUPATION,PHONE,PRESENT_ADDRESS,FARMER_TYPE,EMAIL,MONTHLY_INCOME,DATE_OF_DEATH,SMS_FLAG,STATUS,"
                         + " PAN,NOMINEE,NOM_RELATION,KYC_PHOTO_TYPE,KYC_PHOTO_NO,KYC_ADDRESS_TYPE,KYC_ADDRESS_NO,ORG_STATUS,ORG_REG_NO,CREATED_BY,"
-                        + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,LBR_STATUS,IS_WEAKER,DEL_FLAG)"
+                        + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,LBR_STATUS,IS_WEAKER,DEL_FLAG,KYC_OTHER_TYPE,KYC_OTHER_NO,SB_FOLIO_NO,TD_FOLIO_NO,FD_FOLIO_NO,RD_FOLIO_NO,MIS_FOLIO_NO,PS,PO)"
                         + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},"
                         + " {11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},"
                         + " {25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},"
                         + " {36},{37},{38},{39},{40},{41},{42},{43},{44},{45},SYSDATE,"
-                        + " {46},SYSDATE,{47},{48},{49})";                        
+                        + " {46},SYSDATE,{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57},{58})";                        
             pmp.cust_cd = GetCustomerCdMaxId(pmp.ardb_cd,pmp.brn_cd);
             _ret = pmp.cust_cd;
             using (var connection = OrclDbConnection.NewConnection)
@@ -467,7 +485,16 @@ namespace SBWSFinanceApi.DL
                                          //string.IsNullOrWhiteSpace(pmp.modified_dt.ToString()) ? null : string.Concat("sysdate"),
                                          string.Concat("'", pmp.lbr_status, "'"),
                                          string.Concat("'", pmp.is_weaker, "'"),
-                                         string.Concat("'", pmp.del_flag, "'")) ;
+                                         string.Concat("'", pmp.del_flag, "'"),
+                                         string.Concat("'", pmp.kyc_other_type, "'"),
+                                         string.Concat("'", pmp.kyc_other_no, "'"),
+                                         string.Concat("'", pmp.sb_folio_no, "'"),
+                                         string.Concat("'", pmp.td_folio_no, "'"),
+                                         string.Concat("'", pmp.fd_folio_no, "'"),
+                                         string.Concat("'", pmp.rd_folio_no, "'"),
+                                         string.Concat("'", pmp.mis_folio_no, "'"),
+                                         string.Concat("'", pmp.ps, "'"),
+                                         string.Concat("'", pmp.po, "'")) ;
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
@@ -664,8 +691,17 @@ namespace SBWSFinanceApi.DL
          + "  MODIFIED_BY=NVL({43},MODIFIED_BY),"
          + "  MODIFIED_DT=SYSDATE,"
          + "  LBR_STATUS =NVL({44}, LBR_STATUS),"
-         + "  IS_WEAKER =NVL({45} ,IS_WEAKER)"
-         + "  WHERE ARDB_CD = {46} AND  CUST_CD ={47} AND DEL_FLAG = 'N' ";
+         + "  IS_WEAKER =NVL({45} ,IS_WEAKER),"
+         + "  KYC_OTHER_TYPE =NVL({46} , KYC_OTHER_TYPE),"
+         + "  KYC_OTHER_NO =NVL({47} , KYC_OTHER_NO),"
+         + "  SB_FOLIO_NO =NVL({48} ,SB_FOLIO_NO),"
+         + "  TD_FOLIO_NO =NVL({49} ,TD_FOLIO_NO),"
+         + "  FD_FOLIO_NO =NVL({50} ,FD_FOLIO_NO),"
+         + "  RD_FOLIO_NO =NVL({51} ,RD_FOLIO_NO),"
+         + "  MIS_FOLIO_NO =NVL({52} ,MIS_FOLIO_NO),"
+         + "  PS =NVL({53} ,PS),"
+         + "  PO =NVL({54} ,PO)"
+         + "  WHERE ARDB_CD = {55} AND  CUST_CD ={56} AND DEL_FLAG = 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -721,6 +757,15 @@ namespace SBWSFinanceApi.DL
                                              string.Concat("'", pmp.modified_by, "'"),
                                              string.Concat("'", pmp.lbr_status, "'"),
                                              string.Concat("'", pmp.is_weaker, "'"),
+                                             string.Concat("'", pmp.kyc_other_type, "'"),
+                                             string.Concat("'", pmp.kyc_other_no, "'"),
+                                             string.Concat("'", pmp.sb_folio_no, "'"),
+                                             string.Concat("'", pmp.td_folio_no, "'"),
+                                             string.Concat("'", pmp.fd_folio_no, "'"),
+                                             string.Concat("'", pmp.rd_folio_no, "'"),
+                                             string.Concat("'", pmp.mis_folio_no, "'"),
+                                             string.Concat("'", pmp.ps, "'"),
+                                             string.Concat("'", pmp.po, "'"),                                            
                                              string.Concat("'", pmp.ardb_cd, "'"),
                                              string.Concat("'", pmp.cust_cd, "'")
                                              );

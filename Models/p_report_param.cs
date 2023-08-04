@@ -31,7 +31,7 @@ namespace SBWSFinanceApi.Models
         public int renew_id { get; set; }
         public int ad_cash_acc_cd { get; set; }
         public string sex { get; set; }
-
+        public string locker_id { get; set; }
         public string activity_cd { get; set; }
 
 

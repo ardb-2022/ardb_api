@@ -212,6 +212,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.GetDemandList(prp);
         }
 
+        
+        [Route("GetDemandListSingle")]
+        [HttpPost]
+        public List<demand_list> GetDemandListSingle(p_report_param prp)
+        {
+            return _ll.GetDemandListSingle(prp);
+        }
+
         [Route("GetDemandListMemberwise")]
         [HttpPost]
         public List<demandDM> GetDemandListMemberwise(p_report_param prp)
@@ -292,6 +300,13 @@ namespace SBWSFinanceApi.Controllers
         {
             return _ll.UpdateSubsidyData(prp);
         }
+        
+        [Route("UpdateLoanValuationData")]
+        [HttpPost]
+        public int UpdateLoanValuationData(LoanValuationDM prp)
+        {
+            return _ll.UpdateLoanValuationData(prp);
+        }
 
         [Route("DeleteSubsidyData")]
         [HttpPost]
@@ -321,14 +336,38 @@ namespace SBWSFinanceApi.Controllers
         {         
            
             return _ll.GetLoanData(loan);
-        } 
+        }
+
+        [Route("GetGoldMaster")]
+        [HttpPost]
+        public tm_gold_master GetGoldMaster(tm_gold_master pm)
+        {
+
+            return _ll.GetGoldMaster(pm);
+        }
+
+        [Route("GetGoldMasterDtls")]
+        [HttpPost]
+        public List<tm_gold_master_dtls> GetGoldMasterDtls(tm_gold_master_dtls pm)
+        {
+
+            return _ll.GetGoldMasterDtls(pm);
+        }
 
         [Route("InsertLoanAccountOpeningData")]
         [HttpPost]
          public String InsertLoanAccountOpeningData(LoanOpenDM loan)
         {         
            return _ll.InsertLoanAccountOpeningData(loan);
-        } 
+        }
+
+        [Route("InsertLoanValuationData")]
+        [HttpPost]
+        public String InsertLoanValuationData(LoanValuationDM loan)
+        {
+            return _ll.InsertLoanValuationData(loan);
+        }
+
         [Route("InsertLoanTransactionData")]
         [HttpPost]
          public String InsertLoanTransactionData(LoanOpenDM loan)
@@ -366,6 +405,16 @@ namespace SBWSFinanceApi.Controllers
            
             return _ll.CalculateLoanInterest(loan);
         }
+
+        [Route("CalculateLoanInterestYearend")]
+        [HttpPost]
+        public p_loan_param CalculateLoanInterestYearend(p_loan_param loan)
+        {
+
+            return _ll.CalculateLoanInterestYearend(loan);
+        }
+
+        
 
          [Route("CalculateLoanAccWiseInterest")]
         [HttpPost]

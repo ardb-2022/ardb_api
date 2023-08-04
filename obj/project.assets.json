@@ -8244,17 +8244,17 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Web-Based-Code\\ARDB_WEB\\ardbapi\\SBWSFinanceApi.csproj",
+      "projectUniqueName": "D:\\Web-Based-Code\\ARDB_WEB\\contaiapi\\SBWSFinanceApi.csproj",
       "projectName": "SBWSFinanceApi",
-      "projectPath": "D:\\Web-Based-Code\\ARDB_WEB\\ardbapi\\SBWSFinanceApi.csproj",
+      "projectPath": "D:\\Web-Based-Code\\ARDB_WEB\\contaiapi\\SBWSFinanceApi.csproj",
       "packagesPath": "C:\\Users\\sukanta\\.nuget\\packages\\",
-      "outputPath": "D:\\Web-Based-Code\\ARDB_WEB\\ardbapi\\obj\\",
+      "outputPath": "D:\\Web-Based-Code\\ARDB_WEB\\contaiapi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "D:\\Web-Based-Code\\ARDB_WEB\\ardbapi\\NuGet.Config",
+        "D:\\Web-Based-Code\\ARDB_WEB\\contaiapi\\NuGet.Config",
         "C:\\Users\\sukanta\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Appeon.SnapDevelop.Offline.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"

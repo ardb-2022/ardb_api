@@ -62,7 +62,10 @@ namespace SBWSFinanceApi.Models
         public string home_brn_cd { get; set; }
         public string intra_branch_trn { get; set; }
         public string ardb_cd { get; set; }
-        public string del_flag { get; set; }        
+        public string del_flag { get; set; }
+
+        public string agreement_no { get; set; }
+        
 
     }
 }

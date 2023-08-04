@@ -519,7 +519,7 @@ internal List<mm_constitution> GetConstitution()
         internal List<mm_vill> GetVillageMaster(mm_vill mum)
         {
             List<mm_vill> mamRets=new List<mm_vill>();
-            string _query=" SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,VILL_CD,VILL_NAME,PS_CD,SERVICE_AREA_CD,VILLAGE_ID"
+            string _query=" SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,VILL_CD,VILL_NAME,PS_ID,SERVICE_AREA_CD,PO_ID"
                          +" FROM MM_VILL WHERE ARDB_CD = {0}";
             using (var connection = OrclDbConnection.NewConnection)
             {              
@@ -540,9 +540,9 @@ internal List<mm_constitution> GetConstitution()
                                 mam.block_cd = UtilityM.CheckNull<string>(reader["BLOCK_CD"]);
                                 mam.vill_cd = UtilityM.CheckNull<string>(reader["VILL_CD"]);
                                 mam.vill_name = UtilityM.CheckNull<string>(reader["VILL_NAME"]);
-                                mam.ps_cd = UtilityM.CheckNull<string>(reader["PS_CD"]);  
+                                mam.ps_id = UtilityM.CheckNull<int>(reader["PS_ID"]);  
                                 mam.service_area_cd = UtilityM.CheckNull<string>(reader["SERVICE_AREA_CD"]);  
-                                mam.village_id = UtilityM.CheckNull<decimal>(reader["VILLAGE_ID"]);                             
+                                mam.po_id = UtilityM.CheckNull<int>(reader["PO_ID"]);                             
                                 mamRets.Add(mam);
                             }
                         }
@@ -558,9 +558,9 @@ internal List<mm_constitution> GetConstitution()
         {
             int _ret = 0;
 
-            string _query = "INSERT INTO MM_VILL VALUES ({0},{1},{2}, {3}, {4},{5},'0',{6},SYSDATE,0)";
+            string _query = "INSERT INTO MM_VILL VALUES ({0},{1},{2}, {3}, {4},{5},{6},{7},{8})";
 
-            int VillIdMax = GetVillMaxId(tvd);
+            //int VillIdMax = GetVillMaxId(tvd);
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -574,16 +574,19 @@ internal List<mm_constitution> GetConstitution()
                                   string.Concat("'", tvd.state_cd, "'"),
                                   string.Concat("'", tvd.dist_cd, "'"),
                                   string.Concat("'", tvd.block_cd, "'"),
-                                  string.Concat(VillIdMax),
-                                  string.Concat("'", tvd.vill_name, "'"),
-                                  string.Concat("'", tvd.service_area_cd, "'")
+                                  tvd.ps_id,
+                                  string.Concat("'", tvd.service_area_cd, "'"),
+                                  tvd.po_id,
+                                  string.Concat("'", tvd.vill_cd, "'"),//string.Concat(VillIdMax),
+                                  string.Concat("'", tvd.vill_name, "'")                                 
                                   );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
                             command.ExecuteNonQuery();
                             transaction.Commit();
-                            _ret = VillIdMax;
+                            //_ret = VillIdMax;
+                            _ret = 0;
                         }
                     }
                     catch (Exception ex)
@@ -663,11 +666,161 @@ internal List<mm_constitution> GetConstitution()
         }
 
 
+        internal List<mm_po> GetPoMaster(mm_po mum)
+        {
+            List<mm_po> mamRets = new List<mm_po>();
+            string _query = " SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,PIN,PO_NAME,PS_ID,SERVICE_AREA_CD,PO_ID"
+                         + " FROM MM_PO WHERE ARDB_CD = {0}";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'"));
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new mm_po();
+                                mam.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                mam.state_cd = UtilityM.CheckNull<string>(reader["STATE_CD"]);
+                                mam.dist_cd = UtilityM.CheckNull<string>(reader["DIST_CD"]);
+                                mam.block_cd = UtilityM.CheckNull<string>(reader["BLOCK_CD"]);
+                                mam.pin = UtilityM.CheckNull<string>(reader["PIN"]);
+                                mam.po_name = UtilityM.CheckNull<string>(reader["PO_NAME"]);
+                                mam.ps_id = UtilityM.CheckNull<int>(reader["PS_ID"]);
+                                mam.service_area_cd = UtilityM.CheckNull<string>(reader["SERVICE_AREA_CD"]);
+                                mam.po_id = UtilityM.CheckNull<int>(reader["PO_ID"]);
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+        internal int InsertPoMaster(mm_po tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_PO VALUES ({0},{1},{2}, {3}, {4},{5},{6},{7},{8})";
+
+            int PoIdMax = GetPoMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat("'", tvd.state_cd, "'"),
+                                  string.Concat("'", tvd.dist_cd, "'"),
+                                  string.Concat("'", tvd.block_cd, "'"),
+                                  tvd.ps_id,
+                                  string.Concat("'", tvd.service_area_cd, "'"),
+                                  string.Concat(PoIdMax),
+                                  string.Concat("'", tvd.po_name, "'"),
+                                  string.Concat("'", tvd.pin, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = PoIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        internal int GetPoMaxId(mm_po tvd)
+        {
+            int maxPoCd = 0;
+            string _query = " Select  nvl(max(po_id) + 1, 1) max_po_id "
+                            + " From   mm_po "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxPoCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_PO_ID"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxPoCd;
+        }
+
+        internal int UpdatePo(mm_po tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_po"
+                            + " Set po_name = {0} , pin = {1} "
+                            + " Where  ardb_cd = {2} AND po_id = {3} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.po_name, "'"),
+                                           string.Concat("'", tvd.pin, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           string.Concat("'", tvd.po_id, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+
         internal List<mm_service_area> GetServiceAreaMaster(mm_service_area mum)
         {
             List<mm_service_area> mamRets=new List<mm_service_area>();
-            string _query=" SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,SERVICE_AREA_NAME,SERVICE_AREA_CD"
-                         +" FROM MM_SERVICE_AREA WHERE ARDB_CD ={0}";
+            string _query=" SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,PS_ID,SERVICE_AREA_NAME,SERVICE_AREA_CD"
+                         +" FROM MM_SERVICE_AREA WHERE ARDB_CD ={0} ";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                 _statement = string.Format(_query,
@@ -685,6 +838,7 @@ internal List<mm_constitution> GetConstitution()
                                 mam.state_cd = UtilityM.CheckNull<string>(reader["STATE_CD"]);
                                 mam.dist_cd = UtilityM.CheckNull<string>(reader["DIST_CD"]);
                                 mam.block_cd = UtilityM.CheckNull<string>(reader["BLOCK_CD"]);
+                                mam.ps_id = UtilityM.CheckNull<int>(reader["PS_ID"]);
                                 mam.service_area_name = UtilityM.CheckNull<string>(reader["SERVICE_AREA_NAME"]);
                                 mam.service_area_cd = UtilityM.CheckNull<string>(reader["SERVICE_AREA_CD"]);  
                                 mamRets.Add(mam);
@@ -702,7 +856,7 @@ internal List<mm_constitution> GetConstitution()
         {
             int _ret = 0;
 
-            string _query = "INSERT INTO MM_SERVICE_AREA VALUES ({0},{1},{2}, {3}, {4},{5},SYSDATE)";
+            string _query = "INSERT INTO MM_SERVICE_AREA VALUES ({0},{1},{2}, {3}, {4},{5},{6})";
 
             int ServiceIdMax = GetServiceMaxId(tvd);
 
@@ -717,9 +871,10 @@ internal List<mm_constitution> GetConstitution()
                                   string.Concat("'", tvd.ardb_cd, "'"),
                                   string.Concat("'", tvd.state_cd, "'"),
                                   string.Concat("'", tvd.dist_cd, "'"),
+                                  string.Concat("'", tvd.block_cd, "'"),
+                                  tvd.ps_id,
                                   string.Concat(ServiceIdMax),
-                                  string.Concat("'", tvd.service_area_name, "'"),
-                                  string.Concat("'", tvd.block_cd, "'")
+                                  string.Concat("'", tvd.service_area_name, "'")                                  
                                   );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
@@ -785,6 +940,148 @@ internal List<mm_constitution> GetConstitution()
                                            string.Concat("'", tvd.service_area_name, "'"),
                                            string.Concat("'", tvd.ardb_cd, "'"),
                                            string.Concat("'", tvd.service_area_cd, "'")
+                                         );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+
+            return _ret;
+        }
+
+        internal List<mm_ps> GetPsMaster(mm_ps mum)
+        {
+            List<mm_ps> mamRets = new List<mm_ps>();
+            string _query = " SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,PS_ID,PS_NAME"
+                         + " FROM MM_PS WHERE ARDB_CD ={0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'"));
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new mm_ps();
+                                mam.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                mam.state_cd = UtilityM.CheckNull<string>(reader["STATE_CD"]);
+                                mam.dist_cd = UtilityM.CheckNull<string>(reader["DIST_CD"]);
+                                mam.block_cd = UtilityM.CheckNull<string>(reader["BLOCK_CD"]);
+                                mam.ps_id = UtilityM.CheckNull<int>(reader["PS_ID"]);
+                                mam.ps_name = UtilityM.CheckNull<string>(reader["PS_NAME"]);
+                                mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+        internal int InsertPsMaster(mm_ps tvd)
+        {
+            int _ret = 0;
+
+            string _query = "INSERT INTO MM_PS VALUES ({0},{1},{2}, {3}, {4},{5})";
+
+            int PsIdMax = GetPsMaxId(tvd);
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                  string.Concat("'", tvd.ardb_cd, "'"),
+                                  string.Concat("'", tvd.state_cd, "'"),
+                                  string.Concat("'", tvd.dist_cd, "'"),
+                                  string.Concat("'", tvd.block_cd, "'"),
+                                  PsIdMax,
+                                  string.Concat("'", tvd.ps_name, "'")
+                                  );
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            _ret = PsIdMax;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _ret = -1;
+                    }
+                }
+            }
+            return _ret;
+        }
+
+        internal int GetPsMaxId(mm_ps tvd)
+        {
+            int maxServiceCd = 0;
+            string _query = "Select  nvl(max(to_number(ps_id))+1,1)  max_ps_id "
+                            + " From   mm_ps "
+                            + " Where  ardb_cd = {0} ";
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                _statement = string.Format(_query,
+                                            string.IsNullOrWhiteSpace(tvd.ardb_cd) ? "ardb_cd" : string.Concat("'", tvd.ardb_cd, "'")
+                                            );
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                maxServiceCd = Convert.ToInt32(UtilityM.CheckNull<decimal>(reader["MAX_PS_ID"]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return maxServiceCd;
+        }
+
+        internal int UpdatePs(mm_ps tvd)
+        {
+            int _ret = 0;
+            string _query = "Update mm_ps"
+                            + " Set ps_name = {0} "
+                            + " Where  ardb_cd = {1} AND ps_id = {2} ";
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        _statement = string.Format(_query,
+                                           string.Concat("'", tvd.ps_name, "'"),
+                                           string.Concat("'", tvd.ardb_cd, "'"),
+                                           tvd.ps_id
                                          );
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
