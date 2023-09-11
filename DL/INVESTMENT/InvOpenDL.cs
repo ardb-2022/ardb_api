@@ -2055,6 +2055,7 @@ namespace SBWSFinanceApi.DL.INVESTMENT
                                 + " TT_TDPROV_INTT_INV.PRN_AMT,       "
                                 + " TT_TDPROV_INTT_INV.INTT_RT,       "
                                 + " TT_TDPROV_INTT_INV.PROV_INTT_AMT, "
+                                + " TT_TDPROV_INTT_INV.INTT_AMT, "
                                 + " TT_TDPROV_INTT_INV.CONSTITUTION_CD,"
                                 + " TT_TDPROV_INTT_INV.BANK_CD,   "
                                 + " TT_TDPROV_INTT_INV.BRANH_CD   "
@@ -2088,9 +2089,12 @@ namespace SBWSFinanceApi.DL.INVESTMENT
                             var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
                             parm1.Value = prp.ardb_cd;
                             command.Parameters.Add(parm1);
-                            var parm2 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
-                            parm2.Value = prp.from_dt;
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
                             command.Parameters.Add(parm2);
+                            var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
                            
                             command.ExecuteNonQuery();
                            // transaction.Commit();
@@ -2141,11 +2145,13 @@ namespace SBWSFinanceApi.DL.INVESTMENT
                                                         tca.PRN_AMT = UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
                                                         tca.INTT_RT = Convert.ToDecimal(UtilityM.CheckNull<float>(reader["INTT_RT"]));
                                                         tca.PROV_INTT_AMT = UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
+                                                        tca.intt_amt = UtilityM.CheckNull<decimal>(reader["INTT_AMT"]);
                                                         tca.mat_dt = UtilityM.CheckNull<DateTime>(reader["MAT_DT"]);
 
                                                         tca1.tot_cons_count = tca1.tot_cons_count + 1;
                                                         tca1.tot_cons_balance = tca1.tot_cons_balance + UtilityM.CheckNull<decimal>(reader["PRN_AMT"]);
                                                         tca1.tot_cons_intt_balance = tca1.tot_cons_intt_balance + UtilityM.CheckNull<decimal>(reader["PROV_INTT_AMT"]);
+                                                        tca1.tot_cons_mat_intt_balance = tca1.tot_cons_mat_intt_balance + UtilityM.CheckNull<decimal>(reader["INTT_AMT"]);
                                                         tcaRet1.ttsbcadtllist.Add(tca);
 
                                                         //tcaRet.Add(tca);

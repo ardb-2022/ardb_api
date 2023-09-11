@@ -16,5 +16,7 @@ namespace SBWSFinanceApi.Models
         public decimal tot_cons_balance { get; set; }
         public decimal tot_cons_intt_balance { get; set; }
 
+        public decimal tot_cons_mat_intt_balance { get; set; }
+
     }
 }

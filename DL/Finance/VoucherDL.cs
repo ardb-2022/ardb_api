@@ -111,7 +111,7 @@ namespace SBWSFinanceApi.DL
         internal List<t_voucher_dtls> GetTVoucherNarration(t_voucher_dtls tvd)
         {
              List<t_voucher_dtls> tvdRets=new List<t_voucher_dtls>();
-            string _query="SELECT NARRATION,VOUCHER_ID,VOUCHER_DT,VOUCHER_TYPE,APPROVAL_STATUS FROM T_VOUCHER_NARRATION WHERE  "
+            string _query= "SELECT NARRATION,VOUCHER_ID,VOUCHER_DT,VOUCHER_TYPE,APPROVAL_STATUS,f_get_voucher_created_by(ARDB_CD,BRN_CD,VOUCHER_DT,VOUCHER_ID) CREATED_BY FROM T_VOUCHER_NARRATION WHERE  "
                           + "  T_VOUCHER_NARRATION.ardb_cd = {0} AND T_VOUCHER_NARRATION.brn_cd = {1} "
                           + "  AND T_VOUCHER_NARRATION.APPROVAL_STATUS = 'U' AND T_VOUCHER_NARRATION.del_flag = 'N' ";
             //   + "  AND T_VOUCHER_NARRATION.voucher_dt = to_date('{2}','dd-mm-yyyy' ) AND T_VOUCHER_NARRATION.del_flag = 'N' ";
@@ -137,6 +137,7 @@ namespace SBWSFinanceApi.DL
                                 tvdr.voucher_dt = UtilityM.CheckNull<DateTime>(reader["VOUCHER_DT"]);
                                 tvdr.transaction_type = UtilityM.CheckNull<string>(reader["VOUCHER_TYPE"]);
                                 tvdr.approval_status = UtilityM.CheckNull<string>(reader["APPROVAL_STATUS"]);
+                                tvdr.created_by = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
                                 tvdRets.Add(tvdr);
                             }
                         }

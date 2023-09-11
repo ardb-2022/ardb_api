@@ -137,8 +137,12 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.PopulateInterestSubsidy(prp);
         }
-
         
+        internal List<blockwisesubsidy> PopulateInterestSubsidySummary(p_report_param prp)
+        {
+            return _dac.PopulateInterestSubsidySummary(prp);
+        }
+
         internal List<activitywisedc_type> PopulateDcStatement(p_report_param prp)
         {
             return _dac.PopulateDcStatement(prp);
@@ -237,6 +241,11 @@ namespace SBWSFinanceApi.LL
             return _dac.GetDemandNoticeBlockwise(prp);
         }
 
+        internal List<demand_notice> GetDemandNoticeVillagewise(p_report_param prp)
+        {
+            return _dac.GetDemandNoticeVillagewise(prp);
+        }
+
         internal List<tm_loan_all> PopulateLoanDisburseRegAccwise(p_report_param prp)
         {
             return _dac.PopulateLoanDisburseRegAccwise(prp);
@@ -288,6 +297,12 @@ namespace SBWSFinanceApi.LL
         internal List<tt_npa> PopulateNPAListAll(p_report_param prp)
         {
             return _dac.PopulateNPAListAll(prp);
+        }
+
+        
+        internal List<tt_npa_summary> PopulateNPASummary(p_report_param prp)
+        {
+            return _dac.PopulateNPASummary(prp);
         }
 
         internal List<gm_loan_trans> PopulateRecoveryRegisterAccwise(p_report_param prp)

@@ -16,6 +16,7 @@ namespace SBWSFinanceApi.Models
         public decimal prn_recov { get; set; }
         public decimal intt_recov { get; set; }
         public decimal subsidy_amt { get; set; }
+        public decimal no_of_loans { get; set; }
         
     }
 }

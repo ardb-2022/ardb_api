@@ -207,6 +207,10 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.GetAccDtls(prm);
         }
+        internal List<AccDtlsLov> GetAccDtlsAll(p_gen_param prm)
+        {
+            return _dac.GetAccDtlsAll(prm);
+        }
         internal List<mm_customer> GetCustDtls(p_gen_param prm)
         {
             return _dac.GetCustDtls(prm);

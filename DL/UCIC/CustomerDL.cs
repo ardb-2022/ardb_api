@@ -66,11 +66,21 @@ namespace SBWSFinanceApi.DL
          + " MM_CUSTOMER.MODIFIED_DT,"
          + " MM_CUSTOMER.LBR_STATUS,"
          + " MM_CUSTOMER.IS_WEAKER,"
-         + " MM_CUSTOMER.DEL_FLAG"
+         + " MM_CUSTOMER.DEL_FLAG,"
+         + " MM_CUSTOMER.FATHER_NAME,"
+         + " MM_CUSTOMER.AADHAR,"
+         + " MM_CUSTOMER.APPROVAL_STATUS,"
+         + " MM_CUSTOMER.APPROVED_BY,"
+         + " MM_CUSTOMER.APPROVED_DT,"
+         + " MM_CUSTOMER.PAN_STATUS,"
+         + " MM_CUSTOMER.NATIONALITY,"
+         + " MM_CUSTOMER.EMAIL_ID,"
+         + " MM_CUSTOMER.CREDIT_AGENCY,"
+         + " MM_CUSTOMER.CREDIT_SCORE,"
+         + " MM_CUSTOMER.CREDIT_SCORE_DT"
          + " FROM  MM_CUSTOMER"
          + " WHERE MM_CUSTOMER.ARDB_CD ={0} "
-         + " AND MM_CUSTOMER.BRN_CD={1}"
-         + " AND MM_CUSTOMER.CUST_CD={2}"
+         + " AND MM_CUSTOMER.CUST_CD={1}"
          + " AND MM_CUSTOMER.DEL_FLAG= 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
@@ -78,8 +88,7 @@ namespace SBWSFinanceApi.DL
 
                 _statement = string.Format(_query,
                                            !string.IsNullOrWhiteSpace(pmc.ardb_cd) ? string.Concat("'", pmc.ardb_cd, "'") : "MM_CUSTOMER.ARDB_CD",
-                                           !string.IsNullOrWhiteSpace(pmc.brn_cd) ? string.Concat("'", pmc.brn_cd, "'") : "MM_CUSTOMER.BRN_CD",
-                                           pmc.cust_cd != 0 ? Convert.ToString(pmc.cust_cd) : "cust_cd"
+                                            pmc.cust_cd != 0 ? Convert.ToString(pmc.cust_cd) : "cust_cd"
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -142,6 +151,17 @@ namespace SBWSFinanceApi.DL
                                 mc.lbr_status = UtilityM.CheckNull<string>(reader["LBR_STATUS"]);
                                 mc.is_weaker = UtilityM.CheckNull<string>(reader["IS_WEAKER"]);
                                 mc.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
+                                mc.father_name = UtilityM.CheckNull<string>(reader["FATHER_NAME"]);
+                                mc.aadhar = UtilityM.CheckNull<string>(reader["AADHAR"]);
+                                mc.approval_status = UtilityM.CheckNull<string>(reader["APPROVAL_STATUS"]);
+                                mc.approved_by = UtilityM.CheckNull<string>(reader["APPROVED_BY"]);
+                                mc.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
+                                mc.pan_status = UtilityM.CheckNull<string>(reader["PAN_STATUS"]);
+                                mc.nationality = UtilityM.CheckNull<string>(reader["NATIONALITY"]);
+                                mc.email_id = UtilityM.CheckNull<string>(reader["EMAIL_ID"]);
+                                mc.credit_agency = UtilityM.CheckNull<string>(reader["CREDIT_AGENCY"]);
+                                mc.credit_score = UtilityM.CheckNull<decimal>(reader["CREDIT_SCORE"]);
+                                mc.credit_score_dt = UtilityM.CheckNull<DateTime>(reader["CREDIT_SCORE_DT"]);
 
 
                                 custRets.Add(mc);
@@ -399,12 +419,13 @@ namespace SBWSFinanceApi.DL
                         + " OLD_CUST_CD, DT_OF_BIRTH,AGE, SEX,MARITAL_STATUS,CATG_CD,COMMUNITY,CASTE,PERMANENT_ADDRESS,WARD_NO,STATE,DIST,PIN,VILL_CD,"
                         + " BLOCK_CD,SERVICE_AREA_CD,OCCUPATION,PHONE,PRESENT_ADDRESS,FARMER_TYPE,EMAIL,MONTHLY_INCOME,DATE_OF_DEATH,SMS_FLAG,STATUS,"
                         + " PAN,NOMINEE,NOM_RELATION,KYC_PHOTO_TYPE,KYC_PHOTO_NO,KYC_ADDRESS_TYPE,KYC_ADDRESS_NO,ORG_STATUS,ORG_REG_NO,CREATED_BY,"
-                        + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,LBR_STATUS,IS_WEAKER,DEL_FLAG)"
+                        + " CREATED_DT,MODIFIED_BY,MODIFIED_DT,LBR_STATUS,IS_WEAKER,DEL_FLAG,FATHER_NAME,AADHAR,APPROVAL_STATUS,APPROVED_BY,APPROVED_DT,"
+	                    + " PAN_STATUS,NATIONALITY,EMAIL_ID,CREDIT_AGENCY,CREDIT_SCORE,CREDIT_SCORE_DT)"
                         + " VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},"
                         + " {11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},"
                         + " {25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},"
                         + " {36},{37},{38},{39},{40},{41},{42},{43},{44},{45},SYSDATE,"
-                        + " {46},SYSDATE,{47},{48},{49})";                        
+                        + " {46},SYSDATE,{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57},{58},{59},{60})";                        
             pmp.cust_cd = GetCustomerCdMaxId(pmp.ardb_cd,pmp.brn_cd);
             _ret = pmp.cust_cd;
             using (var connection = OrclDbConnection.NewConnection)
@@ -467,7 +488,19 @@ namespace SBWSFinanceApi.DL
                                          //string.IsNullOrWhiteSpace(pmp.modified_dt.ToString()) ? null : string.Concat("sysdate"),
                                          string.Concat("'", pmp.lbr_status, "'"),
                                          string.Concat("'", pmp.is_weaker, "'"),
-                                         string.Concat("'", pmp.del_flag, "'")) ;
+                                         string.Concat("'", pmp.del_flag, "'"),
+                                         string.Concat("'", pmp.father_name, "'"),
+                                         string.Concat("'", pmp.aadhar, "'"),
+                                         string.Concat("'", pmp.approval_status, "'"),
+                                         string.Concat("'", pmp.approved_by, "'"),
+                                         string.IsNullOrWhiteSpace(pmp.approved_dt.ToString()) ? string.Concat("'", null, "'") : string.Concat("to_date('", pmp.approved_dt.Value.ToString("dd/MM/yyyy"), "','dd/mm/yyyy')"),
+                                         string.Concat("'", pmp.pan_status, "'"),
+                                         string.Concat("'", pmp.nationality, "'"),
+                                         string.Concat("'", pmp.email_id, "'"),
+                                         string.Concat("'", pmp.credit_agency, "'"),
+                                         string.Concat("'", pmp.credit_score, "'"),
+                                         string.IsNullOrWhiteSpace(pmp.credit_score_dt.ToString()) ? string.Concat("'", null, "'") : string.Concat("to_date('", pmp.credit_score_dt.Value.ToString("dd/MM/yyyy"), "','dd/mm/yyyy')")                                         
+                                         ) ;
 
                         using (var command = OrclDbConnection.Command(connection, _statement))
                         {
@@ -495,13 +528,30 @@ namespace SBWSFinanceApi.DL
             + " Where ardb_cd = {1}"
             + "AND brn_cd ={2}";
 
+            string _query1 = "Select {0} || lpad( Nvl(max(to_number(substr(to_char(cust_cd),4))) + 1 , 1),8,'0') MAX_CUST_CD"
+            + " From mm_customer"
+            + " Where ardb_cd = {1}"
+            + "AND brn_cd ={2}";
+
             using (var connection = OrclDbConnection.NewConnection)
-            {
-                _statement = string.Format(_query,
+            {   
+                if (ardbCd == "4" &&  brnCd == "102")
+                   { 
+                    _statement = string.Format(_query1,
                                              string.IsNullOrWhiteSpace(brnCd) ? "brn_cd" : string.Concat("'", brnCd, "'"),
                                              string.IsNullOrWhiteSpace(brnCd) ? "ardb_cd" : string.Concat("'", ardbCd, "'"),
                                              string.IsNullOrWhiteSpace(brnCd) ? "brn_cd" : string.Concat("'", brnCd, "'")
                                             );
+                    }
+                else
+                {
+                    _statement = string.Format(_query,
+                                                string.IsNullOrWhiteSpace(brnCd) ? "brn_cd" : string.Concat("'", brnCd, "'"),
+                                                string.IsNullOrWhiteSpace(brnCd) ? "ardb_cd" : string.Concat("'", ardbCd, "'"),
+                                                string.IsNullOrWhiteSpace(brnCd) ? "brn_cd" : string.Concat("'", brnCd, "'")
+                                               );
+
+                }
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
                     using (var reader = command.ExecuteReader())
@@ -527,12 +577,14 @@ namespace SBWSFinanceApi.DL
 
             string _query = " select  count(*)  CNT "
                             + " from MM_CUSTOMER"
-                            + " where ardb_cd = {0} "
-                            + "  AND ((KYC_PHOTO_TYPE = 'P' And KYC_PHOTO_NO = {1}) OR (KYC_ADDRESS_TYPE = 'P' And KYC_ADDRESS_NO = {2}))";
+                            + " where ardb_cd = {0} AND cust_cd <> {1} "
+                            + "  AND ((PAN = {2}) OR (KYC_PHOTO_TYPE = 'P' And KYC_PHOTO_NO = {3}) OR (KYC_ADDRESS_TYPE = 'P' And KYC_ADDRESS_NO = {4}))";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                           string.Concat("'", pmp.ardb_cd, "'"),
+                                          string.Concat("'", pmp.cust_cd, "'"),
+                                          string.Concat("'", pmp.pan, "'"),
                                           string.Concat("'", pmp.kyc_photo_no, "'"),
                                           string.Concat("'", pmp.kyc_address_no, "'")
                                    );
@@ -574,12 +626,14 @@ namespace SBWSFinanceApi.DL
 
             string _query = " select  count(*)  CNT "
                             + " from MM_CUSTOMER"
-                            + " where ardb_cd = {0} "
-                            + "  AND ((KYC_PHOTO_TYPE = 'G' And KYC_PHOTO_NO = {1}) OR (KYC_ADDRESS_TYPE = 'G' And KYC_ADDRESS_NO = {2}))";
+                            + " where ardb_cd = {0} AND cust_cd <> {1} "
+                            + "  AND ((AADHAR = {2}) OR (KYC_PHOTO_TYPE = 'G' And KYC_PHOTO_NO = {3}) OR (KYC_ADDRESS_TYPE = 'G' And KYC_ADDRESS_NO = {4}))";
             using (var connection = OrclDbConnection.NewConnection)
             {
                 _statement = string.Format(_query,
                                           string.Concat("'", pmp.ardb_cd, "'"),
+                                          string.Concat("'", pmp.cust_cd, "'"),
+                                          string.Concat("'", pmp.aadhar, "'"),
                                           string.Concat("'", pmp.kyc_photo_no, "'"),
                                           string.Concat("'", pmp.kyc_address_no, "'")
                                    );
@@ -664,8 +718,19 @@ namespace SBWSFinanceApi.DL
          + "  MODIFIED_BY=NVL({43},MODIFIED_BY),"
          + "  MODIFIED_DT=SYSDATE,"
          + "  LBR_STATUS =NVL({44}, LBR_STATUS),"
-         + "  IS_WEAKER =NVL({45} ,IS_WEAKER)"
-         + "  WHERE ARDB_CD = {46} AND  CUST_CD ={47} AND DEL_FLAG = 'N' ";
+         + "  IS_WEAKER =NVL({45} ,IS_WEAKER),"
+         + "  FATHER_NAME  =NVL({46} ,FATHER_NAME),"
+         + "  AADHAR = NVL({47} ,AADHAR),"
+         + "  APPROVAL_STATUS = NVL({48} ,APPROVAL_STATUS),"
+         + "  APPROVED_BY = NVL({49} ,APPROVED_BY),"
+         + "  APPROVED_DT = to_date('{50}','dd/mm/yyyy' ),"
+         + "  PAN_STATUS = NVL({51} ,PAN_STATUS),"
+         + "  NATIONALITY = NVL({52} ,NATIONALITY),"
+         + "  EMAIL_ID = NVL({53} ,EMAIL_ID),"
+         + "  CREDIT_AGENCY = NVL({54} ,CREDIT_AGENCY),"
+         + "  CREDIT_SCORE = NVL({55} ,CREDIT_SCORE),"
+         + "  CREDIT_SCORE_DT = to_date('{56}','dd/mm/yyyy' )"
+         + "  WHERE ARDB_CD = {57} AND  CUST_CD ={58} AND DEL_FLAG = 'N' ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -721,6 +786,17 @@ namespace SBWSFinanceApi.DL
                                              string.Concat("'", pmp.modified_by, "'"),
                                              string.Concat("'", pmp.lbr_status, "'"),
                                              string.Concat("'", pmp.is_weaker, "'"),
+                                             string.Concat("'", pmp.father_name, "'"),
+                                             string.Concat("'", pmp.aadhar, "'"),
+                                             string.Concat("'", pmp.approval_status, "'"),
+                                             string.Concat("'", pmp.approved_by, "'"),
+                                             string.IsNullOrWhiteSpace(pmp.approved_dt.ToString()) ? null : string.Concat(pmp.approved_dt.Value.ToString("dd/MM/yyyy")),
+                                             string.Concat("'", pmp.pan_status, "'"),
+                                             string.Concat("'", pmp.nationality, "'"),
+                                             string.Concat("'", pmp.email_id, "'"),
+                                             string.Concat("'", pmp.credit_agency, "'"),
+                                             string.Concat("'", pmp.credit_score, "'"),
+                                             string.IsNullOrWhiteSpace(pmp.credit_score_dt.ToString()) ? null : string.Concat(pmp.credit_score_dt.Value.ToString("dd/MM/yyyy")),
                                              string.Concat("'", pmp.ardb_cd, "'"),
                                              string.Concat("'", pmp.cust_cd, "'")
                                              );

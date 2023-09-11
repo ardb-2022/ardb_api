@@ -18,6 +18,10 @@ namespace SBWSFinanceApi.Models
         public string block_name { get; set; }
         public string party_name { get; set; }
 
+        public string guardian_name { get; set; }
+
+        public string phone { get; set; }
+
         public string service_area_name { get; set; }
 
         public string vill_name { get; set; }
@@ -27,6 +31,8 @@ namespace SBWSFinanceApi.Models
         public string loan_acc_no { get; set; }
 
         public string activity_cd { get; set; }
+
+        public decimal disb_amt { get; set; }
 
         public decimal curr_prn { get; set; }
 

@@ -18,6 +18,7 @@ namespace SBWSFinanceApi.Models
         public double curr_intt_rate { get; set; }
         public double ovd_intt_rate { get; set; }
 
+        public DateTime disb_dt { get; set; }
         public decimal disb_amt { get; set; }
         public decimal due_prn { get; set; }
         public decimal curr_prn { get; set; }
@@ -25,6 +26,10 @@ namespace SBWSFinanceApi.Models
         public decimal curr_intt { get; set; }
         public decimal ovd_intt { get; set; }
         public decimal penal_intt { get; set; }
+
+        public decimal outstanding { get; set; }
+
+
 
 
 

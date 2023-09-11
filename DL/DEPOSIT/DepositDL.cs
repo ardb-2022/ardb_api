@@ -1333,6 +1333,63 @@ namespace SBWSDepositApi.Deposit
             return accDtlsLovs;
         }
 
+
+        internal List<AccDtlsLov> GetAccDtlsAll(p_gen_param prm)
+        {
+            List<AccDtlsLov> accDtlsLovs = new List<AccDtlsLov>();
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var command = OrclDbConnection.Command(connection, "P_GET_ACC_DTLS_ALL"))
+                {
+                    // ad_acc_type_cd NUMBER,as_cust_name VARCHAR2
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    var parm = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.ardb_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("ad_acc_type_cd", OracleDbType.Decimal, ParameterDirection.Input);
+                    parm.Value = prm.ad_acc_type_cd;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("as_cust_name", OracleDbType.Varchar2, ParameterDirection.Input);
+                    parm.Value = prm.as_cust_name;
+                    command.Parameters.Add(parm);
+                    parm = new OracleParameter("p_acc_refcur", OracleDbType.RefCursor, ParameterDirection.Output);
+                    command.Parameters.Add(parm);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        try
+                        {
+                            if (reader.HasRows)
+                            {
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var accDtlsLov = new AccDtlsLov();
+                                        accDtlsLov.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
+                                        accDtlsLov.cust_name = UtilityM.CheckNull<string>(reader["CUST_NAME"]);
+                                        accDtlsLov.guardian_name = UtilityM.CheckNull<string>(reader["GUARDIAN_NAME"]);
+                                        accDtlsLov.present_address = UtilityM.CheckNull<string>(reader["PRESENT_ADDRESS"]);
+                                        accDtlsLov.phone = UtilityM.CheckNull<string>(reader["PHONE"]);
+                                        accDtlsLov.opening_dt = UtilityM.CheckNull<DateTime>(reader["OPENING_DT"]);
+
+                                        accDtlsLovs.Add(accDtlsLov);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return accDtlsLovs;
+        }
+
+
         internal List<mm_customer> GetCustDtls(p_gen_param prm)
         {
             List<mm_customer> customers = new List<mm_customer>();
@@ -1413,6 +1470,17 @@ namespace SBWSDepositApi.Deposit
                                         mc.lbr_status = UtilityM.CheckNull<string>(reader["LBR_STATUS"]);
                                         mc.is_weaker = UtilityM.CheckNull<string>(reader["IS_WEAKER"]);
                                         mc.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
+                                        mc.father_name = UtilityM.CheckNull<string>(reader["FATHER_NAME"]);
+                                        mc.aadhar = UtilityM.CheckNull<string>(reader["AADHAR"]);
+                                        mc.approval_status = UtilityM.CheckNull<string>(reader["APPROVAL_STATUS"]);
+                                        mc.approved_by = UtilityM.CheckNull<string>(reader["APPROVED_BY"]);
+                                        mc.approved_dt = UtilityM.CheckNull<DateTime>(reader["APPROVED_DT"]);
+                                        mc.pan_status = UtilityM.CheckNull<string>(reader["PAN_STATUS"]);
+                                        mc.nationality = UtilityM.CheckNull<string>(reader["NATIONALITY"]);
+                                        mc.email_id = UtilityM.CheckNull<string>(reader["EMAIL_ID"]);
+                                        mc.credit_agency = UtilityM.CheckNull<string>(reader["CREDIT_AGENCY"]);
+                                        mc.credit_score = UtilityM.CheckNull<decimal>(reader["CREDIT_SCORE"]);
+                                        mc.credit_score_dt = UtilityM.CheckNull<DateTime>(reader["CREDIT_SCORE_DT"]);
 
                                         customers.Add(mc);
                                     }
@@ -4121,6 +4189,7 @@ namespace SBWSDepositApi.Deposit
 
                                         pb.trans_dt = UtilityM.CheckNull<DateTime>(reader["TRANS_DT"]);
                                         pb.trans_cd = UtilityM.CheckNull<decimal>(reader["TRANS_CD"]);
+                                        pb.instrument_num = UtilityM.CheckNull<Int64>(reader["INSTRUMENT_NUM"]);
                                         // pb.acc_type_cd = UtilityM.CheckNull<Int16>(reader["ACC_TYPE_CD"]);
                                         pb.acc_num = UtilityM.CheckNull<string>(reader["ACC_NUM"]);
                                         pb.trans_type = UtilityM.CheckNull<string>(reader["TRANS_TYPE"]);

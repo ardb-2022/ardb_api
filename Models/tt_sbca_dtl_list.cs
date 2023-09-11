@@ -35,6 +35,8 @@ namespace SBWSFinanceApi.Models
 
         public int no_of_account { get; set; }
 
+        public decimal intt_amt { get; set; }
+
     }
 
 }

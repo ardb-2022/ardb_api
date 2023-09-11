@@ -55,7 +55,7 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
         internal List<m_user_master> GetUserIDStatus(m_user_master mum)
         {
             List<m_user_master> mumRets = new List<m_user_master>();
-            string _query = " SELECT USER_ID, LOGIN_STATUS , USER_TYPE "
+            string _query = " SELECT USER_ID, LOGIN_STATUS , USER_TYPE, USER_FIRST_NAME, USER_MIDDLE_NAME, USER_LAST_NAME "
                         + " FROM M_USER_MASTER WHERE  ARDB_CD={0} AND BRN_CD = {1}";
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -74,7 +74,10 @@ internal List<m_user_master> GetUserIDDtls(m_user_master mum)
                                 var mumt = new m_user_master();                               
                                 mumt.user_id = UtilityM.CheckNull<string>(reader["USER_ID"]);
                                 mumt.login_status = UtilityM.CheckNull<string>(reader["LOGIN_STATUS"]);
-                                mumt.user_type = UtilityM.CheckNull<string>(reader["USER_TYPE"]);                                
+                                mumt.user_type = UtilityM.CheckNull<string>(reader["USER_TYPE"]);
+                                mumt.user_first_name = UtilityM.CheckNull<string>(reader["USER_FIRST_NAME"]);
+                                mumt.user_middle_name = UtilityM.CheckNull<string>(reader["USER_MIDDLE_NAME"]);
+                                mumt.user_last_name = UtilityM.CheckNull<string>(reader["USER_LAST_NAME"]);
                                 mumRets.Add(mumt);
 
                             }

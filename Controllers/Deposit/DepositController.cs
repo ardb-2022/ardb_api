@@ -527,6 +527,15 @@ namespace SBWSFinanceApi.Controllers
             // ad_acc_type_cd NUMBER,as_cust_name 
             return __ll.GetAccDtls(prm);
         }
+
+        [Route("GetAccDtlsAll")]
+        [HttpPost]
+        public List<AccDtlsLov> GetAccDtlsAll([FromBody] p_gen_param prm)
+        {
+            // ad_acc_type_cd NUMBER,as_cust_name 
+            return __ll.GetAccDtlsAll(prm);
+        }
+
         [Route("GetCustDtls")]
         [HttpPost]
         public List<mm_customer> GetCustDtls([FromBody] p_gen_param prm)

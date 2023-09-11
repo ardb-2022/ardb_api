@@ -577,7 +577,7 @@ namespace SBWSFinanceApi.DL
          + " TRF_TYPE,"
          +  " REMARKS,"
          + " OVD_PRN_RECOV,"
-         + " BRN_CD,ARDB_CD,DEL_FLAG"
+         + " BRN_CD,CREATED_BY,ARDB_CD,DEL_FLAG"
     + " FROM TD_DEP_TRANS"
     + " WHERE (ARDB_CD = {0}) AND (BRN_CD = {1}) AND "
     + " NVL(APPROVAL_STATUS, 'U') = 'U' AND "
@@ -610,6 +610,7 @@ namespace SBWSFinanceApi.DL
                                 tdtr.remarks = UtilityM.CheckNull<string>(reader["REMARKS"]);
                                 tdtr.ovd_prn_recov = UtilityM.CheckNull<decimal>(reader["OVD_PRN_RECOV"]);
                                 tdtr.brn_cd = UtilityM.CheckNull<string>(reader["BRN_CD"]);
+                                tdtr.created_by = UtilityM.CheckNull<string>(reader["CREATED_BY"]);
                                 tdtr.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
                                 tdtr.del_flag = UtilityM.CheckNull<string>(reader["DEL_FLAG"]);
                                 tdtRets.Add(tdtr);

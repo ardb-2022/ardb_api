@@ -10,7 +10,7 @@ namespace SBWSFinanceApi.Models
         public Int16 acc_type_cd { get; set; }
         public string acc_num { get; set; }
         public string trans_type { get; set; }
-        public decimal instrument_num { get; set; }
+        public Int64 instrument_num { get; set; }
         public decimal amount { get; set; }
         public string particulars { get; set; }
         public string printed_flag { get; set; }

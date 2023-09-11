@@ -48,6 +48,14 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateInterestSubsidy(prp);
         }
 
+        
+        [Route("PopulateInterestSubsidySummary")]
+        [HttpPost]
+        public List<blockwisesubsidy> PopulateInterestSubsidySummary(p_report_param prp)
+        {
+            return _ll.PopulateInterestSubsidySummary(prp);
+        }
+
         [Route("PopulateLoanDetailedListAll")]
         [HttpPost]
         public List<tt_detailed_list_loan> PopulateLoanDetailedListAll(p_report_param prp)
@@ -139,6 +147,15 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateNPAListAll(prp);
         }
 
+        [Route("PopulateNPASummary")]
+        [HttpPost]
+        public List<tt_npa_summary> PopulateNPASummary(p_report_param prp)
+        {
+            return _ll.PopulateNPASummary(prp);
+        }
+
+        
+
         [Route("PopulateLoanCloseRegister")]
         [HttpPost]
         public List<tt_loan_opn_cls> PopulateLoanCloseRegister(p_report_param prp)
@@ -189,6 +206,14 @@ namespace SBWSFinanceApi.Controllers
         public List<demand_notice> GetDemandNoticeBlockwise(p_report_param prp)
         {
             return _ll.GetDemandNoticeBlockwise(prp);
+        }
+        
+
+        [Route("GetDemandNoticeVillagewise")]
+        [HttpPost]
+        public List<demand_notice> GetDemandNoticeVillagewise(p_report_param prp)
+        {
+            return _ll.GetDemandNoticeVillagewise(prp);
         }
 
         [Route("PopulateRecoveryRegisterAccwise")]

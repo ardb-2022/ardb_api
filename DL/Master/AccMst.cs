@@ -519,8 +519,18 @@ internal List<mm_constitution> GetConstitution()
         internal List<mm_vill> GetVillageMaster(mm_vill mum)
         {
             List<mm_vill> mamRets=new List<mm_vill>();
-            string _query=" SELECT ARDB_CD,STATE_CD, DIST_CD,BLOCK_CD,VILL_CD,VILL_NAME,PS_CD,SERVICE_AREA_CD,VILLAGE_ID"
-                         +" FROM MM_VILL WHERE ARDB_CD = {0}";
+            string _query=" SELECT ARDB_CD," +
+                "STATE_CD,"+
+                "DIST_CD," +
+                "BLOCK_CD," +
+                "VILL_CD," +
+                "VILL_NAME," +
+                "PS_CD," +
+                "SERVICE_AREA_CD," +
+                "VILLAGE_ID,"+
+                "(SELECT BLOCK_NAME FROM MM_BLOCK WHERE BLOCK_CD = MM_VILL.BLOCK_CD) BLOCK_NAME," +
+                "(SELECT SERVICE_AREA_NAME FROM MM_SERVICE_AREA WHERE SERVICE_AREA_CD = MM_VILL.SERVICE_AREA_CD) SERVICE_AREA_NAME " +
+                " FROM MM_VILL WHERE ARDB_CD = {0}";
             using (var connection = OrclDbConnection.NewConnection)
             {              
                 _statement = string.Format(_query,
@@ -542,7 +552,9 @@ internal List<mm_constitution> GetConstitution()
                                 mam.vill_name = UtilityM.CheckNull<string>(reader["VILL_NAME"]);
                                 mam.ps_cd = UtilityM.CheckNull<string>(reader["PS_CD"]);  
                                 mam.service_area_cd = UtilityM.CheckNull<string>(reader["SERVICE_AREA_CD"]);  
-                                mam.village_id = UtilityM.CheckNull<decimal>(reader["VILLAGE_ID"]);                             
+                                mam.village_id = UtilityM.CheckNull<decimal>(reader["VILLAGE_ID"]);
+                                mam.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
+                                mam.service_area_name = UtilityM.CheckNull<string>(reader["SERVICE_AREA_NAME"]);
                                 mamRets.Add(mam);
                             }
                         }

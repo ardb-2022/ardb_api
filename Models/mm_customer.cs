@@ -56,5 +56,18 @@ public string modified_by {get; set;}
 public DateTime? modified_dt {get; set;}
 public string lbr_status {get; set;}  
 public string is_weaker {get; set;}
-public string del_flag {get; set;}     }
+public string del_flag {get; set;}
+public string father_name { get; set; }
+public string aadhar { get; set; }
+public string approval_status { get; set; }
+public string approved_by { get; set; }
+public DateTime? approved_dt { get; set; }
+public string pan_status { get; set; }
+public string nationality { get; set; }
+public string email_id { get; set; }
+public string credit_agency { get; set; }
+public decimal credit_score { get; set; }
+public DateTime? credit_score_dt { get; set; }
+
+    }
 }
