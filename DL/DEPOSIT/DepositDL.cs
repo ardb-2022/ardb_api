@@ -2628,7 +2628,7 @@ namespace SBWSDepositApi.Deposit
                             + " TT_SBCA_DTL_LIST.DT_OF_BIRTH, "
                             + " nvl(TT_SBCA_DTL_LIST.AGE,0) AGE,  "
                             + " TT_SBCA_DTL_LIST.CUST_CD  CUST_CD "
-                            + " FROM TT_SBCA_DTL_LIST  ORDER BY TO_NUMBER(TT_SBCA_DTL_LIST.ACC_NUM)  ";
+                            + " FROM TT_SBCA_DTL_LIST  ORDER BY TT_SBCA_DTL_LIST.ACC_NUM  ";
 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -3519,8 +3519,8 @@ namespace SBWSDepositApi.Deposit
         {
             decimal ld_intt = 0;
             string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
-            string _query = "p_dds_intt_new";
-            string _query1 = " SELECT   f_calc_interest_dds({0},{1},substr({2},1,10)) INTT_AMT From dual ";
+            string _query = "p_dds_day_prod";
+            //string _query1 = " SELECT   f_calc_interest_dds({0},{1},substr({2},1,10)) INTT_AMT From dual ";
                                 
             using (var connection = OrclDbConnection.NewConnection)
             {
@@ -3542,30 +3542,13 @@ namespace SBWSDepositApi.Deposit
                             var parm2 = new OracleParameter("as_acc_num", OracleDbType.Varchar2, ParameterDirection.Input);
                             parm2.Value = prp.acc_num;
                             command.Parameters.Add(parm2);
-                            var parm3 = new OracleParameter("adt_dt", OracleDbType.Date, ParameterDirection.Input);
-                            parm3.Value = prp.from_dt;
+                            var parm3 = new OracleParameter("ad_intt", OracleDbType.Decimal, ParameterDirection.Output);
                             command.Parameters.Add(parm3);
                             command.ExecuteNonQuery();
+                            ld_intt = UtilityM.CheckNull<Decimal>(Convert.ToDecimal(parm3.Value.ToString()));
                             transaction.Commit();
-                        }
-                        _statement = string.Format(_query1,
-                                       string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
-                                       string.IsNullOrWhiteSpace(prp.acc_num) ? "acc_num" : string.Concat("'", prp.acc_num, "'"),
-                                       string.Concat("'", prp.from_dt, "'") );
-                        using (var command = OrclDbConnection.Command(connection, _statement))
-                        {
-                            using (var reader = command.ExecuteReader())
-                            {
-                                if (reader.HasRows)
-                                {
-                                    while (reader.Read())
-                                    {                                       
-
-                                        ld_intt = UtilityM.CheckNull<decimal>(reader["INTT_AMT"]);                                        
-                                    }
-                                }
-                            }
-                        }
+                        }                       
+                        
                     }
                     catch (Exception ex)
                     {

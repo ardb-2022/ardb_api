@@ -167,6 +167,17 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.GetDemandList(prp);
         }
+        
+        internal fortnightDM GetFortnightDemand(p_report_param prp)
+        {
+            return _dac.GetFortnightDemand(prp);
+        }
+
+        internal fortnightDM GetFortnightDemandConso(p_report_param prp)
+        {
+            return _dac.GetFortnightDemandConso(prp);
+        }
+
 
         internal List<demand_list> GetDemandListSingle(p_report_param prp)
         {
@@ -176,7 +187,13 @@ namespace SBWSFinanceApi.LL
         {
             return _dac.GetDemandListMemberwise(prp);
         }
+
         
+        internal List<demandDM> GetDemandListVillWise(p_report_param prp)
+        {
+            return _dac.GetDemandListVillWise(prp);
+        }
+
         internal List<recoveryDM> GetRecoveryListGroupwise(p_report_param prp)
         {
             return _dac.GetRecoveryListGroupwise(prp);

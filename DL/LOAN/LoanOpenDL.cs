@@ -1437,7 +1437,7 @@ namespace SBWSFinanceApi.DL
 + ", COMP_UNIT_NO      = NVL({37}, COMP_UNIT_NO     )"
 + ", PENAL_INTT        = NVL({38}, PENAL_INTT        )"
 + " WHERE LOAN_ID           = {39} "
-+ " AND ARDB_CD = {41} ";
++ " AND ARDB_CD = {40} ";
 
             _statement = string.Format(_query,
              string.Concat("'", loan.brn_cd, "'"),
@@ -1480,8 +1480,7 @@ namespace SBWSFinanceApi.DL
               string.Concat("'", loan.comp_unit_no, "'"),
               string.Concat("'", loan.penal_intt, "'"),
                string.Concat("'", loan.loan_id, "'"),
-              string.Concat("'", loan.brn_cd, "'"),
-              string.Concat("'", loan.ardb_cd, "'")
+               string.Concat("'", loan.ardb_cd, "'")
               );
             using (var command = OrclDbConnection.Command(connection, _statement))
             {
@@ -5150,6 +5149,1018 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
 
 
+        internal fortnightDM GetFortnightDemand(p_report_param prp)
+        {
+            fortnightDM loanDfltList = new fortnightDM();
+
+            fortnightdemand loanDfltList1 = new fortnightdemand();
+            fortnightrecov loanDfltList2 = new fortnightrecov();
+            fortnightrecov loanDfltList3 = new fortnightrecov();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _statement1;
+            string _statement2;
+            string _procedure = "p_block_new_acti_demand";
+            string _query = "SELECT    ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'P', 'O') / 100000, 2) + "
+                            + " ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'P', 'O') / 100000, 2) FARM_OVERDUE_PRN, "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'P', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'P', 'C') / 100000, 2) FARM_CURRENT_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'P', 'O') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'P', 'O') / 100000, 2) NONFARM_OVERDUE_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'P', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'P', 'C') / 100000, 2) NONFARM_CURRENT_PRN, "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'P', 'O') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'P', 'O') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'P', 'O') / 100000, 2) HOUSING_OVERDUE_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'P', 'C') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'P', 'C') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'P', 'C') / 100000, 2) HOUSING_CURRENT_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'P', 'O') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'P', 'O') / 100000, 2) SHG_OVERDUE_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'P', 'C') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'P', 'C') / 100000, 2) SHG_CURRENT_PRN,"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'I', 'O') / 100000, 2)) FARM_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'I', 'C') / 100000, 2) FARM_CURRENT_INTT,"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'I', 'O') / 100000, 2)) NONFARM_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'I', 'C') / 100000, 2) NONFARM_CURRENT_INTT,	"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'I', 'O') / 100000, 2)) HOUSING_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'I', 'C') / 100000, 2) HOUSING_CURRENT_INTT,"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'I', 'O') / 100000, 2)) SHG_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'I', 'C') / 100000, 2) SHG_CURRENT_INTT "
+                            + "From    DUAL";
+
+            string _query1 = "SELECT  ROUND(F_GET_COLLECT_NEW({0},{1},'N',1,'FNB','C','P','O')/ 100000,2) + "
+                            + "ROUND(F_GET_COLLECT_NEW({2},{3},'N',1,'FNL','C','P','O')/ 100000,2) FARM_OVERDUE_RECOV_PRN , "
+                             + "ROUND(F_GET_COLLECT_NEW({4},{5},'N',1,'FNB','C','P','C')/ 100000,2) + "
+                             + "ROUND(F_GET_COLLECT_NEW({6},{7},'N',1,'FNL','C','P','C')/ 100000,2) FARM_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({8},{9},'N',1,'FNB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({10},{11},'N',1,'FNL','C','P','A')/ 100000,2) FARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({12},{13},'N',2,'NNB','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({14},{15},'N',2,'NNL','C','P','O')/ 100000,2) NONFARM_OVERDUE_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({16},{17},'N',2,'NNB','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({18},{19},'N',2,'NNL','C','P','C')/ 100000,2) NONFARM_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({20},{21},'N',2,'NNB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({22},{23},'N',2,'NNL','C','P','A')/ 100000,2) NONFARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({24},{25},'N',3,'HNB','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({26},{27},'N',3,'NHB','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({28},{29},'N',3,'HHD','C','P','O')/ 100000,2) HOUSING_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({30},{31},'N',3,'HNB','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({32},{33},'N',3,'NHB','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({34},{35},'N',3,'HHD','C','P','C')/ 100000,2) HOUSING_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({36},{37},'N',3,'HNB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({38},{39},'N',3,'NHB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({40},{41},'N',3,'HHD','C','P','A')/ 100000,2) HOUSING_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({42},{43},'N',4,'JLG','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({44},{45},'N',4,'SHG','C','P','O')/ 100000,2) SHG_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({46},{47},'N',4,'JLG','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({48},{49},'N',4,'SHG','C','P','C')/ 100000,2) SHG_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({50},{51},'N',4,'JLG','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({52},{53},'N',4,'SHG','C','P','A')/ 100000,2) SHG_ADVANCE_RECOV_PRN, "
+                            + "ROUND(F_GET_COLLECT_NEW({54},{55},'N',1,'FNB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({56},{57},'N',1,'FNL','C','I','O')/ 100000,2) FARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({58},{59},'N',1,'FNB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({60},{61},'N',1,'FNL','C','I','C')/ 100000,2) FARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({62},{63},'N',2,'NNB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({64},{65},'N',2,'NNL','C','I','O')/ 100000,2) NONFARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({66},{67},'N',2,'NNB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({68},{69},'N',2,'NNL','C','I','C')/ 100000,2) NONFARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({70},{71},'N',3,'HNB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({72},{73},'N',3,'NHB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({74},{75},'N',3,'HHD','C','I','O')/ 100000,2) HOUSING_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({76},{77},'N',3,'HNB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({78},{79},'N',3,'NHB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({80},{81},'N',3,'HHD','C','I','C')/ 100000,2) HOUSING_CURRENT_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({82},{83},'N',4,'JLG','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({84},{85},'N',4,'SHG','C','I','O')/ 100000,2) SHG_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({86},{87},'N',4,'JLG','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({88},{89},'N',4,'SHG','C','I','C')/ 100000,2) SHG_CURRENT_RECOV_INTT "
+                            + " FROM DUAL";
+
+            string _query2 = "SELECT  ROUND(F_GET_COLLECT_NEW({0},{1},'N',1,'FNB','P','P','O')/ 100000,2) + "
+                            + "ROUND(F_GET_COLLECT_NEW({2},{3},'N',1,'FNL','P','P','O')/ 100000,2) FARM_OVERDUE_RECOV_PRN , "
+                             + "ROUND(F_GET_COLLECT_NEW({4},{5},'N',1,'FNB','P','P','C')/ 100000,2) + "
+                             + "ROUND(F_GET_COLLECT_NEW({6},{7},'N',1,'FNL','P','P','C')/ 100000,2) FARM_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({8},{9},'N',1,'FNB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({10},{11},'N',1,'FNL','P','P','A')/ 100000,2) FARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({12},{13},'N',2,'NNB','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({14},{15},'N',2,'NNL','P','P','O')/ 100000,2) NONFARM_OVERDUE_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({16},{17},'N',2,'NNB','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({18},{19},'N',2,'NNL','P','P','C')/ 100000,2) NONFARM_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({20},{21},'N',2,'NNB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({22},{23},'N',2,'NNL','P','P','A')/ 100000,2) NONFARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({24},{25},'N',3,'HNB','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({26},{27},'N',3,'NHB','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({28},{29},'N',3,'HHD','P','P','O')/ 100000,2) HOUSING_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({30},{31},'N',3,'HNB','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({32},{33},'N',3,'NHB','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({34},{35},'N',3,'HHD','P','P','C')/ 100000,2) HOUSING_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({36},{37},'N',3,'HNB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({38},{39},'N',3,'NHB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({40},{41},'N',3,'HHD','P','P','A')/ 100000,2) HOUSING_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({42},{43},'N',4,'JLG','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({44},{45},'N',4,'SHG','P','P','O')/ 100000,2) SHG_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({46},{47},'N',4,'JLG','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({48},{49},'N',4,'SHG','P','P','C')/ 100000,2) SHG_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({50},{51},'N',4,'JLG','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({52},{53},'N',4,'SHG','P','P','A')/ 100000,2) SHG_ADVANCE_RECOV_PRN, "
+                            + "ROUND(F_GET_COLLECT_NEW({54},{55},'N',1,'FNB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({56},{57},'N',1,'FNL','P','I','O')/ 100000,2) FARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({58},{59},'N',1,'FNB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({60},{61},'N',1,'FNL','P','I','C')/ 100000,2) FARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({62},{63},'N',2,'NNB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({64},{65},'N',2,'NNL','P','I','O')/ 100000,2) NONFARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({66},{67},'N',2,'NNB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({68},{69},'N',2,'NNL','P','I','C')/ 100000,2) NONFARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({70},{71},'N',3,'HNB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({72},{73},'N',3,'NHB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({74},{75},'N',3,'HHD','P','I','O')/ 100000,2) HOUSING_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({76},{77},'N',3,'HNB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({78},{79},'N',3,'NHB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({80},{81},'N',3,'HHD','P','I','C')/ 100000,2) HOUSING_CURRENT_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({82},{83},'N',4,'JLG','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({84},{85},'N',4,'SHG','P','I','O')/ 100000,2) SHG_OVERDUE_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({86},{87},'N',4,'JLG','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({88},{89},'N',4,'SHG','P','I','C')/ 100000,2) SHG_CURRENT_RECOV_INTT "
+                            + " FROM DUAL";
+
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_procedure);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_form_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt_demand;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm4.Value = prp.to_dt_demand;
+                            command.Parameters.Add(parm4);
+
+                            var parm5 = new OracleParameter("ac_fund_type", OracleDbType.Char, ParameterDirection.Input);
+                            parm5.Value = prp.fund_type;
+                            command.Parameters.Add(parm5);
+
+                            command.ExecuteNonQuery();
+
+                            //transaction.Commit();
+
+                        }
+
+                        _statement = string.Format(_query);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)                                {
+
+                                    while (reader.Read())
+                                    {
+
+                                        loanDfltList1.farm_overdue_prn = UtilityM.CheckNull<decimal>(reader["FARM_OVERDUE_PRN"]);
+                                        loanDfltList1.farm_current_prn = UtilityM.CheckNull<decimal>(reader["FARM_CURRENT_PRN"]);
+                                        loanDfltList1.nonfarm_overdue_prn = UtilityM.CheckNull<decimal>(reader["NONFARM_OVERDUE_PRN"]);
+                                        loanDfltList1.nonfarm_current_prn = UtilityM.CheckNull<decimal>(reader["NONFARM_CURRENT_PRN"]);
+                                        loanDfltList1.housing_overdue_prn = UtilityM.CheckNull<decimal>(reader["HOUSING_OVERDUE_PRN"]);
+                                        loanDfltList1.housing_current_prn = UtilityM.CheckNull<decimal>(reader["HOUSING_CURRENT_PRN"]);
+                                        loanDfltList1.shg_overdue_prn = UtilityM.CheckNull<decimal>(reader["SHG_OVERDUE_PRN"]);
+                                        loanDfltList1.shg_current_prn = UtilityM.CheckNull<decimal>(reader["SHG_CURRENT_PRN"]);
+                                        loanDfltList1.farm_overdue_intt = UtilityM.CheckNull<decimal>(reader["FARM_OVERDUE_INTT"]);
+                                        loanDfltList1.farm_current_intt = UtilityM.CheckNull<decimal>(reader["FARM_CURRENT_INTT"]);
+                                        loanDfltList1.nonfarm_overdue_intt = UtilityM.CheckNull<decimal>(reader["NONFARM_OVERDUE_INTT"]);
+                                        loanDfltList1.nonfarm_current_intt = UtilityM.CheckNull<decimal>(reader["NONFARM_CURRENT_INTT"]);
+                                        loanDfltList1.housing_overdue_intt = UtilityM.CheckNull<decimal>(reader["HOUSING_OVERDUE_INTT"]);
+                                        loanDfltList1.housing_current_intt = UtilityM.CheckNull<decimal>(reader["HOUSING_CURRENT_INTT"]);
+                                        loanDfltList1.shg_overdue_intt = UtilityM.CheckNull<decimal>(reader["SHG_OVERDUE_INTT"]);
+                                        loanDfltList1.shg_current_intt = UtilityM.CheckNull<decimal>(reader["SHG_CURRENT_INTT"]);
+
+                                        loanDfltList.fortnight_demand = loanDfltList1;
+
+                                    }
+                                    
+                                }
+                            }
+                        }
+
+
+                        _statement1 = string.Format(_query1,
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'")
+                                                   );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+
+                                    while (reader1.Read())
+                                    {
+
+                                        loanDfltList2.farm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["FARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.farm_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["FARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.farm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["FARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.nonfarm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["NONFARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.nonfarm_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["NONFARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.nonfarm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["NONFARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.housing_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["HOUSING_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.housing_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["HOUSING_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.housing_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["HOUSING_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.shg_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["SHG_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.shg_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["SHG_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.shg_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["SHG_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.farm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["FARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.farm_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["FARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList2.nonfarm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["NONFARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.nonfarm_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["NONFARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList2.housing_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["HOUSING_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.housing_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["HOUSING_CURRENT_RECOV_INTT"]);
+                                        loanDfltList2.shg_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["SHG_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.shg_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["SHG_CURRENT_RECOV_INTT"]);
+
+                                        loanDfltList.fortnight_recov = loanDfltList2;
+
+                                    }
+
+                                }
+                            }
+                        }
+
+
+                        _statement2 = string.Format(_query2,
+                                                     string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'")
+                                                   );
+
+                        using (var command2 = OrclDbConnection.Command(connection, _statement2))
+                        {
+                            using (var reader2 = command2.ExecuteReader())
+                            {
+                                if (reader2.HasRows)
+                                {
+
+                                    while (reader2.Read())
+                                    {
+
+                                        loanDfltList3.farm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["FARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.farm_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["FARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.farm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["FARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.nonfarm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["NONFARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.nonfarm_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["NONFARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.nonfarm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["NONFARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.housing_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["HOUSING_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.housing_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["HOUSING_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.housing_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["HOUSING_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.shg_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["SHG_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.shg_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["SHG_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.shg_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["SHG_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.farm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["FARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.farm_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["FARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList3.nonfarm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["NONFARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.nonfarm_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["NONFARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList3.housing_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["HOUSING_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.housing_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["HOUSING_CURRENT_RECOV_INTT"]);
+                                        loanDfltList3.shg_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["SHG_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.shg_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["SHG_CURRENT_RECOV_INTT"]);
+
+                                        loanDfltList.fortnight_prog_recov = loanDfltList3;
+
+                                    }
+
+                                }
+                            }
+                        }
+
+                        transaction.Commit();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
+        }
+
+
+
+        internal fortnightDM GetFortnightDemandConso(p_report_param prp)
+        {
+            fortnightDM loanDfltList = new fortnightDM();
+
+            fortnightdemand loanDfltList1 = new fortnightdemand();
+            fortnightrecov loanDfltList2 = new fortnightrecov();
+            fortnightrecov loanDfltList3 = new fortnightrecov();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _statement1;
+            string _statement2;
+            string _procedure = "p_block_new_acti_demand_conso";
+            string _query = "SELECT    ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'P', 'O') / 100000, 2) + "
+                            + " ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'P', 'O') / 100000, 2) FARM_OVERDUE_PRN, "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'P', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'P', 'C') / 100000, 2) FARM_CURRENT_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'P', 'O') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'P', 'O') / 100000, 2) NONFARM_OVERDUE_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'P', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'P', 'C') / 100000, 2) NONFARM_CURRENT_PRN, "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'P', 'O') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'P', 'O') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'P', 'O') / 100000, 2) HOUSING_OVERDUE_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'P', 'C') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'P', 'C') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'P', 'C') / 100000, 2) HOUSING_CURRENT_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'P', 'O') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'P', 'O') / 100000, 2) SHG_OVERDUE_PRN,"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'P', 'C') / 100000, 2) +"
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'P', 'C') / 100000, 2) SHG_CURRENT_PRN,"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'I', 'O') / 100000, 2)) FARM_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 1, 'FNL', 'I', 'C') / 100000, 2) FARM_CURRENT_INTT,"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'I', 'O') / 100000, 2)) NONFARM_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 2, 'NNL', 'I', 'C') / 100000, 2) NONFARM_CURRENT_INTT,	"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'I', 'O') / 100000, 2)) HOUSING_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HNB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'NHB', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 3, 'HHD', 'I', 'C') / 100000, 2) HOUSING_CURRENT_INTT,"
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'I', 'O') / 100000, 2)) + "
+                            + "(ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'I', 'O') / 100000, 2)) SHG_OVERDUE_INTT, + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'SHG', 'I', 'C') / 100000, 2) + "
+                            + "ROUND(F_GET_DEMAND_NEW('01/04/2023', '31/03/2024', 'N', 4, 'JLG', 'I', 'C') / 100000, 2) SHG_CURRENT_INTT "
+                            + "From    DUAL";
+
+            string _query1 = "SELECT  ROUND(F_GET_COLLECT_NEW({0},{1},'N',1,'FNB','C','P','O')/ 100000,2) + "
+                            + "ROUND(F_GET_COLLECT_NEW({2},{3},'N',1,'FNL','C','P','O')/ 100000,2) FARM_OVERDUE_RECOV_PRN , "
+                             + "ROUND(F_GET_COLLECT_NEW({4},{5},'N',1,'FNB','C','P','C')/ 100000,2) + "
+                             + "ROUND(F_GET_COLLECT_NEW({6},{7},'N',1,'FNL','C','P','C')/ 100000,2) FARM_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({8},{9},'N',1,'FNB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({10},{11},'N',1,'FNL','C','P','A')/ 100000,2) FARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({12},{13},'N',2,'NNB','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({14},{15},'N',2,'NNL','C','P','O')/ 100000,2) NONFARM_OVERDUE_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({16},{17},'N',2,'NNB','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({18},{19},'N',2,'NNL','C','P','C')/ 100000,2) NONFARM_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({20},{21},'N',2,'NNB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({22},{23},'N',2,'NNL','C','P','A')/ 100000,2) NONFARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({24},{25},'N',3,'HNB','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({26},{27},'N',3,'NHB','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({28},{29},'N',3,'HHD','C','P','O')/ 100000,2) HOUSING_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({30},{31},'N',3,'HNB','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({32},{33},'N',3,'NHB','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({34},{35},'N',3,'HHD','C','P','C')/ 100000,2) HOUSING_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({36},{37},'N',3,'HNB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({38},{39},'N',3,'NHB','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({40},{41},'N',3,'HHD','C','P','A')/ 100000,2) HOUSING_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({42},{43},'N',4,'JLG','C','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({44},{45},'N',4,'SHG','C','P','O')/ 100000,2) SHG_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({46},{47},'N',4,'JLG','C','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({48},{49},'N',4,'SHG','C','P','C')/ 100000,2) SHG_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({50},{51},'N',4,'JLG','C','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({52},{53},'N',4,'SHG','C','P','A')/ 100000,2) SHG_ADVANCE_RECOV_PRN, "
+                            + "ROUND(F_GET_COLLECT_NEW({54},{55},'N',1,'FNB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({56},{57},'N',1,'FNL','C','I','O')/ 100000,2) FARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({58},{59},'N',1,'FNB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({60},{61},'N',1,'FNL','C','I','C')/ 100000,2) FARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({62},{63},'N',2,'NNB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({64},{65},'N',2,'NNL','C','I','O')/ 100000,2) NONFARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({66},{67},'N',2,'NNB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({68},{69},'N',2,'NNL','C','I','C')/ 100000,2) NONFARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({70},{71},'N',3,'HNB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({72},{73},'N',3,'NHB','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({74},{75},'N',3,'HHD','C','I','O')/ 100000,2) HOUSING_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({76},{77},'N',3,'HNB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({78},{79},'N',3,'NHB','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({80},{81},'N',3,'HHD','C','I','C')/ 100000,2) HOUSING_CURRENT_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({82},{83},'N',4,'JLG','C','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({84},{85},'N',4,'SHG','C','I','O')/ 100000,2) SHG_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({86},{87},'N',4,'JLG','C','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({88},{89},'N',4,'SHG','C','I','C')/ 100000,2) SHG_CURRENT_RECOV_INTT "
+                            + " FROM DUAL";
+
+            string _query2 = "SELECT  ROUND(F_GET_COLLECT_NEW({0},{1},'N',1,'FNB','P','P','O')/ 100000,2) + "
+                            + "ROUND(F_GET_COLLECT_NEW({2},{3},'N',1,'FNL','P','P','O')/ 100000,2) FARM_OVERDUE_RECOV_PRN , "
+                             + "ROUND(F_GET_COLLECT_NEW({4},{5},'N',1,'FNB','P','P','C')/ 100000,2) + "
+                             + "ROUND(F_GET_COLLECT_NEW({6},{7},'N',1,'FNL','P','P','C')/ 100000,2) FARM_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({8},{9},'N',1,'FNB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({10},{11},'N',1,'FNL','P','P','A')/ 100000,2) FARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({12},{13},'N',2,'NNB','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({14},{15},'N',2,'NNL','P','P','O')/ 100000,2) NONFARM_OVERDUE_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({16},{17},'N',2,'NNB','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({18},{19},'N',2,'NNL','P','P','C')/ 100000,2) NONFARM_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({20},{21},'N',2,'NNB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({22},{23},'N',2,'NNL','P','P','A')/ 100000,2) NONFARM_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({24},{25},'N',3,'HNB','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({26},{27},'N',3,'NHB','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({28},{29},'N',3,'HHD','P','P','O')/ 100000,2) HOUSING_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({30},{31},'N',3,'HNB','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({32},{33},'N',3,'NHB','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({34},{35},'N',3,'HHD','P','P','C')/ 100000,2) HOUSING_CURRENT_RECOV_PRN, "
+                             + "ROUND(F_GET_COLLECT_NEW({36},{37},'N',3,'HNB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({38},{39},'N',3,'NHB','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({40},{41},'N',3,'HHD','P','P','A')/ 100000,2) HOUSING_ADVANCE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({42},{43},'N',4,'JLG','P','P','O')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({44},{45},'N',4,'SHG','P','P','O')/ 100000,2) SHG_OVERDUE_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({46},{47},'N',4,'JLG','P','P','C')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({48},{49},'N',4,'SHG','P','P','C')/ 100000,2) SHG_CURRENT_RECOV_PRN,"
+                             + "ROUND(F_GET_COLLECT_NEW({50},{51},'N',4,'JLG','P','P','A')/ 100000,2) +"
+                             + "ROUND(F_GET_COLLECT_NEW({52},{53},'N',4,'SHG','P','P','A')/ 100000,2) SHG_ADVANCE_RECOV_PRN, "
+                            + "ROUND(F_GET_COLLECT_NEW({54},{55},'N',1,'FNB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({56},{57},'N',1,'FNL','P','I','O')/ 100000,2) FARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({58},{59},'N',1,'FNB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({60},{61},'N',1,'FNL','P','I','C')/ 100000,2) FARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({62},{63},'N',2,'NNB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({64},{65},'N',2,'NNL','P','I','O')/ 100000,2) NONFARM_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({66},{67},'N',2,'NNB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({68},{69},'N',2,'NNL','P','I','C')/ 100000,2) NONFARM_CURRENT_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({70},{71},'N',3,'HNB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({72},{73},'N',3,'NHB','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({74},{75},'N',3,'HHD','P','I','O')/ 100000,2) HOUSING_OVERDUE_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({76},{77},'N',3,'HNB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({78},{79},'N',3,'NHB','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({80},{81},'N',3,'HHD','P','I','C')/ 100000,2) HOUSING_CURRENT_RECOV_INTT,"
+                            + "ROUND(F_GET_COLLECT_NEW({82},{83},'N',4,'JLG','P','I','O')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({84},{85},'N',4,'SHG','P','I','O')/ 100000,2) SHG_OVERDUE_RECOV_INTT, "
+                            + "ROUND(F_GET_COLLECT_NEW({86},{87},'N',4,'JLG','P','I','C')/ 100000,2) +"
+                            + "ROUND(F_GET_COLLECT_NEW({88},{89},'N',4,'SHG','P','I','C')/ 100000,2) SHG_CURRENT_RECOV_INTT "
+                            + " FROM DUAL";
+
+
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_procedure);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("adt_form_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm2.Value = prp.from_dt_demand;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.to_dt_demand;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("ac_fund_type", OracleDbType.Char, ParameterDirection.Input);
+                            parm4.Value = prp.fund_type;
+                            command.Parameters.Add(parm4);
+
+                            command.ExecuteNonQuery();
+
+                            //transaction.Commit();
+
+                        }
+
+                        _statement = string.Format(_query);
+
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+
+                                    while (reader.Read())
+                                    {
+
+                                        loanDfltList1.farm_overdue_prn = UtilityM.CheckNull<decimal>(reader["FARM_OVERDUE_PRN"]);
+                                        loanDfltList1.farm_current_prn = UtilityM.CheckNull<decimal>(reader["FARM_CURRENT_PRN"]);
+                                        loanDfltList1.nonfarm_overdue_prn = UtilityM.CheckNull<decimal>(reader["NONFARM_OVERDUE_PRN"]);
+                                        loanDfltList1.nonfarm_current_prn = UtilityM.CheckNull<decimal>(reader["NONFARM_CURRENT_PRN"]);
+                                        loanDfltList1.housing_overdue_prn = UtilityM.CheckNull<decimal>(reader["HOUSING_OVERDUE_PRN"]);
+                                        loanDfltList1.housing_current_prn = UtilityM.CheckNull<decimal>(reader["HOUSING_CURRENT_PRN"]);
+                                        loanDfltList1.shg_overdue_prn = UtilityM.CheckNull<decimal>(reader["SHG_OVERDUE_PRN"]);
+                                        loanDfltList1.shg_current_prn = UtilityM.CheckNull<decimal>(reader["SHG_CURRENT_PRN"]);
+                                        loanDfltList1.farm_overdue_intt = UtilityM.CheckNull<decimal>(reader["FARM_OVERDUE_INTT"]);
+                                        loanDfltList1.farm_current_intt = UtilityM.CheckNull<decimal>(reader["FARM_CURRENT_INTT"]);
+                                        loanDfltList1.nonfarm_overdue_intt = UtilityM.CheckNull<decimal>(reader["NONFARM_OVERDUE_INTT"]);
+                                        loanDfltList1.nonfarm_current_intt = UtilityM.CheckNull<decimal>(reader["NONFARM_CURRENT_INTT"]);
+                                        loanDfltList1.housing_overdue_intt = UtilityM.CheckNull<decimal>(reader["HOUSING_OVERDUE_INTT"]);
+                                        loanDfltList1.housing_current_intt = UtilityM.CheckNull<decimal>(reader["HOUSING_CURRENT_INTT"]);
+                                        loanDfltList1.shg_overdue_intt = UtilityM.CheckNull<decimal>(reader["SHG_OVERDUE_INTT"]);
+                                        loanDfltList1.shg_current_intt = UtilityM.CheckNull<decimal>(reader["SHG_CURRENT_INTT"]);
+
+                                        loanDfltList.fortnight_demand = loanDfltList1;
+
+                                    }
+
+                                }
+                            }
+                        }
+
+
+                        _statement1 = string.Format(_query1,
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'")
+                                                   );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+
+                                    while (reader1.Read())
+                                    {
+
+                                        loanDfltList2.farm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["FARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.farm_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["FARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.farm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["FARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.nonfarm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["NONFARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.nonfarm_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["NONFARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.nonfarm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["NONFARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.housing_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["HOUSING_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.housing_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["HOUSING_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.housing_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["HOUSING_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.shg_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader1["SHG_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList2.shg_current_recov_prn = UtilityM.CheckNull<decimal>(reader1["SHG_CURRENT_RECOV_PRN"]);
+                                        loanDfltList2.shg_advance_recov_prn = UtilityM.CheckNull<decimal>(reader1["SHG_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList2.farm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["FARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.farm_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["FARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList2.nonfarm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["NONFARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.nonfarm_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["NONFARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList2.housing_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["HOUSING_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.housing_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["HOUSING_CURRENT_RECOV_INTT"]);
+                                        loanDfltList2.shg_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader1["SHG_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList2.shg_current_recov_intt = UtilityM.CheckNull<decimal>(reader1["SHG_CURRENT_RECOV_INTT"]);
+
+                                        loanDfltList.fortnight_recov = loanDfltList2;
+
+                                    }
+
+                                }
+                            }
+                        }
+
+
+                        _statement2 = string.Format(_query2,
+                                                     string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.from_dt.ToString("dd/MM/yyyy"), "'"),
+                                                   string.Concat("'", prp.to_dt.ToString("dd/MM/yyyy"), "'")
+                                                   );
+
+                        using (var command2 = OrclDbConnection.Command(connection, _statement2))
+                        {
+                            using (var reader2 = command2.ExecuteReader())
+                            {
+                                if (reader2.HasRows)
+                                {
+
+                                    while (reader2.Read())
+                                    {
+
+                                        loanDfltList3.farm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["FARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.farm_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["FARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.farm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["FARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.nonfarm_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["NONFARM_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.nonfarm_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["NONFARM_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.nonfarm_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["NONFARM_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.housing_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["HOUSING_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.housing_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["HOUSING_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.housing_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["HOUSING_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.shg_overdue_recov_prn = UtilityM.CheckNull<decimal>(reader2["SHG_OVERDUE_RECOV_PRN"]);
+                                        loanDfltList3.shg_current_recov_prn = UtilityM.CheckNull<decimal>(reader2["SHG_CURRENT_RECOV_PRN"]);
+                                        loanDfltList3.shg_advance_recov_prn = UtilityM.CheckNull<decimal>(reader2["SHG_ADVANCE_RECOV_PRN"]);
+                                        loanDfltList3.farm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["FARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.farm_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["FARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList3.nonfarm_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["NONFARM_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.nonfarm_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["NONFARM_CURRENT_RECOV_INTT"]);
+                                        loanDfltList3.housing_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["HOUSING_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.housing_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["HOUSING_CURRENT_RECOV_INTT"]);
+                                        loanDfltList3.shg_overdue_recov_intt = UtilityM.CheckNull<decimal>(reader2["SHG_OVERDUE_RECOV_INTT"]);
+                                        loanDfltList3.shg_current_recov_intt = UtilityM.CheckNull<decimal>(reader2["SHG_CURRENT_RECOV_INTT"]);
+
+                                        loanDfltList.fortnight_prog_recov = loanDfltList3;
+
+                                    }
+
+                                }
+                            }
+                        }
+
+                        transaction.Commit();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
+        }
+
+
+
+
 
         internal List<demand_list> GetDemandList(p_report_param prp)
         {
@@ -5272,6 +6283,226 @@ internal List<AccDtlsLov> GetLoanDtls(p_gen_param prm)
 
 
                                         loanDfltList.Add(loanDtl);
+                                    }
+                                    transaction.Commit();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        loanDfltList = null;
+                    }
+                }
+            }
+            return loanDfltList;
+        }
+
+
+
+        internal List<demandDM> GetDemandListVillWise(p_report_param prp)
+        {
+            List<demandDM> loanDfltList = new List<demandDM>();
+
+            string _alter = "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY HH24:MI:SS'";
+            string _statement;
+            string _procedure = "p_block_new_acti_demand";
+            string _query = " SELECT DISTINCT TT_BLOCK_ACTI_DEMAND.ARDB_CD,TT_BLOCK_ACTI_DEMAND.LOAN_ID,             "
+                           + " TT_BLOCK_ACTI_DEMAND.ACTIVITY_CD,           "
+                           + " TT_BLOCK_ACTI_DEMAND.CURR_PRN,            "
+                           + " TT_BLOCK_ACTI_DEMAND.OVD_PRN,                 "
+                           + " TT_BLOCK_ACTI_DEMAND.CURR_INTT,                  "
+                           + " TT_BLOCK_ACTI_DEMAND.OVD_INTT,                "
+                           + " TT_BLOCK_ACTI_DEMAND.PENAL_INTT,                 "
+                           + " TT_BLOCK_ACTI_DEMAND.DISB_DT,                 "
+                           + " TT_BLOCK_ACTI_DEMAND.OUTSTANDING_PRN,                  "
+                           + " TT_BLOCK_ACTI_DEMAND.UPTO_1,               "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_1,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_2,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_3,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_4,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_5,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ABOVE_6,          "
+                           + " TT_BLOCK_ACTI_DEMAND.PARTY_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.BLOCK_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.SERVICE_AREA_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.VILL_NAME,          "
+                           + " TT_BLOCK_ACTI_DEMAND.MONTH,          "
+                           + " TT_BLOCK_ACTI_DEMAND.ACC_CD,          "
+                           + " TT_BLOCK_ACTI_DEMAND.LOAN_ACC_NO          "
+                           + " FROM TT_BLOCK_ACTI_DEMAND  "
+                           + " WHERE TT_BLOCK_ACTI_DEMAND.ARDB_CD = {0}  "
+                           + " AND TT_BLOCK_ACTI_DEMAND.BLOCK_NAME = {1}  "
+                           + " AND TT_BLOCK_ACTI_DEMAND.VILL_NAME = {2}  ";
+
+            string _query1 = " SELECT DISTINCT block_name "
+                             + "  FROM TT_BLOCK_ACTI_DEMAND "
+                             + "  WHERE ARDB_CD = {0} ORDER BY block_name ";
+
+            string _query2 = " SELECT DISTINCT VILL_NAME  "
+                             + "  FROM TT_BLOCK_ACTI_DEMAND "
+                             + "  WHERE ARDB_CD = {0} AND BLOCK_NAME = {1} ORDER BY VILL_NAME ";
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var command = OrclDbConnection.Command(connection, _alter))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        _statement = string.Format(_procedure);
+                        using (var command = OrclDbConnection.Command(connection, _statement))
+                        {
+                            command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                            var parm1 = new OracleParameter("as_ardb_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm1.Value = prp.ardb_cd;
+                            command.Parameters.Add(parm1);
+
+                            var parm2 = new OracleParameter("as_brn_cd", OracleDbType.Varchar2, ParameterDirection.Input);
+                            parm2.Value = prp.brn_cd;
+                            command.Parameters.Add(parm2);
+
+                            var parm3 = new OracleParameter("adt_form_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm3.Value = prp.from_dt;
+                            command.Parameters.Add(parm3);
+
+                            var parm4 = new OracleParameter("adt_to_dt", OracleDbType.Date, ParameterDirection.Input);
+                            parm4.Value = prp.to_dt;
+                            command.Parameters.Add(parm4);
+
+                            var parm5 = new OracleParameter("ac_fund_type", OracleDbType.Char, ParameterDirection.Input);
+                            parm5.Value = prp.fund_type;
+                            command.Parameters.Add(parm5);
+
+                            command.ExecuteNonQuery();
+
+                        }
+
+                        string _statement1 = string.Format(_query1,
+                                         string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'")
+                                         );
+
+                        using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                        {
+                            using (var reader1 = command1.ExecuteReader())
+                            {
+                                if (reader1.HasRows)
+                                {
+                                    while (reader1.Read())
+                                    {
+                                        demandDM tcaRet1 = new demandDM();
+
+                                        var tca = new demandblock_type();
+                                        tca.block = UtilityM.CheckNull<string>(reader1["BLOCK_NAME"]);
+
+                                        string _statement2 = string.Format(_query2,
+                                        string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                        string.Concat("'", UtilityM.CheckNull<string>(reader1["BLOCK_NAME"]), "'")
+                                        );
+
+                                        tca.tot_block_curr_prn = 0;
+                                        tca.tot_block_ovd_prn = 0;
+                                        tca.tot_block_curr_intt = 0;
+                                        tca.tot_block_ovd_intt = 0;
+                                        tca.tot_block_penal_intt = 0;
+
+                                        tcaRet1.demandblock = tca;
+
+                                        using (var command2 = OrclDbConnection.Command(connection, _statement2))
+                                        {
+                                            using (var reader2 = command2.ExecuteReader())
+                                            {
+                                                if (reader2.HasRows)
+                                                {
+                                                    while (reader2.Read())
+                                                    {
+                                                        var tca1 = new activitywise_type();
+                                                        tca1.activitytype.activity = UtilityM.CheckNull<string>(reader2["VILL_NAME"]);
+
+                                                        _statement = string.Format(_query,
+                                                                                    string.IsNullOrWhiteSpace(prp.ardb_cd) ? "ardb_cd" : string.Concat("'", prp.ardb_cd, "'"),
+                                                                                    string.Concat("'", UtilityM.CheckNull<string>(reader1["BLOCK_NAME"]), "'"),
+                                                                                    string.Concat("'", UtilityM.CheckNull<string>(reader2["VILL_NAME"]), "'"));
+
+
+                                                        tca1.tot_vill_curr_prn = 0;
+                                                        tca1.tot_vill_ovd_prn = 0;
+                                                        tca1.tot_vill_curr_intt = 0;
+                                                        tca1.tot_vill_ovd_intt = 0;
+                                                        tca1.tot_vill_penal_intt = 0;
+
+
+                                                        //tcaRet1.demandactivity = tca1;
+
+                                                        using (var command = OrclDbConnection.Command(connection, _statement))
+                                                        {
+                                                            using (var reader = command.ExecuteReader())
+                                                            {
+                                                                if (reader.HasRows)
+                                                                {
+                                                                    while (reader.Read())
+                                                                    {
+                                                                        var loanDtl = new demand_list();
+
+                                                                        loanDtl.ardb_cd = UtilityM.CheckNull<string>(reader["ARDB_CD"]);
+                                                                        loanDtl.loan_id = UtilityM.CheckNull<string>(reader["LOAN_ID"]);
+                                                                        loanDtl.activity_cd = UtilityM.CheckNull<string>(reader["ACTIVITY_CD"]);
+                                                                        loanDtl.curr_prn = UtilityM.CheckNull<decimal>(reader["CURR_PRN"]);
+                                                                        loanDtl.ovd_prn = UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
+                                                                        loanDtl.curr_intt = UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
+                                                                        loanDtl.ovd_intt = UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                                                        loanDtl.penal_intt = UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
+                                                                        loanDtl.disb_dt = UtilityM.CheckNull<DateTime>(reader["DISB_DT"]);
+                                                                        loanDtl.outstanding_prn = UtilityM.CheckNull<decimal>(reader["OUTSTANDING_PRN"]);
+                                                                        loanDtl.upto_1 = UtilityM.CheckNull<decimal>(reader["UPTO_1"]);
+                                                                        loanDtl.above_1 = UtilityM.CheckNull<decimal>(reader["ABOVE_1"]);
+                                                                        loanDtl.above_2 = UtilityM.CheckNull<decimal>(reader["ABOVE_2"]);
+                                                                        loanDtl.above_3 = UtilityM.CheckNull<decimal>(reader["ABOVE_3"]);
+                                                                        loanDtl.above_4 = UtilityM.CheckNull<decimal>(reader["ABOVE_4"]);
+                                                                        loanDtl.above_5 = UtilityM.CheckNull<decimal>(reader["ABOVE_5"]);
+                                                                        loanDtl.above_6 = UtilityM.CheckNull<decimal>(reader["ABOVE_6"]);
+                                                                        loanDtl.party_name = UtilityM.CheckNull<string>(reader["PARTY_NAME"]);
+                                                                        loanDtl.block_name = UtilityM.CheckNull<string>(reader["BLOCK_NAME"]);
+                                                                        loanDtl.service_area_name = UtilityM.CheckNull<string>(reader["SERVICE_AREA_NAME"]);
+                                                                        loanDtl.vill_name = UtilityM.CheckNull<string>(reader["VILL_NAME"]);
+                                                                        loanDtl.month = UtilityM.CheckNull<Int64>(reader["MONTH"]);
+                                                                        loanDtl.acc_cd = Convert.ToInt64(UtilityM.CheckNull<Int64>(reader["ACC_CD"]));
+                                                                        loanDtl.loan_acc_no = UtilityM.CheckNull<string>(reader["LOAN_ACC_NO"]);
+
+                                                                        tca1.tot_vill_curr_prn = tca1.tot_vill_curr_prn + UtilityM.CheckNull<decimal>(reader["CURR_PRN"]);
+                                                                        tca1.tot_vill_ovd_prn = tca1.tot_vill_ovd_prn +  UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
+                                                                        tca1.tot_vill_curr_intt = tca1.tot_vill_curr_intt + UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
+                                                                        tca1.tot_vill_ovd_intt = tca1.tot_vill_ovd_intt + UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                                                        tca1.tot_vill_penal_intt = tca1.tot_vill_penal_intt + UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
+
+                                                                        tca.tot_block_curr_prn = tca.tot_block_curr_prn + UtilityM.CheckNull<decimal>(reader["CURR_PRN"]);
+                                                                        tca.tot_block_ovd_prn = tca.tot_block_ovd_prn + UtilityM.CheckNull<decimal>(reader["OVD_PRN"]);
+                                                                        tca.tot_block_curr_intt = tca.tot_block_curr_intt + UtilityM.CheckNull<decimal>(reader["CURR_INTT"]);
+                                                                        tca.tot_block_ovd_intt = tca.tot_block_ovd_intt + UtilityM.CheckNull<decimal>(reader["OVD_INTT"]);
+                                                                        tca.tot_block_penal_intt = tca.tot_block_penal_intt + UtilityM.CheckNull<decimal>(reader["PENAL_INTT"]);
+
+                                                                        tca1.demandlist.Add(loanDtl);
+                                                                    }
+                                                                    tcaRet1.demandactivity.Add(tca1); // transaction.Commit();
+                                                                }
+                                                            }
+                                                        }
+                                                        //loanDfltList.Add(tcaRet1);
+                                                    }
+                                                }
+                                            }
+                                            
+
+                                        }                                      
+
+                                        loanDfltList.Add(tcaRet1);
                                     }
                                     transaction.Commit();
                                 }

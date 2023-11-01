@@ -20,7 +20,12 @@ namespace SBWSFinanceApi.LL
         public List<mm_role_permission> GetRolePermission(p_gen_param mum)
         {
             return _dac.GetRolePermission(mum);
-        }      
+        }
+
+        public menuDM GetMenuPermission(p_gen_param mum)
+        {
+            return _dac.GetMenuPermission(mum);
+        }
 
         public List<mm_role_permission> GetRoleMaster(p_gen_param mum)
         {

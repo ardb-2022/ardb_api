@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using SBWSFinanceApi.Config;
 using SBWSFinanceApi.Models;
@@ -278,21 +279,47 @@ internal List<mm_constitution> GetConstitution()
             return mamRets;
         }
 
-       
+        static byte[] HexToBytes(string hex)
+        {
+            int length = hex.Length / 2;
+            byte[] bytes = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                bytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+            }
+            return bytes;
+        }
+
+
+
+
 
         internal List<m_user_master> GetUserDtls(m_user_master mum)
         {
             UserDL ud=new UserDL();
-            var passkey=ud.GetUserPass(mum.password); 
+
+            string hexString = mum.password; //"50617274686140313233"; // Example hex string
+
+            // Convert hex to bytes
+            byte[] hexBytes = HexToBytes(hexString);
+
+            // Convert bytes to text
+            string text = Encoding.UTF8.GetString(hexBytes);
+
+            var passkey=ud.GetUserPass(text); 
             List<m_user_master> mumRets=new List<m_user_master>();
             string _query=" SELECT ARDB_CD,BRN_CD, USER_ID, PASSWORD, LOGIN_STATUS, USER_TYPE, USER_FIRST_NAME, USER_MIDDLE_NAME, USER_LAST_NAME "
                         +" FROM M_USER_MASTER WHERE ARDB_CD = {0} AND USER_ID={1} AND PASSWORD={2}";
+
+
+                      
+
             using (var connection = OrclDbConnection.NewConnection)
             {              
                _statement = string.Format(_query,
                                             string.Concat("'",  mum.ardb_cd, "'"),
                                             string.Concat("'",  mum.user_id, "'"),
-                                            string.Concat("'",  passkey, "'")
+                                            string.Concat("'", passkey, "'")
                                             );
                 using (var command = OrclDbConnection.Command(connection, _statement))
                 {
@@ -1727,6 +1754,164 @@ internal List<mm_constitution> GetConstitution()
                                 mam.role_cd = UtilityM.CheckNull<Int64>(reader["ROLE_CD"]);
                                 mam.role_type = UtilityM.CheckNull<string>(reader["ROLE_TYPE"]);
                                 mamRets.Add(mam);
+                            }
+                        }
+                    }
+                }
+
+            }
+            return mamRets;
+        }
+
+
+
+        internal menuDM GetMenuPermission(p_gen_param mum)
+        {
+            string _statement1;
+            string _statement2;
+            string _statement3;
+
+            menuDM mamRets = new menuDM();
+
+            string _query = " SELECT DISTINCT MODULE,IDENTIFICATION,PERMISSION,MODULE_ICON"
+                          + " FROM MM_ROLE_PERMISSION WHERE ARDB_CD = {0} AND ROLE_CD = {1} AND SUB_MODULE IS NULL AND FIRST_SUB_MODULE_ITEM IS NULL AND SECOND_SUB_MODULE_ITEM IS NULL";
+
+            string _query1 = " SELECT DISTINCT SUB_MODULE,'N/A' IDENTIFICATION ,'Y' PERMISSION,SUB_MODULE_ICON"
+                            + " FROM MM_ROLE_PERMISSION WHERE ARDB_CD = {0} AND ROLE_CD = {1} AND MODULE = {2} AND  SUB_MODULE IS NOT NULL ";
+
+            string _query2 = "SELECT FIRST_SUB_MODULE_ITEM,IDENTIFICATION,PERMISSION,FAST_SUB_MODULE_ICON "
+                              + "  FROM MM_ROLE_PERMISSION "
+                              + "  WHERE ARDB_CD = {0} "
+                              + "  AND ROLE_CD = {1} "
+                              + "  AND MODULE = {2} "
+                              + "  AND SUB_MODULE = {3} "
+                              + "  AND SECOND_SUB_MODULE_ITEM IS NULL"
+                              + "  UNION "
+                              + " SELECT DISTINCT FIRST_SUB_MODULE_ITEM,'N/A' IDENTIFICATION, 'Y' PERMISSION, FAST_SUB_MODULE_ICON "
+                              + "  FROM MM_ROLE_PERMISSION "
+                              + "  WHERE ARDB_CD = {4} "
+                              + "  AND ROLE_CD ={5} "
+                              + "  AND MODULE = {6} "
+                              + "  AND SUB_MODULE = {7} "
+                              + "  AND SECOND_SUB_MODULE_ITEM IS NOT NULL" ;
+
+            string _query3 = "SELECT SECOND_SUB_MODULE_ITEM,IDENTIFICATION,PERMISSION,SECOND_SUB_MODULE_ICON "
+                             + " FROM MM_ROLE_PERMISSION "
+                             + " WHERE ARDB_CD = {0} "
+                             + " AND ROLE_CD = {1}"
+                             + " AND MODULE = {2} "
+                             + " AND SUB_MODULE = {3} "
+                             + " AND FIRST_SUB_MODULE_ITEM = {4} "
+                             + " AND SECOND_SUB_MODULE_ITEM IS NOT NULL";
+
+
+            using (var connection = OrclDbConnection.NewConnection)
+            {
+                
+                _statement = string.Format(_query,
+                                            string.Concat("'", mum.ardb_cd, "'"),
+                                            string.Concat(mum.role_cd));
+                using (var command = OrclDbConnection.Command(connection, _statement))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var mam = new menumodule();
+                                mam.menu_name = UtilityM.CheckNull<string>(reader["MODULE"]);
+                                mam.ref_page = UtilityM.CheckNull<string>(reader["IDENTIFICATION"]);
+                                mam.permission = UtilityM.CheckNull<string>(reader["PERMISSION"]);
+                                mam.iconName = UtilityM.CheckNull<string>(reader["MODULE_ICON"]);
+                                //mamRets.menu_module.Add(mam);
+                                _statement1 = string.Format(_query1,
+                                            string.Concat("'", mum.ardb_cd, "'"),
+                                            string.Concat(mum.role_cd),
+                                            string.Concat("'", mam.menu_name, "'"));
+
+                                using (var command1 = OrclDbConnection.Command(connection, _statement1))
+                                {
+                                    using (var reader1 = command1.ExecuteReader())
+                                    {
+                                        if (reader1.HasRows)
+                                        {
+                                            while (reader1.Read())
+                                            {
+                                                var mam1 = new menusubmodule();
+                                                mam1.menu_name = UtilityM.CheckNull<string>(reader1["SUB_MODULE"]);
+                                                mam1.ref_page = UtilityM.CheckNull<string>(reader1["IDENTIFICATION"]);
+                                                mam1.permission = UtilityM.CheckNull<string>(reader1["PERMISSION"]);
+                                                mam1.iconName = UtilityM.CheckNull<string>(reader1["SUB_MODULE_ICON"]);
+                                               // mam.menu_submodule.Add(mam1);
+
+                                                _statement2 = string.Format(_query2,
+                                                               string.Concat("'", mum.ardb_cd, "'"),
+                                                               string.Concat(mum.role_cd),
+                                                               string.Concat("'", mam.menu_name, "'"),
+                                                               string.Concat("'", mam1.menu_name, "'"),
+                                                               string.Concat("'", mum.ardb_cd, "'"),
+                                                               string.Concat(mum.role_cd),
+                                                               string.Concat("'", mam.menu_name, "'"),
+                                                               string.Concat("'", mam1.menu_name, "'")
+                                                               );
+
+                                                using (var command2 = OrclDbConnection.Command(connection, _statement2))
+                                                {
+                                                    using (var reader2 = command2.ExecuteReader())
+                                                    {
+                                                        if (reader2.HasRows)
+                                                        {
+                                                            while (reader2.Read())
+                                                            {
+                                                                var mam2 = new menufirstmodule();
+                                                                mam2.menu_name = UtilityM.CheckNull<string>(reader2["FIRST_SUB_MODULE_ITEM"]);
+                                                                mam2.ref_page = UtilityM.CheckNull<string>(reader2["IDENTIFICATION"]);
+                                                                mam2.permission = UtilityM.CheckNull<string>(reader2["PERMISSION"]);
+                                                                mam2.iconName = UtilityM.CheckNull<string>(reader2["FAST_SUB_MODULE_ICON"]);
+                                                                //mam1.menu_firstmodule.Add(mam2);
+
+                                                                _statement3 = string.Format(_query3,
+                                                                            string.Concat("'", mum.ardb_cd, "'"),
+                                                                            string.Concat(mum.role_cd),
+                                                                            string.Concat("'", mam.menu_name, "'"),
+                                                                            string.Concat("'", mam1.menu_name, "'"),
+                                                                            string.Concat("'", mam2.menu_name, "'"));
+
+                                                                using (var command3 = OrclDbConnection.Command(connection, _statement3))
+                                                                {
+                                                                    using (var reader3 = command3.ExecuteReader())
+                                                                    {
+                                                                        if (reader3.HasRows)
+                                                                        {
+                                                                            while (reader3.Read())
+                                                                            {
+                                                                                var mam3 = new menusecondmodule();
+                                                                                mam3.menu_name = UtilityM.CheckNull<string>(reader3["SECOND_SUB_MODULE_ITEM"]);
+                                                                                mam3.ref_page = UtilityM.CheckNull<string>(reader3["IDENTIFICATION"]);
+                                                                                mam3.permission = UtilityM.CheckNull<string>(reader3["PERMISSION"]);
+                                                                                mam3.iconName = UtilityM.CheckNull<string>(reader3["SECOND_SUB_MODULE_ICON"]);
+                                                                                mam2.childMenuConfigs.Add(mam3);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                mam1.childMenuConfigs.Add(mam2);
+
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                mam.childMenuConfigs.Add(mam1);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                mamRets.menu_module.Add(mam);
+
                             }
                         }
                     }

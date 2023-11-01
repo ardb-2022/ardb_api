@@ -245,15 +245,21 @@ namespace SBWSFinanceApi.Controllers
             return _ll.PopulateOvdTrfDtls(prp);
         }
 
-
-        [Route("GetDemandList")]
+        [Route("GetFortnightDemand")]
         [HttpPost]
-        public List<demand_list> GetDemandList(p_report_param prp)
+        public fortnightDM GetFortnightDemand(p_report_param prp)
         {
-            return _ll.GetDemandList(prp);
+            return _ll.GetFortnightDemand(prp);
         }
 
-        
+        [Route("GetFortnightDemandConso")]
+        [HttpPost]
+        public fortnightDM GetFortnightDemandConso(p_report_param prp)
+        {
+            return _ll.GetFortnightDemandConso(prp);
+        }
+
+
         [Route("GetDemandListSingle")]
         [HttpPost]
         public List<demand_list> GetDemandListSingle(p_report_param prp)
@@ -269,6 +275,22 @@ namespace SBWSFinanceApi.Controllers
         }
 
         
+
+        [Route("GetDemandListVillWise")]
+        [HttpPost]
+        public List<demandDM> GetDemandListVillWise(p_report_param prp)
+        {
+            return _ll.GetDemandListVillWise(prp);
+        }
+
+        [Route("GetDemandList")]
+        [HttpPost]
+        public List<demand_list> GetDemandList(p_report_param prp)
+        {
+            return _ll.GetDemandList(prp);
+        }
+
+
         [Route("GetRecoveryListGroupwise")]
         [HttpPost]
         public List<recoveryDM> GetRecoveryListGroupwise(p_report_param prp)

@@ -14,9 +14,12 @@ namespace SBWSFinanceApi.Models
 
         public string flag { get; set; }
         public DateTime from_dt {get; set;}
+
+        public DateTime from_dt_demand { get; set; }
         public DateTime adt_as_on_dt { get; set; }
-        public DateTime to_dt {get; set;} 
-         public DateTime trial_dt {get; set;}
+        public DateTime to_dt {get; set;}
+        public DateTime to_dt_demand { get; set; }
+        public DateTime trial_dt {get; set;}
         public DateTime adt_dt { get; set; }
         public int pl_acc_cd {get; set;}
          public int gp_acc_cd {get; set;}         
